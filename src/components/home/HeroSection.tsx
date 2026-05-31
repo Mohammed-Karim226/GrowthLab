@@ -27,7 +27,7 @@ export default function HeroSection() {
           </motion.div>
 
           <motion.h1
-            initial={{opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.7 }}
             className="font-satoshi text-4xl leading-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl"
@@ -39,11 +39,12 @@ export default function HeroSection() {
             Growth
           </motion.h1>
 
-          <motion.p 
-           initial={{opacity: 0, scale: 0.90 }}
+          <motion.p
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.9 }}
-          className="max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+            className="max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg"
+          >
             Stop guessing. Start scaling. We engineer attention-grabbing,
             data-driven growth strategies across YouTube and other social media
             channels that compound month over month — turning your content into
@@ -131,8 +132,12 @@ export default function HeroSection() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: [0, -12, 0] }}
-        transition={{ opacity: {delay: 1.5, duration: 0.8}, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
-      className="absolute inset-x-0 bottom-8 flex justify-center text-slate-600">
+        transition={{
+          opacity: { delay: 1.5, duration: 0.8 },
+          y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+        }}
+        className="absolute inset-x-0 bottom-8 flex justify-center text-slate-600"
+      >
         <ChevronDown className="h-6 w-6" />
       </motion.div>
     </section>

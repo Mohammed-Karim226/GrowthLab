@@ -58,7 +58,11 @@ export default function NavBar({ navLinks, scrolled }: NavBarProps) {
           onClick={() => setMobileMenuOpen((current) => !current)}
           aria-label="Toggle menu"
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 

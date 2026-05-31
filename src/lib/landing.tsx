@@ -243,3 +243,34 @@ export const faqs: FaqItem[] = [
     a: "Yes. We cover AdSense, sponsorships, memberships, and digital products as part of our revenue track.",
   },
 ];
+
+export  const cardMeta = [
+    {
+      badge: "border-cyan-400/15 text-cyan-300",
+      icon: "text-cyan-300",
+      dot: "bg-cyan-300/80",
+      hoverBg: "rgba(8,145,178,0.16)",
+      callout: "Recover visibility with better metadata and title strategy.",
+    },
+    {
+      badge: "border-emerald-400/15 text-emerald-300",
+      icon: "text-emerald-300",
+      dot: "bg-emerald-300/80",
+      hoverBg: "rgba(16,185,129,0.16)",
+      callout: "Turn viewers into subscribers with clearer positioning.",
+    },
+    {
+      badge: "border-amber-400/15 text-amber-300",
+      icon: "text-amber-300",
+      dot: "bg-amber-300/80",
+      hoverBg: "rgba(245,158,11,0.16)",
+      callout: "Stop audience mismatch with a tighter content funnel.",
+    },
+    {
+      badge: "border-rose-400/15 text-rose-300",
+      icon: "text-rose-300",
+      dot: "bg-rose-300/80",
+      hoverBg: "rgba(244,114,182,0.16)",
+      callout: "Smooth inconsistent growth with a data-driven cadence.",
+    },
+  ];

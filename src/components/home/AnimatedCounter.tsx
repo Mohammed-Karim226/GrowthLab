@@ -8,7 +8,11 @@ type AnimatedCounterProps = {
   duration?: number;
 };
 
-export default function AnimatedCounter({ target, suffix = "", duration = 2000 }: AnimatedCounterProps) {
+export default function AnimatedCounter({
+  target,
+  suffix = "",
+  duration = 2000,
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement | null>(null);
   const [started, setStarted] = useState(false);
@@ -21,7 +25,7 @@ export default function AnimatedCounter({ target, suffix = "", duration = 2000 }
           observer.disconnect();
         }
       },
-      { threshold: 0.6 }
+      { threshold: 0.6 },
     );
 
     if (ref.current) {
@@ -50,7 +54,10 @@ export default function AnimatedCounter({ target, suffix = "", duration = 2000 }
   }, [started, target, duration]);
 
   return (
-    <span ref={ref} className="flex flex-col items-center text-3xl font-bold text-white">
+    <span
+      ref={ref}
+      className="flex flex-col items-center text-3xl font-bold text-white"
+    >
       {count.toLocaleString("en-US")}
       {suffix}
     </span>
