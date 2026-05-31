@@ -126,9 +126,13 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-8 flex justify-center text-slate-600">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: [0, -12, 0] }}
+        transition={{ opacity: {delay: 1.5, duration: 0.8}, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
+      className="absolute inset-x-0 bottom-8 flex justify-center text-slate-600">
         <ChevronDown className="h-6 w-6" />
-      </div>
+      </motion.div>
     </section>
   );
 }
