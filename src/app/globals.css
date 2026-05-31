@@ -85,12 +85,30 @@
   }
 
   .card-hover-glow {
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  .card-hover-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .card-hover-glow:hover::before {
+    opacity: 0;
   }
 
   .card-hover-glow:hover {
-    box-shadow: 0 0 24px rgba(8, 145, 178, 0.5), 0 0 48px rgba(8, 145, 178, 0.15);
-    border-color: #0891B2 !important;
+    transform: translateY(-4px);
+    box-shadow: 0 24px 70px rgba(8, 145, 178, 0.16);
+    border-color: rgba(8, 145, 178, 0.3) !important;
+    background-color: rgba(13, 18, 53, 0.95);
   }
 
   .gradient-text-teal {

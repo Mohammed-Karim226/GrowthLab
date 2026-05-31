@@ -12,24 +12,28 @@ export default function StatsBar({ stats }: StatsBarProps) {
     <section className="py-10 border-y border-white/5 bg-[#08102a]">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="grid gap-8 text-center sm:grid-cols-3 cursor-pointer">
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="grid gap-8 text-center sm:grid-cols-3 cursor-pointer"
+        >
           {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="relative group rounded-3xl border border-white/6 bg-[#0A0E27]/80 p-6 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] hover:border-white/10"
+            >
               <div
-                key={stat.label}
-                className="relative group rounded-3xl border border-white/6 bg-[#0A0E27]/80 p-6 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] hover:border-white/10"
+                aria-hidden
+                className="absolute inset-0 rounded-3xl pointer-events-none transition-opacity duration-200 opacity-0 group-hover:opacity-60"
+                style={{
+                  background: `radial-gradient(circle at 20% 20%, ${stat.color}40, transparent 50%)`,
+                  filter: "blur(10px)",
+                }}
+              />
+              <div
+                className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                style={{ background: `${stat.color}20`, color: stat.color }}
               >
-                <div
-                  aria-hidden
-                  className="absolute inset-0 rounded-3xl pointer-events-none transition-opacity duration-200 opacity-0 group-hover:opacity-60"
-                  style={{
-                    background: `radial-gradient(circle at 20% 20%, ${stat.color}40, transparent 50%)`,
-                    filter: "blur(10px)",
-                  }}
-                />
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: `${stat.color}20`, color: stat.color }}>
                 {stat.icon}
               </div>
               <p className="text-4xl font-semibold text-white">
