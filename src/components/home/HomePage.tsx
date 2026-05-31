@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import NavBar from "@/components/home/NavBar";
 import Footer from "@/components/home/Footer";
 import { navLinks, problems, steps, benefits, stats, testimonials, faqs } from "@/lib/landing";
+import HeroSection from "./HeroSection";
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -20,7 +21,7 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-hidden bg-[#0A0E27]">
       <NavBar navLinks={navLinks} scrolled={scrolled} />
       <main className="pt-20">
-      
+          <HeroSection />
         <Footer />
       </main>
     </div>
