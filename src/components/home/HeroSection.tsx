@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, ChevronDown, Play, Sparkles, Star } from "lucide-react";
 import AnalyticsDashboard from "@/components/home/AnalyticsDashboard";
 import Image from "next/image";

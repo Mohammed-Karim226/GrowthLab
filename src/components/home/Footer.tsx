@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
