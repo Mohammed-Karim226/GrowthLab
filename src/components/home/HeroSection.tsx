@@ -25,8 +25,8 @@ export default function HeroSection() {
           </motion.div>
 
           <motion.h1
-            initial={{scale: 0.95 }}
-            animate={{scale: 1 }}
+            initial={{opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.7 }}
             className="font-satoshi text-4xl leading-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl"
           >
@@ -38,8 +38,8 @@ export default function HeroSection() {
           </motion.h1>
 
           <motion.p 
-           initial={{scale: 0.90 }}
-            animate={{scale: 1 }}
+           initial={{opacity: 0, scale: 0.90 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.9 }}
           className="max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
             Stop guessing. Start scaling. We engineer attention-grabbing,
