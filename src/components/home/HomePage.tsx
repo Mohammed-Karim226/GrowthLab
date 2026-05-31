@@ -5,6 +5,7 @@ import NavBar from "@/components/home/NavBar";
 import Footer from "@/components/home/Footer";
 import { navLinks, problems, steps, benefits, stats, testimonials, faqs } from "@/lib/landing";
 import HeroSection from "./HeroSection";
+import StatsBar from "./StatsBar";
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -22,6 +23,7 @@ export default function HomePage() {
       <NavBar navLinks={navLinks} scrolled={scrolled} />
       <main className="pt-20">
           <HeroSection />
+          <StatsBar stats={stats} />
         <Footer />
       </main>
     </div>
