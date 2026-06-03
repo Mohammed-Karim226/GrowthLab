@@ -11,6 +11,9 @@ import {
   Zap,
   Target,
   Shield,
+  Clapperboard,
+  Scissors,
+  Radio,
 } from "lucide-react";
 
 export type StatCard = {
@@ -105,29 +108,29 @@ export const problems: SectionCard[] = [
 ];
 
 export const steps: StepCard[] = [
-  {
+ {
     num: "01",
-    title: "Discovery",
-    desc: "Deep audit of your channel, competitors, and niche landscape to understand your current position.",
-    icon: <Search className="w-6 h-6" />,
+    title: "Source the Core Video",
+    desc: "We start with a long-form video from the YouTube channel owner and identify the strongest hooks, moments, and audience angles.",
+    icon: <Clapperboard />,
   },
   {
     num: "02",
-    title: "Analysis",
-    desc: "Data forensics across views, retention, CTR, and algorithm signals to pinpoint gaps.",
-    icon: <BarChart2 className="w-6 h-6" />,
+    title: "Turn One Video into Six Reels",
+    desc: "Each source video is repurposed into six short-form reels, optimized for vertical platforms and built for repeatable distribution.",
+    icon: <Scissors />,
   },
   {
     num: "03",
-    title: "Strategy",
-    desc: "Custom 90-day growth blueprint covering content, packaging, and publishing cadence.",
-    icon: <Layers className="w-6 h-6" />,
+    title: "Prepare the Distribution Accounts",
+    desc: "We warm up and stabilize Instagram, Facebook, TikTok, and YouTube accounts so they build trust, activity history, and natural platform behavior.",
+    icon: <Radio />,
   },
   {
     num: "04",
-    title: "Implementation",
-    desc: "Weekly execution support, live reviews, and real-time optimizations until targets are hit.",
-    icon: <Rocket className="w-6 h-6" />,
+    title: "Launch for Organic Growth",
+    desc: "Once the accounts are ready, we publish in strategic stages to drive real organic reach, engagement, and subscriber growth.",
+    icon: <TrendingUp />,
   },
 ];
 
