@@ -14,6 +14,7 @@ import {
   Clapperboard,
   Scissors,
   Radio,
+  Clock,
 } from "lucide-react";
 
 export type StatCard = {
@@ -108,71 +109,70 @@ export const problems: SectionCard[] = [
 ];
 
 export const steps: StepCard[] = [
- {
+  {
     num: "01",
-    title: "Source the Core Video",
-    desc: "We start with a long-form video from the YouTube channel owner and identify the strongest hooks, moments, and audience angles.",
+    title: "Extract the Gold",
+    desc: "We deeply analyze your long-form video to find the highest-impact hooks, emotional peaks, and proven audience magnets.",
     icon: <Clapperboard />,
   },
   {
     num: "02",
-    title: "Turn One Video into Six Reels",
-    desc: "Each source video is repurposed into six short-form reels, optimized for vertical platforms and built for repeatable distribution.",
+    title: "Repurpose at Scale",
+    desc: "One video becomes six scroll-stopping vertical reels — each with custom hooks, captions, and platform-specific pacing.",
     icon: <Scissors />,
   },
   {
     num: "03",
-    title: "Prepare the Distribution Accounts",
-    desc: "We warm up and stabilize Instagram, Facebook, TikTok, and YouTube accounts so they build trust, activity history, and natural platform behavior.",
+    title: "Build Platform Foundations",
+    desc: "We professionally warm up and optimize your Instagram, TikTok, Facebook, and YouTube accounts for maximum deliverability and trust.",
     icon: <Radio />,
   },
   {
     num: "04",
-    title: "Launch for Organic Growth",
-    desc: "Once the accounts are ready, we publish in strategic stages to drive real organic reach, engagement, and subscriber growth.",
+    title: "Launch & Amplify",
+    desc: "Strategic, staggered publishing + smart distribution that triggers organic algorithms and compounds reach over time.",
     icon: <TrendingUp />,
   },
 ];
 
 export const benefits: BenefitCard[] = [
   {
+    icon: <Scissors className="w-6 h-6" />,
+    title: "6X Content Output",
+    desc: "Multiply every long-form video into six high-performing reels — dramatically increasing your content velocity without extra filming.",
+    color: "#22D3EE",
+  },
+  {
+    icon: <TrendingUp className="w-6 h-6" />,
+    title: "Explosive Organic Reach",
+    desc: "Consistent short-form drops engineered to break through algorithms and land in front of fresh, highly engaged audiences.",
+    color: "#3B82F6",
+  },
+  {
+    icon: <Users className="w-6 h-6" />,
+    title: "Community Compounding",
+    desc: "Turn passive viewers into loyal subscribers and fans across multiple platforms — creating a self-sustaining growth flywheel.",
+    color: "#F59E0B",
+  },
+  {
+    icon: <Clock className="w-6 h-6" />,
+    title: "Done-For-You Freedom",
+    desc: "Reclaim 10–15 hours every week. Never worry about editing, formatting, or posting schedules again.",
+    color: "#0891B2",
+  },
+  {
+    icon: <Radio className="w-6 h-6" />,
+    title: "Omnichannel Authority",
+    desc: "Build a powerful, consistent brand presence across YouTube, TikTok, Instagram, Facebook & Shorts simultaneously.",
+    color: "#A855F7",
+  },
+  {
     icon: <BarChart2 className="w-6 h-6" />,
-    title: "Algorithm Intelligence",
-    desc: "We decode each update so your content always surfaces at the top.",
-    color: "#0891B2",
-  },
-  {
-    icon: <Target className="w-6 h-6" />,
-    title: "Niche Positioning",
-    desc: "Carve a defensible space in your category that attracts the right audience.",
-    color: "#3B82F6",
-  },
-  {
-    icon: <Zap className="w-6 h-6" />,
-    title: "Rapid Iteration",
-    desc: "Weekly content sprints with real-time feedback loops for faster learning.",
-    color: "#F59E0B",
-  },
-  {
-    icon: <Eye className="w-6 h-6" />,
-    title: "Thumbnail Mastery",
-    desc: "Click-through rate optimization backed by A/B test data across 1000+ videos.",
-    color: "#0891B2",
-  },
-  {
-    icon: <Layers className="w-6 h-6" />,
-    title: "Full Funnel Strategy",
-    desc: "From discovery to retention to monetization — every stage engineered.",
-    color: "#3B82F6",
-  },
-  {
-    icon: <Shield className="w-6 h-6" />,
-    title: "Risk Mitigation",
-    desc: "Protect your channel from policy issues and algorithm penalties proactively.",
-    color: "#F59E0B",
+    title: "Predictable Scaling System",
+    desc: "A repeatable, data-backed system that delivers compounding views, engagement, and subscribers month after month.",
+    color: "#EC4899",
   },
 ];
-
 export const testimonials: Testimonial[] = [
   {
     name: "Sarah Chen",
