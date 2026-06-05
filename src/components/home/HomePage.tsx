@@ -16,6 +16,7 @@ import HeroSection from "./HeroSection";
 import StatsBar from "./StatsBar";
 import ProblemSection from "./ProblemSection";
 import HowItWorksSection from "./HowItWorksSection";
+import BenefitsSection from "./BenefitsSection";
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -36,6 +37,7 @@ export default function HomePage() {
         <StatsBar stats={stats} />
         <ProblemSection problems={problems} />
         <HowItWorksSection steps={steps} />
+        <BenefitsSection benefits={benefits} />
         <Footer />
       </main>
     </div>
