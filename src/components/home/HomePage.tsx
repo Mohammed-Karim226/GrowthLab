@@ -19,6 +19,7 @@ import HowItWorksSection from "./HowItWorksSection";
 import BenefitsSection from "./BenefitsSection";
 import TestimonialsSection from "./TestimonialsSection";
 import FaqSection from "./FaqSection";
+import ContactSection from "./ContactSection";
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -42,6 +43,7 @@ export default function HomePage() {
         <BenefitsSection benefits={benefits} />
         <TestimonialsSection testimonials={testimonials} />
         <FaqSection faqs={faqs} {...({ openFaq, onToggle: setOpenFaq } as any)} />
+        <ContactSection />
         <Footer />
       </main>
     </div>
