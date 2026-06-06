@@ -17,6 +17,7 @@ import StatsBar from "./StatsBar";
 import ProblemSection from "./ProblemSection";
 import HowItWorksSection from "./HowItWorksSection";
 import BenefitsSection from "./BenefitsSection";
+import TestimonialsSection from "./TestimonialsSection";
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -38,6 +39,7 @@ export default function HomePage() {
         <ProblemSection problems={problems} />
         <HowItWorksSection steps={steps} />
         <BenefitsSection benefits={benefits} />
+        <TestimonialsSection testimonials={testimonials} />
         <Footer />
       </main>
     </div>
