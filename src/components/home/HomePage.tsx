@@ -41,7 +41,7 @@ export default function HomePage() {
         <HowItWorksSection steps={steps} />
         <BenefitsSection benefits={benefits} />
         <TestimonialsSection testimonials={testimonials} />
-        <FaqSection faqs={faqs} openFaq={openFaq} onToggle={setOpenFaq} />
+        <FaqSection faqs={faqs} {...({ openFaq, onToggle: setOpenFaq } as any)} />
         <Footer />
       </main>
     </div>
