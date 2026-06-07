@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CheckCircle, Shield, Clock, Users, Star, Zap, TrendingUp } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, Clock, Users, Star, Zap, TrendingUp, Youtube, Instagram, Music } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -112,10 +112,25 @@ export default function ContactSection() {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-400 leading-tight">
-                Trusted by creators from<br />
-                <span className="text-white">YouTube • TikTok • Instagram</span>
-              </p>
+              <div className="relative text-sm leading-tight text-slate-400">
+                {/* <span className="absolute -left-2 top-1 h-2 w-2 rounded-full bg-cyan-300/90 shadow-[0_0_10px_rgba(34,211,238,0.7)] animate-pulse" /> */}
+                {/* <span className="absolute right-0 top-6 h-2 w-2 rounded-full bg-pink-300/90 shadow-[0_0_12px_rgba(244,114,182,0.65)] animate-pulse" /> */}
+                <p className="text-sm text-slate-400 leading-tight">Trusted by creators from</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(248,113,113,0.18)]">
+                    <Youtube className="h-4 w-4 text-red-400" />
+                    YouTube
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(148,163,184,0.2)]">
+                    <Music className="h-4 w-4 text-slate-200" />
+                    TikTok
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(244,114,182,0.2)]">
+                    <Instagram className="h-4 w-4 text-pink-300" />
+                    Instagram
+                  </span>
+                </div>
+              </div>
             </div>
           </motion.div>
 
