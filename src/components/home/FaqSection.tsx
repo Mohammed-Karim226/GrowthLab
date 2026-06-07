@@ -16,7 +16,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
   return (
     <section
       id="faq"
-      className="relative py-28 lg:py-40 overflow-hidden bg-[#05070F]"
+      className="relative py-6 overflow-hidden bg-[#05070F]"
     >
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.6px,transparent_1px)] [background-size:40px_40px] opacity-40" />
@@ -36,7 +36,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
               </div>
             </div>
 
-            <h2 className="font-satoshi text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-white mb-6">
+            <h2 className="font-satoshi text-5xl max-sm:text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-white mb-6">
               Everything you wanted to know,
               <br />
               <span className="bg-gradient-to-r from-white via-[#0891B2] to-[#22D3EE] bg-clip-text text-transparent">
@@ -44,7 +44,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
               </span>
             </h2>
 
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+            <p className="text-xl max-sm:text-lg text-slate-400 max-w-2xl mx-auto">
               No corporate fluff. Just real answers from creators who’ve been
               exactly where you are.
             </p>
