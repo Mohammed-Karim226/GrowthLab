@@ -15,7 +15,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="results" className="relative py-24 lg:py-32 overflow-hidden bg-[#05070F]">
+    <section id="results" className="relative py-12 overflow-hidden bg-[#05070F]">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.8px,transparent_1px)] [background-size:40px_40px] animate-[pulse_12s_ease-in-out_infinite]" />
@@ -31,7 +31,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
               <p className="text-emerald-400 text-xs font-mono tracking-[3px] uppercase">Proven Transformations</p>
             </div>
             
-            <h2 className="font-satoshi text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tighter mb-6">
+            <h2 className="font-satoshi text-5xl max-sm:text-4xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tighter mb-6">
               They didn&apos;t just grow.<br />
               They <span className="bg-linear-to-r from-[#F59E0B] via-[#22D3EE] to-[#A855F7] bg-clip-text text-transparent">exploded</span>.
             </h2>
