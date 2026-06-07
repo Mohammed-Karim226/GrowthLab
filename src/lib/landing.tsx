@@ -59,7 +59,7 @@ export type FaqItem = {
   a: string;
 };
 
-export const navLinks = ["Services", "How It Works", "Results", "FAQ"];
+export const navLinks = ["Services", "How It Works", "Results", "FAQ", "Contact"];
 
 export const stats: StatCard[] = [
   {
