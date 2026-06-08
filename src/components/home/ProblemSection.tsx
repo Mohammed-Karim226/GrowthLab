@@ -7,7 +7,7 @@ type ProblemSectionProps = {
 
 export default function ProblemSection({ problems }: ProblemSectionProps) {
   return (
-    <section id="services" className="py-20 lg:py-28">
+    <section id="problem" className="py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionReveal>
           <div className="text-center mb-14">

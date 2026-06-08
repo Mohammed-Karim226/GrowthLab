@@ -1,5 +1,6 @@
-import HomePage from "@/components/home/HomePage";
+import { redirect } from "next/navigation";
+import { defaultLocale } from "@/lib/i18n";
 
 export default function Page() {
-  return <HomePage />;
+  redirect(`/${defaultLocale}`);
 }

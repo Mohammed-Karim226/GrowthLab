@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "subtitle": "1,000+ Creators Scaled to New Heights",
+    "titleLine1": "Your Channel",
+    "titleLine2": "Deserves Strategic",
+    "titleLine3": "Growth",
+    "description": "Stop guessing. Start scaling. We engineer attention-grabbing, data-driven growth strategies across YouTube and other social media channels that compound month over month — turning your content into a powerful distribution engine.",
+    "ctaBook": "Book Free Strategy Call",
+    "ctaHowItWorks": "See How It Works",
+    "trustedBy": "Trusted by {count}+ creators"
+  },
+  "nav": {
+   "brand": "GrowthLab",
+    "problem": "Problem",
+    "howItWorks": "How It Works",
+    "benefits": "Benefits",
+    "testimonials": "Testimonials",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "signIn": "Sign In",
+    "bookCall": "Book Free Call",
+    "switchToAr": "AR",
+    "switchToEn": "EN"
+  }
+}

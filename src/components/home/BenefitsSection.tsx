@@ -9,7 +9,7 @@ type BenefitsSectionProps = {
 
 const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
   return (
-    <section className="relative py-28 lg:py-40 overflow-hidden bg-[#0A0A1F]">
+    <section id="benefits" className="relative py-28 lg:py-40 overflow-hidden bg-[#0A0A1F]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(103,232,249,0.18)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(34,211,238,0.15)_0%,transparent_65%)]" />
       <div className="absolute inset-0 bg-grid-white/[0.035] bg-size:[60px_60px]" />

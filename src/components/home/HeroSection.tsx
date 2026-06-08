@@ -4,8 +4,11 @@ import { ArrowRight, ChevronDown, Play, Sparkles, Star } from "lucide-react";
 import AnalyticsDashboard from "@/components/home/AnalyticsDashboard";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export default function HeroSection() {
+  const t = useTranslations("hero");
+
   return (
     <section className="relative min-h-[calc(100vh-5rem)] overflow-hidden pt-20 pb-12">
       <div className="absolute inset-0 pointer-events-none">
@@ -23,7 +26,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2 rounded-full border border-[#0891B2]/30 bg-[#0891B2]/10 px-4 py-1.5 text-xs font-medium text-[#0891B2]"
           >
             <Sparkles className="h-4 w-4" />
-            1,000+ Creators Scaled to New Heights
+            {t("subtitle")}
           </motion.div>
 
           <motion.h1
@@ -32,11 +35,11 @@ export default function HeroSection() {
             transition={{ delay: 0.2, duration: 0.7 }}
             className="font-satoshi text-4xl leading-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl"
           >
-            Your Channel
+            {t("titleLine1")}
             <br />
-            <span className="gradient-text-teal">Deserves Strategic</span>
+            <span className="gradient-text-teal">{t("titleLine2")}</span>
             <br />
-            Growth
+            {t("titleLine3")}
           </motion.h1>
 
           <motion.p
@@ -45,10 +48,7 @@ export default function HeroSection() {
             transition={{ delay: 0.4, duration: 0.9 }}
             className="max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg"
           >
-            Stop guessing. Start scaling. We engineer attention-grabbing,
-            data-driven growth strategies across YouTube and other social media
-            channels that compound month over month — turning your content into
-            a powerful distribution engine.
+            {t("description")}
           </motion.p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -59,7 +59,7 @@ export default function HeroSection() {
               href="#contact"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#0891B2] to-[#0671A1] px-7 py-3.5 text-sm font-semibold text-white transition hover:opacity-95"
             >
-              Book Free Strategy Call
+              {t("ctaBook")}
               <ArrowRight className="h-4 w-4" />
             </motion.a>
             <motion.a
@@ -70,7 +70,7 @@ export default function HeroSection() {
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-sm font-medium text-white transition hover:border-white/30"
             >
               <Play className="h-4 w-4" />
-              See How It Works
+              {t("ctaHowItWorks")}
             </motion.a>
           </div>
 
@@ -118,7 +118,7 @@ export default function HeroSection() {
                 transition={{ delay: 1.2 }}
                 className="text-xs text-slate-400"
               >
-                Trusted by <span className="text-white">1,000+</span> creators
+                {t("trustedBy", { count: 1_000 })}
               </motion.p>
             </div>
           </div>
