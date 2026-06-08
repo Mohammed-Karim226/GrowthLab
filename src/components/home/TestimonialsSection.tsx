@@ -15,7 +15,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="results" className="relative py-12 overflow-hidden bg-[#05070F]">
+    <section id="testimonials" className="relative py-12 overflow-hidden bg-[#05070F]">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.8px,transparent_1px)] [background-size:40px_40px] animate-[pulse_12s_ease-in-out_infinite]" />
