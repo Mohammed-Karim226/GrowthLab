@@ -11,6 +11,14 @@ type TestimonialsSectionProps = {
   testimonials: Testimonial[];
 };
 
+/**
+ * Renders the "Testimonials" landing section with animated background, a grid of testimonial cards, and a trust bar.
+ *
+ * Each testimonial card displays the creator's name, category, growth number, quote, before→after audience stat, a progress bar that animates into view, and a fixed "VERIFIED" badge. Hovering a card highlights it, lifts the card, and triggers a pulsing scale animation on that card's primary "after" number.
+ *
+ * @param testimonials - Array of testimonial objects (expected fields include `name`, `category`, `before`, `after`, and `quote`) used to populate the cards.
+ * @returns The JSX element for the testimonials section (including decorative background, testimonial grid, and trust bar).
+ */
 export default function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 

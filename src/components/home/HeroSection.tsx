@@ -6,6 +6,11 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
+/**
+ * Render the landing page hero section with localized text, animated entrance effects, call-to-action links, trust indicators, and an analytics dashboard.
+ *
+ * @returns The hero section as a JSX element.
+ */
 export default function HeroSection() {
   const t = useTranslations("hero");
 

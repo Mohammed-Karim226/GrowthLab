@@ -5,6 +5,12 @@ type ProblemSectionProps = {
   problems: SectionCard[];
 };
 
+/**
+ * Render the "Problem" landing section with an intro and a responsive grid of issue cards.
+ *
+ * @param problems - Array of card objects to display; each should include at least `title`, `desc`, and `icon`
+ * @returns The section's JSX element containing the headline and a responsive grid of problem cards
+ */
 export default function ProblemSection({ problems }: ProblemSectionProps) {
   return (
     <section id="problem" className="py-20 lg:py-28">

@@ -18,6 +18,20 @@ type NavBarProps = {
   scrolled: boolean;
 };
 
+/**
+ * Renders the top navigation bar with responsive layout, locale switching, and a mobile menu.
+ *
+ * Renders brand branding, a set of navigation links, a locale switch control derived from the current
+ * locale and pathname, and contact actions. On small screens it exposes a toggleable mobile panel
+ * that closes when a link is selected.
+ *
+ * @param brand - Text displayed next to the brand icon
+ * @param navLinks - Array of navigation items; each item must include `key`, `label`, and `href`
+ * @param signInLabel - Label for the secondary contact link (styled as a bordered button)
+ * @param bookCallLabel - Label for the primary contact action (styled as a prominent button)
+ * @param scrolled - When true, applies the "glass shadow" scrolled style; otherwise the navbar is transparent
+ * @returns A React element representing the navigation bar
+ */
 export default function NavBar({
   brand,
   navLinks,
