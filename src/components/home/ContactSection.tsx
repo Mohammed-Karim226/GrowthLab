@@ -52,11 +52,10 @@ export default function ContactSection() {
 
   return (
     <section id="contact" className="relative pt-2 pb-10 overflow-hidden bg-[#030614]">
-      <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.7px,transparent_1px)] [background-size:60px_60px] opacity-40" />
+      <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.7px,transparent_1px)] background-size:[60px_60px] opacity-40" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-          {/* LEFT SIDE - MORE INCREDIBLE */}
           <motion.div
             initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -65,14 +64,14 @@ export default function ContactSection() {
             className="space-y-12"
           >
             <div className = "max-sm:flex max-sm:flex-col max-sm:items-center max-sm:justify-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-3xl bg-gradient-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-400/30 mb-8">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-3xl bg-linear-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-400/30 mb-8">
                 <Zap className="h-6 w-6 text-cyan-400 animate-pulse" />
                 <span className="text-sm font-mono tracking-[3px] text-cyan-300 font-semibold">TRANSFORM YOUR CHANNEL</span>
               </div>
 
               <h2 className="text-5xl max-sm:text-4xl max-sm:text-center font-bold tracking-tighter leading-12 max-sm:leading-16">
                 From Zero to{" "}
-                <span className="bg-gradient-to-r from-[#67E8F9] via-[#C084FC] to-[#F472B6] bg-clip-text text-transparent animate-gradient">
+                <span className="bg-linear-to-r from-[#67E8F9] via-[#C084FC] to-[#F472B6] bg-clip-text text-transparent animate-gradient">
                   6-Figure
                 </span>{" "}
                 Creator
@@ -93,7 +92,7 @@ export default function ContactSection() {
                   transition={{ delay: i * 0.15 }}
                   className="flex gap-6 group"
                 >
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-cyan-400/10 to-violet-400/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                  <div className="h-12 w-12 rounded-2xl bg-linear-to-br from-cyan-400/10 to-violet-400/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
                     <item.icon className="h-7 w-7 text-cyan-400" />
                   </div>
                   <div>
@@ -113,8 +112,6 @@ export default function ContactSection() {
                 ))}
               </div>
               <div className="relative text-sm leading-tight text-slate-400">
-                {/* <span className="absolute -left-2 top-1 h-2 w-2 rounded-full bg-cyan-300/90 shadow-[0_0_10px_rgba(34,211,238,0.7)] animate-pulse" /> */}
-                {/* <span className="absolute right-0 top-6 h-2 w-2 rounded-full bg-pink-300/90 shadow-[0_0_12px_rgba(244,114,182,0.65)] animate-pulse" /> */}
                 <p className="text-sm text-slate-400 leading-tight">Trusted by creators from</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(248,113,113,0.18)]">
@@ -134,7 +131,6 @@ export default function ContactSection() {
             </div>
           </motion.div>
 
-          {/* RIGHT SIDE - PREMIUM FORM */}
           <motion.div
             initial={{ opacity: 0, x: 60 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -142,7 +138,7 @@ export default function ContactSection() {
             transition={{ duration: 1, delay: 0.2 }}
           >
             <div className="relative rounded-3xl border border-white/10 bg-[#0A0E27] p-10 lg:p-12 shadow-2xl backdrop-blur-3xl">
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-cyan-400/20 via-violet-400/10 to-transparent rounded-3xl -z-10" />
+              <div className="absolute -inset-px bg-linear-to-br from-cyan-400/20 via-violet-400/10 to-transparent rounded-3xl -z-10" />
 
               <h3 className="text-3xl max-sm:text-2xl font-bold text-white mb-10">Start Your Free Growth Strategy</h3>
 
@@ -227,7 +223,6 @@ export default function ContactSection() {
                   />
                 </div>
 
-                {/* Enhanced Submit Button */}
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}

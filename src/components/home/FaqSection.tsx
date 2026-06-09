@@ -14,12 +14,9 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section
-      id="faq"
-      className="relative py-6 overflow-hidden bg-[#05070F]"
-    >
+    <section id="faq" className="relative py-6 overflow-hidden bg-[#05070F]">
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.6px,transparent_1px)] [background-size:40px_40px] opacity-40" />
+        <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.6px,transparent_1px)] background-size:[40px_40px] opacity-40" />
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-[#0891B2] rounded-full blur-[120px] opacity-20" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#22D3EE] rounded-full blur-[140px] opacity-20" />
       </div>
@@ -69,7 +66,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
                   className={`group cursor-pointer rounded-3xl border transition-all duration-500 overflow-hidden
                     ${
                       isOpen
-                        ? "border-[#0891B2] shadow-2xl shadow-[#0891B2]/20 bg-gradient-to-br from-[#0D1235] to-[#0A0E27]"
+                        ? "border-[#0891B2] shadow-2xl shadow-[#0891B2]/20 bg-linear-to-br from-[#0D1235] to-[#0A0E27]"
                         : "border-white/10 hover:border-white/30 bg-[#0A0E27]"
                     }`}
                 >
@@ -125,7 +122,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="group inline-flex items-center gap-4 px-10 py-5 rounded-3xl bg-gradient-to-r from-white/5 to-white/10 border border-white/10 hover:border-[#0891B2]/50 backdrop-blur-xl shadow-xl hover:shadow-2xl hover:shadow-[#0891B2]/20 transition-all duration-500"
+              className="group inline-flex items-center gap-4 px-10 py-5 rounded-3xl bg-linear-to-r from-white/5 to-white/10 border border-white/10 hover:border-[#0891B2]/50 backdrop-blur-xl shadow-xl hover:shadow-2xl hover:shadow-[#0891B2]/20 transition-all duration-500"
             >
               <motion.div
                 animate={{ rotate: [0, 15, -15, 0] }}

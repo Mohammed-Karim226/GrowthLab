@@ -1,4 +1,5 @@
 "use client";
+
 import AnimatedCounter from "@/components/home/AnimatedCounter";
 import type { StatCard } from "@/lib/landing";
 import { motion } from "framer-motion";

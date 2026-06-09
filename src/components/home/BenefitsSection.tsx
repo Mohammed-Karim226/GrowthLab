@@ -1,3 +1,5 @@
+"use client";
+
 import SectionReveal from "@/components/home/SectionReveal";
 import type { BenefitCard } from "@/lib/landing";
 import { motion, useMotionValue, useTransform } from "framer-motion";

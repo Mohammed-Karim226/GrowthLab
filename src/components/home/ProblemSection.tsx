@@ -1,3 +1,5 @@
+"use client";
+
 import SectionReveal from "@/components/home/SectionReveal";
 import { cardMeta, type SectionCard } from "@/lib/landing";
 

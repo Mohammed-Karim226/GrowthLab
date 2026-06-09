@@ -32,9 +32,10 @@ export default function NavBar({
 
   const alternateLocale = locale === "ar" ? "en" : "ar";
   const localeSwitchLabel = locale === "ar" ? t("switchToEn") : t("switchToAr");
-  const localeSwitchHref = pathname.startsWith("/en") || pathname.startsWith("/ar")
-    ? pathname.replace(/^\/(en|ar)(?=\/|$)/, `/${alternateLocale}`)
-    : `/${alternateLocale}${pathname}`;
+  const localeSwitchHref =
+    pathname.startsWith("/en") || pathname.startsWith("/ar")
+      ? pathname.replace(/^\/(en|ar)(?=\/|$)/, `/${alternateLocale}`)
+      : `/${alternateLocale}${pathname}`;
 
   return (
     <nav
