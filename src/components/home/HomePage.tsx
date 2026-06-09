@@ -33,38 +33,38 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-const navLinks = [
-  {
-    key: "problem",
-    label: t("problem"),
-    href: "#problem",
-  },
-  {
-    key: "howItWorks",
-    label: t("howItWorks"),
-    href: "#how-it-works",
-  },
-  {
-    key: "benefits",
-    label: t("benefits"),
-    href: "#benefits",
-  },
-  {
-    key: "testimonials",
-    label: t("testimonials"),
-    href: "#testimonials",
-  },
-  {
-    key: "faq",
-    label: t("faq"),
-    href: "#faq",
-  },
-  {
-    key: "contact",
-    label: t("contact"),
-    href: "#contact",
-  },
-];
+  const navLinks = [
+    {
+      key: "problem",
+      label: t("problem"),
+      href: "#problem",
+    },
+    {
+      key: "howItWorks",
+      label: t("howItWorks"),
+      href: "#how-it-works",
+    },
+    {
+      key: "benefits",
+      label: t("benefits"),
+      href: "#benefits",
+    },
+    {
+      key: "testimonials",
+      label: t("testimonials"),
+      href: "#testimonials",
+    },
+    {
+      key: "faq",
+      label: t("faq"),
+      href: "#faq",
+    },
+    {
+      key: "contact",
+      label: t("contact"),
+      href: "#contact",
+    },
+  ];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0A0E27]">
@@ -82,7 +82,10 @@ const navLinks = [
         <HowItWorksSection steps={steps} />
         <BenefitsSection benefits={benefits} />
         <TestimonialsSection testimonials={testimonials} />
-        <FaqSection faqs={faqs} {...({ openFaq, onToggle: setOpenFaq } as any)} />
+        <FaqSection
+          faqs={faqs}
+          {...({ openFaq, onToggle: setOpenFaq } as any)}
+        />
         <ContactSection />
         <Footer />
       </main>

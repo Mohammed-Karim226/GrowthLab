@@ -227,7 +227,7 @@ export const testimonials: Testimonial[] = [
 export const faqs: FaqItem[] = [
   {
     q: "How quickly will I see results?",
-    a: "Most creators see measurable growth within 30 days. Our average client gains +15k subscribers in the first 90-day engagement.",
+    a: "Most creators see measurable growth within 60 days. Our average client gains +15k subscribers in the first 90-day engagement.",
   },
   {
     q: "Do you work with small channels?",

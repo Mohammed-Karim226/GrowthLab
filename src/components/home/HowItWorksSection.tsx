@@ -317,7 +317,6 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
       id="how-it-works"
       className="relative overflow-hidden bg-[#030614] py-24 sm:py-28 lg:py-36"
     >
-      {/* Background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-[8%] h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
         <div className="absolute left-[8%] top-[18%] h-[240px] w-[240px] rounded-full bg-sky-500/8 blur-3xl" />
@@ -347,7 +346,6 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
           </div>
         </SectionReveal>
 
-        {/* Desktop */}
         <div className="relative hidden min-h-[940px] lg:block">
           <FlowConnectors
             nodeCount={visibleSteps.length}
@@ -356,7 +354,6 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
 
           <GrowthCore prefersReducedMotion={prefersReducedMotion!} />
 
-          {/* Step Cards */}
           {visibleSteps.map((step, index) => {
             const node = FLOW_NODES[index];
             const radius = CAPSULE_RADIUS[index % CAPSULE_RADIUS.length];
@@ -374,7 +371,6 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
           })}
         </div>
 
-        {/* Mobile */}
         <div className="grid gap-5 lg:hidden">
           {visibleSteps.map((step, index) => (
             <SectionReveal
