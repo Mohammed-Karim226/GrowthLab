@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const bars = [45, 62, 38, 78, 55, 91, 67, 83, 74, 95];
 
 export default function AnalyticsDashboard() {
+  const t = useTranslations("analytics");
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -27,13 +29,13 @@ export default function AnalyticsDashboard() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-400">
-              Channel Analytics
+              {t("title")}
             </p>
             <p className="text-sm font-semibold text-white">@YourChannel</p>
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-[#0891B2]/20 border border-[#0891B2]/40 px-3 py-1 text-xs font-medium text-[#0891B2]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#0891B2] animate-pulse" />
-            Live
+            {t("live")}
           </div>
         </div>
 
@@ -77,7 +79,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="mb-3">
-          <p className="mb-2 text-[10px] text-slate-500">Subscriber Growth</p>
+          <p className="mb-2 text-[10px] text-slate-500">{t("subscriberGrowth")}</p>
           <div className="flex h-16 items-end gap-1.5">
             {bars.map((value, index) => (
               <motion.div

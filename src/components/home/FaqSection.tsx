@@ -5,6 +5,7 @@ import SectionReveal from "@/components/home/SectionReveal";
 import type { FaqItem } from "@/lib/landing";
 import { HelpCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 type FaqSectionProps = {
   faqs: FaqItem[];
@@ -12,6 +13,9 @@ type FaqSectionProps = {
 
 export default function FaqSection({ faqs }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const t = useTranslations("faq");
+  const locale = useLocale();
+  const isRTL = locale === "ar";
 
   return (
     <section id="faq" className="relative py-6 overflow-hidden bg-[#05070F]">
@@ -28,22 +32,21 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
               <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-[#0891B2]/30 bg-[#0891B2]/5">
                 <Sparkles className="h-5 w-5 text-[#0891B2]" />
                 <span className="text-[#0891B2] text-xs font-mono tracking-[3px] font-semibold">
-                  KNOWLEDGE BASE
+                  {t("badge")}
                 </span>
               </div>
             </div>
 
             <h2 className="font-satoshi text-5xl max-sm:text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-white mb-6">
-              Everything you wanted to know,
+              {t("titleLine1")}
               <br />
-              <span className="bg-gradient-to-r from-white via-[#0891B2] to-[#22D3EE] bg-clip-text text-transparent">
-                answered instantly
+              <span className="bg-linear-to-r from-white via-[#0891B2] to-[#22D3EE] bg-clip-text text-transparent">
+                {t("titleHighlight")}
               </span>
             </h2>
 
             <p className="text-xl max-sm:text-lg text-slate-400 max-w-2xl mx-auto">
-              No corporate fluff. Just real answers from creators who’ve been
-              exactly where you are.
+             {t("description")}
             </p>
           </div>
         </SectionReveal>
@@ -80,7 +83,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
                     </div>
 
                     <h3 className="flex-1 text-[17px] font-medium text-white leading-tight pr-8">
-                      {faq.q}
+                      {t(`items.${index}.q`)}
                     </h3>
 
                     <motion.div
@@ -104,7 +107,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
                       >
                         <div className="px-8 pb-10">
                           <div className="pl-14 border-l-2 border-[#0891B2]/50 text-slate-200 leading-relaxed text-[15.5px]">
-                            {faq.a}
+                            {t(`items.${index}.a`)}
                           </div>
                         </div>
                       </motion.div>
@@ -139,9 +142,9 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
                 href="#contact"
                 className="text-lg font-semibold text-white group-hover:text-[#0891B2] transition-colors flex items-center gap-3"
               >
-                Still have questions?
+                {t("stillHaveQuestions")}
                 <span className="text-[#0891B2] group-hover:translate-x-2 transition-transform duration-300">
-                  →
+                  {isRTL ? "←" : "→"}
                 </span>
               </a>
 
@@ -154,8 +157,8 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
             </motion.div>
 
             <p className="mt-5 text-sm text-slate-500 font-mono tracking-wide">
-              Average reply time •{" "}
-              <span className="text-emerald-400">Under 2 hours</span>
+              {t("averageReplyTime")} •{" "}
+              <span className="text-emerald-400">{t("under2Hours")}</span>
             </p>
           </div>
         </SectionReveal>

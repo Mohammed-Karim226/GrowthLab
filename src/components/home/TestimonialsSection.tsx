@@ -12,7 +12,7 @@ import {
 import type { Testimonial } from "@/lib/landing";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
@@ -24,6 +24,8 @@ export default function TestimonialsSection({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const locale = useLocale();
   const isRTL = locale === "ar";
+
+  const t = useTranslations("testimonials");
   return (
     <section
       id="testimonials"
@@ -41,22 +43,22 @@ export default function TestimonialsSection({
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               <p className="text-emerald-400 text-xs font-mono tracking-[3px] uppercase">
-                Proven Transformations
+                {t("badge")}
               </p>
             </div>
 
             <h2 className="font-satoshi text-5xl max-sm:text-4xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tighter mb-6">
-              They didn&apos;t just grow.
+              {t("titleLine1")}{" "}
               <br />
-              They{" "}
+              {t("titleLine2Prefix")}{" "}
               <span className="bg-linear-to-r from-[#F59E0B] via-[#22D3EE] to-[#A855F7] bg-clip-text text-transparent">
-                exploded
+                {t("titleLine2Highlight")}
               </span>
-              .
+              {t("titleLine2Suffix")}
             </h2>
 
             <p className="mx-auto max-w-lg text-lg text-slate-400">
-              Real creators. Real numbers. Zero fluff.
+              {t("description")}
             </p>
           </div>
         </SectionReveal>
@@ -93,7 +95,7 @@ export default function TestimonialsSection({
                 </div>
                 <div>
                   <p className="font-semibold text-xl text-white tracking-tight">
-                    {item.name}
+                    {t(`items.${index}.name`)}
                   </p>
                   <p className="text-sm text-slate-400">{item.category}</p>
                 </div>
@@ -104,17 +106,19 @@ export default function TestimonialsSection({
                 transition={{ duration: 2.2, repeat: Infinity }}
                 className="mb-5"
               >
-                <p className="text-6xl font-bold tracking-[-2px] bg-linear-to-br from-white to-slate-300 bg-clip-text text-transparent">
-                  {item.after}
+                <p className={cn(
+                  "text-base text-slate-400 italic leading-relaxed",
+                  isRTL && "text-right",)}>
+                  {t(`items.${index}.category`)}
                 </p>
                 <p className="text-xs uppercase tracking-[2px] text-emerald-400 font-mono mt-1">
-                  AFTER 90 DAYS
+                  {t("afterLabel")}
                 </p>
               </motion.div>
 
               <div className="flex-1 mb-8">
                 <p className="text-slate-300 leading-relaxed text-[15.2px]">
-                  “{item.quote}”
+                  “{t(`items.${index}.quote`)}”
                 </p>
               </div>
 
@@ -124,7 +128,7 @@ export default function TestimonialsSection({
                     📈
                   </div>
                   <div>
-                    <p className="text-emerald-400 text-xs font-mono">GROWTH</p>
+                    <p className="text-emerald-400 text-xs font-mono">{t("growth")}</p>
                     <p className="text-white">{item.after}</p>
                   </div>
                 </div>
@@ -135,7 +139,7 @@ export default function TestimonialsSection({
                   </div>
                   <div>
                     <p className="text-emerald-400 text-xs font-mono">
-                      AUDIENCE
+                      {t("audience")}
                     </p>
                     <p className="text-white">
                       {isRTL
@@ -148,8 +152,8 @@ export default function TestimonialsSection({
 
               <div className="mt-auto">
                 <div className="flex justify-between text-[10px] font-mono tracking-widest text-slate-500 mb-2">
-                  <span>BEFORE</span>
-                  <span>NOW</span>
+                  <span>{t("before")}</span>
+                  <span>{t("now")}</span>
                 </div>
                 <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                   <motion.div
@@ -171,7 +175,7 @@ export default function TestimonialsSection({
                 )}
               >
                 <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                <span>VERIFIED</span>
+                <span>{t("verified")}</span>
               </div>
             </motion.div>
           ))}
@@ -180,7 +184,7 @@ export default function TestimonialsSection({
         <SectionReveal delay={0.5}>
           <div className="mt-24 border-t border-white/10 pt-12">
             <p className="text-center text-slate-500 font-mono text-sm tracking-widest mb-10">
-              TRUSTED BY CREATORS ON
+              {t("trustedByCreatorsOn")}
             </p>
 
             <div className="flex flex-wrap justify-center gap-x-10 gap-y-10">
@@ -251,7 +255,7 @@ export default function TestimonialsSection({
             </div>
 
             <p className="text-center text-[13px] text-slate-500 mt-12 font-light">
-              And thousands more creators growing every week
+              {t("thousandsMore")}
             </p>
           </div>
         </SectionReveal>

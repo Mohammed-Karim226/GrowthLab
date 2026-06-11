@@ -1,23 +1,24 @@
 "use client";
 
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const t = useTranslations("footer");
   return (
     <footer className="border-t border-white/10 bg-[#070b1f] py-14 text-slate-300">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div className="space-y-4">
           <p className="text-sm uppercase tracking-[0.32em] text-[#0891B2]">
-            GrowthLab
+            {t("brand")}
           </p>
           <p className="max-w-sm text-sm leading-relaxed text-slate-400">
-            We help ambitious creators and founders build a content engine that
-            delivers predictable growth, stronger retention, and higher revenue.
+           {t("description")}
           </p>
           <div className="space-y-3 text-sm text-slate-400">
             <div className="flex items-center gap-3">
               <MapPin className="h-4 w-4 text-[#0891B2]" />
-              <span>Remote-first team, worldwide</span>
+              <span>{t("location")}</span>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-[#0891B2]" />
@@ -31,9 +32,9 @@ export default function Footer() {
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:col-span-2">
-          <div>
+          {/* <div>
             <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-white">
-              Quick links
+              {t("quickLinks")}
             </h3>
             <ul className="mt-6 space-y-3 text-sm text-slate-400">
               {[
@@ -49,11 +50,11 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-white">
-              Next steps
+              {t("nextSteps")}
             </h3>
             <ul className="mt-6 space-y-3 text-sm text-slate-400">
               <li>
@@ -61,7 +62,7 @@ export default function Footer() {
                   href="#contact"
                   className="inline-flex items-center gap-2 transition hover:text-white"
                 >
-                  Book a free call <ArrowUpRight className="h-4 w-4" />
+                  {t("bookCall")} <ArrowUpRight className="h-4 w-4" />
                 </a>
               </li>
               <li>
@@ -69,12 +70,12 @@ export default function Footer() {
                   href="mailto:hello@growthlab.com"
                   className="transition hover:text-white"
                 >
-                  Email our growth team
+                  {t("emailTeam")}
                 </a>
               </li>
               <li>
-                <a href="#services" className="transition hover:text-white">
-                  Review the service model
+                <a href="#benefits" className="transition hover:text-white">
+                  {t("reviewModel")}
                 </a>
               </li>
             </ul>

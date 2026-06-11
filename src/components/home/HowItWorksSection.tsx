@@ -1,9 +1,8 @@
-"use client";
-
 import { motion, useReducedMotion } from "framer-motion";
 import { memo } from "react";
 import SectionReveal from "@/components/home/SectionReveal";
 import type { StepCard } from "@/lib/landing";
+import { useTranslations } from "next-intl";
 
 type HowItWorksSectionProps = {
   steps: StepCard[];
@@ -151,6 +150,7 @@ const GrowthCore = memo(function GrowthCore({
 }: {
   prefersReducedMotion: boolean;
 }) {
+  const t = useTranslations("howItWorks");
   return (
     <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
       {!prefersReducedMotion && (
@@ -205,7 +205,7 @@ const GrowthCore = memo(function GrowthCore({
             <span className="text-lg font-bold">◎</span>
           </div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-cyan-300/90">
-            Growth Core
+            {t("flowTitle")}
           </p>
         </div>
       </motion.div>
@@ -227,6 +227,7 @@ const StepCardComponent = memo(function StepCard({
   radius: string;
   prefersReducedMotion: boolean;
 }) {
+  const t = useTranslations("howItWorks");
   return (
     <SectionReveal delay={index * ANIMATION_CONFIG.revealDelay}>
       <motion.article
@@ -289,17 +290,17 @@ const StepCardComponent = memo(function StepCard({
 
               <div className="min-w-0">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-400">
-                  Step {step.num}
+                  {t("stepPrefix")} {step.num}
                 </p>
                 <h3 className="text-lg font-semibold tracking-tight text-white">
-                  {step.title}
+                  {t(`items.${index}.title`)}
                 </h3>
               </div>
             </div>
 
             <div className="mb-4 h-px w-full bg-linear-to-r from-cyan-400/35 via-white/10 to-transparent" />
 
-            <p className="text-sm leading-7 text-slate-400">{step.desc}</p>
+            <p className="text-sm leading-7 text-slate-400">{t(`items.${index}.desc`)}</p>
           </div>
         </motion.div>
       </motion.article>
@@ -311,6 +312,7 @@ const StepCardComponent = memo(function StepCard({
 export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
   const prefersReducedMotion = useReducedMotion();
   const visibleSteps = steps.slice(0, 4);
+  const t = useTranslations("howItWorks");
 
   return (
     <section
@@ -329,19 +331,18 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
         <SectionReveal>
           <div className="mx-auto mb-14 w-full text-center lg:mb-20">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.38em] text-cyan-400">
-              The Process
+              {t("badge")}
             </p>
 
             <h2 className="font-satoshi text-3xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              How We{" "}
+              {t("titleLine1")}{" "}
               <span className="bg-linear-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
-                Convert Content into Organic Distribution
+                {t("titleHighlight")}
               </span>
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
-              Four connected phases, designed to strengthen each other — more
-              like a responsive engine than a static checklist.
+              {t("description")}
             </p>
           </div>
         </SectionReveal>
@@ -393,13 +394,13 @@ export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
 
                   <div className="min-w-0">
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.32em] text-cyan-400">
-                      Step {step.num}
+                      {t("stepPrefix")} {step.num}
                     </p>
                     <h3 className="text-lg font-semibold text-white">
-                      {step.title}
+                      {t(`items.${index}.title`)}
                     </h3>
                     <p className="mt-3 text-sm leading-7 text-slate-400">
-                      {step.desc}
+                      {t(`items.${index}.desc`)}
                     </p>
                   </div>
                 </div>

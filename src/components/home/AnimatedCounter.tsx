@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 
 type AnimatedCounterProps = {
   target: number;
@@ -13,6 +14,7 @@ export default function AnimatedCounter({
   suffix = "",
   duration = 2000,
 }: AnimatedCounterProps) {
+  const locale = useLocale();
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement | null>(null);
   const [started, setStarted] = useState(false);
@@ -58,7 +60,7 @@ export default function AnimatedCounter({
       ref={ref}
       className="flex flex-col items-center text-3xl font-bold text-white"
     >
-      {count.toLocaleString("en-US")}
+      {count.toLocaleString(locale)}
       {suffix}
     </span>
   );
