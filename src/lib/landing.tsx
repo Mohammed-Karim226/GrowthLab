@@ -240,11 +240,7 @@ export const faqs: FaqItem[] = [
   {
     q: "Is there a long-term contract?",
     a: "No lock-ins. We offer month-to-month engagements. We earn your renewal every single month.",
-  },
-  {
-    q: "Can you help with monetization?",
-    a: "Yes. We cover AdSense, sponsorships, memberships, and digital products as part of our revenue track.",
-  },
+  }
 ];
 
 export  const cardMeta = [

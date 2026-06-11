@@ -3,6 +3,7 @@
 import SectionReveal from "@/components/home/SectionReveal";
 import type { BenefitCard } from "@/lib/landing";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
 type BenefitsSectionProps = {
@@ -10,8 +11,12 @@ type BenefitsSectionProps = {
 };
 
 const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
+  const t = useTranslations("benefits");
   return (
-    <section id="benefits" className="relative py-28 lg:py-40 overflow-hidden bg-[#0A0A1F]">
+    <section
+      id="benefits"
+      className="relative py-28 lg:py-40 overflow-hidden bg-[#0A0A1F]"
+    >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(103,232,249,0.18)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(34,211,238,0.15)_0%,transparent_65%)]" />
       <div className="absolute inset-0 bg-grid-white/[0.035] bg-size:[60px_60px]" />
@@ -20,21 +25,19 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         <SectionReveal>
           <div className="text-center mb-20">
             <div className="mx-auto mb-6 inline-flex items-center gap-2.5 rounded-full border border-cyan-400/20 bg-cyan-400/5 px-8 py-2.5 text-xs font-mono font-medium tracking-[3px] text-cyan-300">
-              UNFAIR ADVANTAGES
+              {t("badge")}
             </div>
 
             <h2 className="font-satoshi text-6xl sm:text-7xl max-sm:text-3xl lg:text-[5.2rem] leading-[1.02] max-sm:leading-[1.4] font-semibold text-white">
-              Superpowers That{" "}
+              {t("titleLine1")}{" "}
               <span className="bg-linear-to-br from-[#67E8F9] via-[#22D3EE] to-[#06B6D4] bg-clip-text text-transparent">
-                Actually Move the Needle
+                {t("titleHighlight")}
               </span>
             </h2>
 
             <p className="mt-8 text-xl text-slate-400 leading-relaxed w-full max-sm:text-base">
-              Not generic features.
-              <br />
-              These are engineered edges that separate the top 1% from everyone
-              else.
+              {t("descriptionLine1")} <br />
+              {t("descriptionLine2")}
             </p>
           </div>
         </SectionReveal>
@@ -48,7 +51,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         <SectionReveal delay={0.5}>
           <div className="text-center mt-20">
             <p className="text-sm font-mono uppercase tracking-[4px] text-cyan-400/60 max-sm:text-xs">
-              YOUR COMPETITION WON’T KNOW WHAT HIT THEM
+             {t("footerText")}
             </p>
           </div>
         </SectionReveal>
@@ -82,7 +85,7 @@ const BenefitCard = ({
     x.set(0);
     y.set(0);
   };
-
+  const t = useTranslations("benefits");
   return (
     <SectionReveal delay={index * 0.1}>
       <motion.div
@@ -132,15 +135,15 @@ const BenefitCard = ({
         </motion.div>
 
         <h3 className="text-3xl font-semibold text-white mb-4 tracking-[-0.02em]">
-          {benefit.title}
+          {t(`items.${index}.title`)}
         </h3>
 
         <p className="text-slate-400 text-[15.8px] leading-relaxed mb-8">
-          {benefit.desc}
+          {t(`items.${index}.desc`)}
         </p>
 
         <div className="flex items-center gap-2 text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
-          Unlock this superpower
+          {t("unlock")}
           <span className="text-xl transition-transform group-hover:translate-x-1">
             →
           </span>

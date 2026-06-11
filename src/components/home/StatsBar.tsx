@@ -3,12 +3,15 @@
 import AnimatedCounter from "@/components/home/AnimatedCounter";
 import type { StatCard } from "@/lib/landing";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 type StatsBarProps = {
   stats: StatCard[];
 };
 
 export default function StatsBar({ stats }: StatsBarProps) {
+  const t = useTranslations("stats");
+
   return (
     <section className="py-10 border-y border-white/5 bg-[#08102a]">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -18,9 +21,9 @@ export default function StatsBar({ stats }: StatsBarProps) {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="grid gap-8 text-center sm:grid-cols-3 cursor-pointer"
         >
-          {stats.map((stat) => (
+          {stats.map((stat, index) => (
             <div
-              key={stat.label}
+              key={index}
               className="relative group rounded-3xl border border-white/6 bg-[#0A0E27]/80 p-6 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] hover:border-white/10"
             >
               <div
@@ -40,7 +43,7 @@ export default function StatsBar({ stats }: StatsBarProps) {
               <p className="text-4xl font-semibold text-white">
                 <AnimatedCounter target={stat.target} suffix={stat.suffix} />
               </p>
-              <p className="mt-3 text-sm text-slate-400">{stat.label}</p>
+              <p className="mt-3 text-sm text-slate-400">{t(`items.${index}.label`)}</p>
             </div>
           ))}
         </motion.div>

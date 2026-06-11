@@ -9,8 +9,9 @@
     "ctaHowItWorks": "See How It Works",
     "trustedBy": "Trusted by {count}+ creators"
   },
+
   "nav": {
-   "brand": "GrowthLab",
+    "brand": "GrowthLab",
     "problem": "Problem",
     "howItWorks": "How It Works",
     "benefits": "Benefits",
@@ -21,5 +22,285 @@
     "bookCall": "Book Free Call",
     "switchToAr": "AR",
     "switchToEn": "EN"
+  },
+
+  "problem": {
+    "badge": "The Reality",
+    "titleLine1": "Why Most Channels",
+    "titleHighlight": "Struggle to Grow",
+    "description": "The YouTube landscape has never been more competitive. Without a deliberate strategy, even great content gets buried.",
+    "issuePrefix": "Issue",
+    "items": [
+      {
+        "title": "Algorithm Shifts",
+        "desc": "Constant YouTube updates tank your reach without warning. Most creators never adapt."
+      },
+      {
+        "title": "Low Visibility",
+        "desc": "Great content buried under poor metadata and weak search signals."
+      },
+      {
+        "title": "Audience Mismatch",
+        "desc": "Attracting the wrong viewers that don't convert to subscribers or revenue."
+      },
+      {
+        "title": "Inconsistent Growth",
+        "desc": "Random spikes followed by painful plateaus and no data-driven path forward."
+      }
+    ],
+    "callouts": [
+      "Recover visibility with better metadata and title strategy.",
+      "Turn viewers into subscribers with clearer positioning.",
+      "Stop audience mismatch with a tighter content funnel.",
+      "Smooth inconsistent growth with a data-driven cadence."
+    ]
+  },
+
+  "howItWorks": {
+    "badge": "The Process",
+    "titleLine1": "How We",
+    "titleHighlight": "Convert Content into Organic Distribution",
+    "description": "Four connected phases, designed to strengthen each other — more like a responsive engine than a static checklist.",
+    "stepPrefix": "Step",
+    "flowTitle": "Growth Core",
+    "items": [
+      {
+        "num": "01",
+        "title": "Extract the Gold",
+        "desc": "We deeply analyze your long-form video to find the highest-impact hooks, emotional peaks, and proven audience magnets."
+      },
+      {
+        "num": "02",
+        "title": "Repurpose at Scale",
+        "desc": "One video becomes six scroll-stopping vertical reels — each with custom hooks, captions, and platform-specific pacing."
+      },
+      {
+        "num": "03",
+        "title": "Build Platform Foundations",
+        "desc": "We professionally warm up and optimize your Instagram, TikTok, Facebook, and YouTube accounts for maximum deliverability and trust."
+      },
+      {
+        "num": "04",
+        "title": "Launch & Amplify",
+        "desc": "Strategic, staggered publishing + smart distribution that triggers organic algorithms and compounds reach over time."
+      }
+    ]
+  },
+
+  "benefits": {
+    "badge": "UNFAIR ADVANTAGES",
+    "titleLine1": "Superpowers That",
+    "titleHighlight": "Actually Move the Needle",
+    "descriptionLine1": "Not generic features.",
+    "descriptionLine2": "These are engineered edges that separate the top 1% from everyone else.",
+    "footerText": "YOUR COMPETITION WON’T KNOW WHAT HIT THEM",
+    "unlock": "Unlock this superpower",
+    "items": [
+      {
+        "title": "6X Content Output",
+        "desc": "Multiply every long-form video into six high-performing reels — dramatically increasing your content velocity without extra filming."
+      },
+      {
+        "title": "Explosive Organic Reach",
+        "desc": "Consistent short-form drops engineered to break through algorithms and land in front of fresh, highly engaged audiences."
+      },
+      {
+        "title": "Community Compounding",
+        "desc": "Turn passive viewers into loyal subscribers and fans across multiple platforms — creating a self-sustaining growth flywheel."
+      },
+      {
+        "title": "Done-For-You Freedom",
+        "desc": "Reclaim 10–15 hours every week. Never worry about editing, formatting, or posting schedules again."
+      },
+      {
+        "title": "Omnichannel Authority",
+        "desc": "Build a powerful, consistent brand presence across YouTube, TikTok, Instagram, Facebook & Shorts simultaneously."
+      },
+      {
+        "title": "Predictable Scaling System",
+        "desc": "A repeatable, data-backed system that delivers compounding views, engagement, and subscribers month after month."
+      }
+    ]
+  },
+
+  "testimonials": {
+    "badge": "Proven Transformations",
+    "titleLine1": "They didn't just grow.",
+    "titleLine2Prefix": "They ",
+    "titleLine2Highlight": "exploded",
+    "titleLine2Suffix": ".",
+    "description": "Real creators. Real numbers. Zero fluff.",
+    "afterLabel": "AFTER 90 DAYS",
+    "growth": "GROWTH",
+    "audience": "AUDIENCE",
+    "before": "BEFORE",
+    "now": "NOW",
+    "verified": "VERIFIED",
+    "trustedByCreatorsOn": "TRUSTED BY CREATORS ON",
+    "thousandsMore": "And thousands more creators growing every week",
+    "items": [
+      {
+        "name": "Sarah Chen",
+        "category": "Tech Reviews",
+        "before": "12k",
+        "after": "98k",
+        "quote": "The strategy they built doubled my CTR in 6 weeks. My channel finally has a clear direction."
+      },
+      {
+        "name": "Marcus Williams",
+        "category": "Personal Finance",
+        "before": "8k",
+        "after": "64k",
+        "quote": "I was plateaued for 8 months. One discovery call later, everything changed. Real ROI."
+      },
+      {
+        "name": "Aisha Patel",
+        "category": "Lifestyle & Wellness",
+        "before": "22k",
+        "after": "187k",
+        "quote": "Their analytics dashboard gave me visibility I never had. Growth went parabolic."
+      },
+      {
+        "name": "Ryan Torres",
+        "category": "Gaming & Esports",
+        "before": "5k",
+        "after": "43k",
+        "quote": "Worth every dollar. They treated my channel like a business, not a hobby."
+      },
+      {
+        "name": "Emma Johansson",
+        "category": "Education",
+        "before": "31k",
+        "after": "210k",
+        "quote": "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push."
+      },
+      {
+        "name": "David Kim",
+        "category": "Cooking & Food",
+        "before": "9k",
+        "after": "71k",
+        "quote": "They found the exact niche angle I was missing. Channel exploded in 90 days."
+      }
+    ]
+  },
+
+  "faq": {
+    "badge": "KNOWLEDGE BASE",
+    "titleLine1": "Everything you wanted to know,",
+    "titleHighlight": "answered instantly",
+    "description": "No corporate fluff. Just real answers from creators who’ve been exactly where you are.",
+    "stillHaveQuestions": "Still have questions?",
+    "averageReplyTime": "Average reply time",
+    "under2Hours": "Under 2 hours",
+    "items": [
+      {
+        "q": "How quickly will I see results?",
+        "a": "Most creators see measurable growth within 60 days. Our average client gains +15k subscribers in the first 90-day engagement."
+      },
+      {
+        "q": "Do you work with small channels?",
+        "a": "Absolutely. We work with channels at 500 subs and up. Early strategy sets the best compounding trajectory."
+      },
+      {
+        "q": "What makes your approach different?",
+        "a": "We combine data-driven algorithm analysis with narrative storytelling strategy — covering both discovery and retention."
+      },
+      {
+        "q": "Is there a long-term contract?",
+        "a": "No lock-ins. We offer month-to-month engagements. We earn your renewal every single month."
+      }
+    ]
+  },
+
+  "stats": {
+    "items": [
+      {
+        "label": "Creators Joined"
+      },
+      {
+        "label": "Avg Subs in 90 Days"
+      },
+      {
+        "label": "Average Rating"
+      }
+    ]
+  },
+
+  "contact": {
+    "badge": "TRANSFORM YOUR CHANNEL",
+    "titleLine1": "From Zero to",
+    "titleHighlight": "6-Figure Creator",
+    "trustedBy": "Trusted by creators from",
+    "formTitle": "Start Your Free Growth Strategy",
+    "firstNameLabel": "FIRST NAME",
+    "lastNameLabel": "LAST NAME",
+    "emailLabel": "EMAIL ADDRESS",
+    "channelNameLabel": "CHANNEL NAME",
+    "phoneLabel": "PHONE NUMBER",
+    "smsConfirmation": "Instant SMS confirmation",
+    "processing": "Processing...",
+    "successMessage": "Request Sent Successfully!",
+    "submitButton": "Get My Personalized Strategy",
+    "toastSuccess": "Request Received Successfully!",
+    "toastDesc": "Confirmation SMS sent to {phone}",
+    "firstNamePlaceholder": "Alex",
+    "lastNamePlaceholder": "Rivera",
+    "emailPlaceholder": "you@creator.com",
+    "phonePlaceholder": "+1 (555) 123-4567",
+    "features": [
+      {
+        "title": "Proven Growth Tactics",
+        "desc": "Strategies used by top creators in 2026"
+      },
+      {
+        "title": "1,200+ Success Stories",
+        "desc": "Real creators making real money"
+      },
+      {
+        "title": "Response in < 2 Hours",
+        "desc": "Dedicated strategy team"
+      },
+      {
+        "title": "100% Private & Secure",
+        "desc": "Your data is protected"
+      }
+    ],
+    "validation": {
+      "firstNameMin": "First name must be at least 2 characters.",
+      "lastNameMin": "Last name must be at least 2 characters.",
+      "emailInvalid": "Please enter a valid email address.",
+      "phoneMin": "Phone number must be at least 10 digits.",
+      "phoneInvalid": "Please enter a valid phone number."
+    }
+  },
+
+  "analytics": {
+    "title": "YouTube Analytics",
+    "live": "LIVE",
+    "subscribers": "Subscribers",
+    "views": "Views (30d)",
+    "watchTime": "Watch Time",
+    "subscriberGrowth": "Subscriber Growth (Last 30 Days)",
+    "avgCtr": "Avg CTR: {value}",
+    "vsLast90d": "+94% vs last 90d",
+    "algorithmBoost": "✨ Algorithm boost detected",
+    "subsMonth": "🚀 +15k subs/month"
+  },
+
+  "metadata": {
+    "title": "GrowthLab | YouTube Growth Strategy",
+    "description": "A modern YouTube growth landing page built with Next.js, Tailwind CSS, and Framer Motion."
+  },
+
+  "footer": {
+    "brand": "GrowthLab",
+    "description": "We help ambitious creators and founders build a content engine that delivers predictable growth, stronger retention, and higher revenue.",
+    "location": "Remote-first team, worldwide",
+    "quickLinks": "Quick links",
+    "nextSteps": "Next steps",
+    "bookCall": "Book a free call",
+    "emailTeam": "Email our growth team",
+    "reviewModel": "Review the service model",
+    "copyright": "© {year} GrowthLab. Trusted by creators building brands for the modern creator economy."
   }
 }
