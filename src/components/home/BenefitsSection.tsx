@@ -3,7 +3,7 @@
 import SectionReveal from "@/components/home/SectionReveal";
 import type { BenefitCard } from "@/lib/landing";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRef } from "react";
 
 type BenefitsSectionProps = {
@@ -11,6 +11,7 @@ type BenefitsSectionProps = {
 };
 
 const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
+ 
   const t = useTranslations("benefits");
   return (
     <section
@@ -85,6 +86,8 @@ const BenefitCard = ({
     x.set(0);
     y.set(0);
   };
+   const locale = useLocale();
+  const isRTL = locale === "ar";
   const t = useTranslations("benefits");
   return (
     <SectionReveal delay={index * 0.1}>
@@ -142,12 +145,12 @@ const BenefitCard = ({
           {t(`items.${index}.desc`)}
         </p>
 
-        <div className="flex items-center gap-2 text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+        <a href="#contact" className="flex items-center gap-2 text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
           {t("unlock")}
           <span className="text-xl transition-transform group-hover:translate-x-1">
-            →
+            {isRTL ? "←" : "→"}
           </span>
-        </div>
+        </a>
 
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-linear-to-r from-transparent via-cyan-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
 

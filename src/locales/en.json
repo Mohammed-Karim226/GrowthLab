@@ -273,7 +273,10 @@
       "phoneInvalid": "Please enter a valid phone number."
     }
   },
-
+"toast": {
+    "requestSuccess": "🎉 Request Received Successfully!",
+    "requestSuccessDesc": "Confirmation SMS sent to {phone}"
+  },
   "analytics": {
     "title": "YouTube Analytics",
     "live": "LIVE",

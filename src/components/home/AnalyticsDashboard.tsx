@@ -42,19 +42,19 @@ export default function AnalyticsDashboard() {
         <div className="grid gap-3 sm:grid-cols-3 mb-4">
           {[
             {
-              label: "Subscribers",
+              label: t("subscribers"),
               value: "124.8K",
               change: "+18.3%",
               color: "#0891B2",
             },
             {
-              label: "Views (30d)",
+              label: t("views"),
               value: "2.4M",
               change: "+31.2%",
               color: "#3B82F6",
             },
             {
-              label: "Watch Time",
+              label: t("watchTime"),
               value: "68%",
               change: "+12.1%",
               color: "#F59E0B",
@@ -109,12 +109,12 @@ export default function AnalyticsDashboard() {
           <div className="flex items-center gap-2 text-slate-400">
             <span className="h-2 w-2 rounded-full bg-[#F59E0B]" />
             <span className="text-xs">
-              Avg CTR: <span className="font-semibold text-white">7.4%</span>
+               {t("avgCtr", { value: "80.4%" })}
             </span>
           </div>
           <div className="flex items-center gap-1 text-xs font-medium text-[#0891B2]">
             <TrendingUp className="h-3.5 w-3.5" />
-            <span>+94% vs last 90d</span>
+            <span>{t("vsLast90d")}</span>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function AnalyticsDashboard() {
         }}
         className="absolute -bottom-3 -left-4 rounded-full bg-[#0D1235] border border-[#0891B2]/40 px-3 py-1.5 text-xs text-white shadow-lg"
       >
-        ✨ Algorithm boost detected
+        {t("algorithmBoost")}
       </motion.div>
 
       <motion.div
@@ -142,7 +142,7 @@ export default function AnalyticsDashboard() {
         }}
         className="absolute -top-4 -right-4 rounded-full bg-[#F59E0B] px-3 py-1.5 text-xs font-bold text-black shadow-lg"
       >
-        🚀 +15k subs/month
+       {t("subsMonth")}
       </motion.div>
     </motion.div>
   );
