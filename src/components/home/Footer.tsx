@@ -22,11 +22,21 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-[#0891B2]" />
-              <span>hello@growthlab.com</span>
+              <a href={`mailto:${"sha080435@gmail.com"}`} className="transition hover:text-white">
+                sha080435@gmail.com
+              </a>
             </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-[#0891B2]" />
-              <span>+1 (555) 123-9876</span>
+            <div className="pt-2">
+              <a 
+                href="https://wa.me/201126421602" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md bg-[#0891B2] px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#067993] focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 focus:ring-offset-[#070b1f]"
+              >
+                <Phone className="h-4 w-4" />
+                {t("chatOnWhatsApp")}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
             </div>
           </div>
         </div>
@@ -67,7 +77,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:hello@growthlab.com"
+                  href="mailto:sha080435@gmail.com"
                   className="transition hover:text-white"
                 >
                   {t("emailTeam")}

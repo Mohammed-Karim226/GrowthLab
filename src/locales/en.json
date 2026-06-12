@@ -137,50 +137,51 @@
     "now": "NOW",
     "verified": "VERIFIED",
     "trustedByCreatorsOn": "TRUSTED BY CREATORS ON",
-    "thousandsMore": "And thousands more creators growing every week",
+    "thousandsMore": "And 1000+ creators growing every week",
+    "moreCreatorsTransformed": "And 1000+ creators transformed every day",
     "items": [
       {
-        "name": "Sarah Chen",
-        "category": "Tech Reviews",
-        "before": "12k",
-        "after": "98k",
-        "quote": "The strategy they built doubled my CTR in 6 weeks. My channel finally has a clear direction."
-      },
-      {
-        "name": "Marcus Williams",
-        "category": "Personal Finance",
-        "before": "8k",
-        "after": "64k",
-        "quote": "I was plateaued for 8 months. One discovery call later, everything changed. Real ROI."
-      },
-      {
-        "name": "Aisha Patel",
-        "category": "Lifestyle & Wellness",
-        "before": "22k",
-        "after": "187k",
-        "quote": "Their analytics dashboard gave me visibility I never had. Growth went parabolic."
-      },
-      {
-        "name": "Ryan Torres",
-        "category": "Gaming & Esports",
-        "before": "5k",
-        "after": "43k",
-        "quote": "Worth every dollar. They treated my channel like a business, not a hobby."
-      },
-      {
-        "name": "Emma Johansson",
-        "category": "Education",
-        "before": "31k",
-        "after": "210k",
-        "quote": "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push."
-      },
-      {
-        "name": "David Kim",
-        "category": "Cooking & Food",
-        "before": "9k",
-        "after": "71k",
-        "quote": "They found the exact niche angle I was missing. Channel exploded in 90 days."
-      }
+    "name": "Omar Jehad",
+    "category": "Analysis | Documentaries",
+    "before": "490k",
+    "after": "573k",
+    "quote": "The strategy they built doubled my CTR in 3 months. My channel finally has a clear direction."
+  },
+  {
+    "name": "Mohammed Rifaat",
+    "category": "Crime Awareness Education",
+    "before": "325k",
+    "after": "335k",
+    "quote": "I was plateaued for 6 weeks. One discovery call later, everything changed. Real ROI."
+  },
+  {
+    "name": "Noor ElKady",
+    "category": "Lifestyle & Wellness",
+    "before": "22k",
+    "after": "187k",
+    "quote": "Their analytics dashboard gave me visibility I never had. Growth went parabolic."
+  },
+  {
+    "name": "Mohamed Mo Fares",
+    "category": "Gaming & Esports",
+    "before": "5k",
+    "after": "43k",
+    "quote": "Worth every dollar. They treated my channel like a business, not a hobby."
+  },
+  {
+    "name": "Lina Marwan",
+    "category": "Education & Study Tips",
+    "before": "31k",
+    "after": "210k",
+    "quote": "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push."
+  },
+  {
+    "name": "Karim Hassan",
+    "category": "Cooking & Home Recipes",
+    "before": "9k",
+    "after": "71k",
+    "quote": "They found the exact niche angle I was missing. Channel exploded in 90 days."
+  }
     ]
   },
 
@@ -303,6 +304,7 @@
     "nextSteps": "Next steps",
     "bookCall": "Book a free call",
     "emailTeam": "Email our growth team",
+    "chatOnWhatsApp": "Chat with us on WhatsApp",
     "reviewModel": "Review the service model",
     "copyright": "© {year} GrowthLab. Trusted by creators building brands for the modern creator economy."
   }

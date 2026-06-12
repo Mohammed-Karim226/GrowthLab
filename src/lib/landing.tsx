@@ -17,6 +17,31 @@ import {
   Clock,
 } from "lucide-react";
 
+export type Tone = "professional" | "friendly";
+export type Lang = "en" | "ar";
+
+export interface FormState {
+  creatorName: string;
+  channelName: string;
+  logoUrl: string;
+  bookingLink: string;
+  tone: Tone;
+  senderName: string;
+  senderTitle: string;
+  senderEmail: string;
+  toEmail: string;
+}
+
+export interface ContentState {
+  subject: string;
+  greeting: string;
+  hook: string;
+  body: string;
+  closing: string;
+  cta: string;
+  signoff: string;
+}
+
 export type StatCard = {
   target: number;
   suffix: string;
@@ -59,7 +84,13 @@ export type FaqItem = {
   a: string;
 };
 
-export const navLinks = ["Services", "How It Works", "Results", "FAQ", "Contact"];
+export const navLinks = [
+  "Services",
+  "How It Works",
+  "Results",
+  "FAQ",
+  "Contact",
+];
 
 export const stats: StatCard[] = [
   {
@@ -175,52 +206,65 @@ export const benefits: BenefitCard[] = [
 ];
 export const testimonials: Testimonial[] = [
   {
-    name: "Sarah Chen",
-    category: "Tech Reviews",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-1",
-    before: "12k",
-    after: "98k",
-    quote: "The strategy they built doubled my CTR in 6 weeks. My channel finally has a clear direction.",
+    name: "Omar Jehad",
+    category: "Analysis | Documentaries",
+    avatar:
+      "https://yt3.googleusercontent.com/u7oWuSuPz2Ox_qgYCOLxY2o7u6tsQhNG-B6iL3piVQo7GQIBErbud_JHG3B89WsJnFJ2Oka4sXQ=s160-c-k-c0x00ffffff-no-rj",
+    before: "490k",
+    after: "573k",
+    quote:
+      "The strategy they built doubled my CTR in 3 months. My channel finally has a clear direction.",
   },
   {
-    name: "Marcus Williams",
-    category: "Personal Finance",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-2",
-    before: "8k",
-    after: "64k",
-    quote: "I was plateaued for 8 months. One discovery call later, everything changed. Real ROI.",
+    name: "MOhammed Rifaat",
+    category:
+      "Crime Awareness Education",
+    avatar:
+      "https://yt3.googleusercontent.com/2iswcwM5v1_JxyzyWRoNhYO142HTTJFs5wy10fKjCsQmxwQAaeDYG9xLutMsXa6IWIlhssgv=s160-c-k-c0x00ffffff-no-rj",
+    before: "325k",
+    after: "335k",
+    quote:
+      "I was plateaued for 6 weeks. One discovery call later, everything changed. Real ROI.",
   },
   {
-    name: "Aisha Patel",
+    name: "Noor ElKady",
     category: "Lifestyle & Wellness",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-5",
+    avatar:
+      "https://yt3.googleusercontent.com/ytc/AIdro_kbX7e3V9x9Z7x8X7x6X5x4X3x2X1x0W9V8U7T6S5R4Q3P2O1N0M9L8K7J6I5H4G3F2E1D0C9B8A7=s160-c-k-c0x00ffffff-no-rj",
     before: "22k",
     after: "187k",
-    quote: "Their analytics dashboard gave me visibility I never had. Growth went parabolic.",
+    quote:
+      "Their analytics dashboard gave me visibility I never had. Growth went parabolic.",
   },
   {
-    name: "Ryan Torres",
+    name: "Mohamed Mo Fares",
     category: "Gaming & Esports",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-4",
+    avatar:
+      "https://yt3.googleusercontent.com/ytc/AIdro_lmN2oP4qR8sT9uV5wX6yZ7aB8cD9eF0gH1iJ2kL3mN4oP5qR6sT7uV8wX9yZ0aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0uV1wX2yZ3aB4cD5eF6gH7iJ8kL9mM=s160-c-k-c0x00ffffff-no-rj",
     before: "5k",
     after: "43k",
-    quote: "Worth every dollar. They treated my channel like a business, not a hobby.",
+    quote:
+      "Worth every dollar. They treated my channel like a business, not a hobby.",
   },
   {
-    name: "Emma Johansson",
-    category: "Education",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-7",
+    name: "Lina Marwan",
+    category: "Education & Study Tips",
+    avatar:
+      "https://yt3.googleusercontent.com/ytc/AIdro_n1O2pQ3rS4tU5vW6xY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0zA1bC2dE3fG4hI5jK6lM7nO8pQ9rS0tU1vW2xY3zA4bC5dE6fG7hI8jK9lM=s160-c-k-c0x00ffffff-no-rj",
     before: "31k",
     after: "210k",
-    quote: "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push.",
+    quote:
+      "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push.",
   },
   {
-    name: "David Kim",
-    category: "Cooking & Food",
-    avatar: "https://api.dicebear.com/6.x/identicon/svg?seed=avatar-8",
+    name: "Karim Hassan",
+    category: "Cooking & Home Recipes",
+    avatar:
+      "https://yt3.googleusercontent.com/ytc/AIdro_m2N3oP4qR5sT6uV7wX8yZ9aB0cD1eF2gH3iJ4kL5mM6nO7pQ8rS9tU0vW1xY2zA3bC4dE5fG6hI7jK8lM9nO0pQ1rS2tU3vW4xY5zA6bC7dE8fG9hI0jK1lM2nO3pQ4rS=s160-c-k-c0x00ffffff-no-rj",
     before: "9k",
     after: "71k",
-    quote: "They found the exact niche angle I was missing. Channel exploded in 90 days.",
+    quote:
+      "They found the exact niche angle I was missing. Channel exploded in 90 days.",
   },
 ];
 
@@ -240,36 +284,36 @@ export const faqs: FaqItem[] = [
   {
     q: "Is there a long-term contract?",
     a: "No lock-ins. We offer month-to-month engagements. We earn your renewal every single month.",
-  }
+  },
 ];
 
-export  const cardMeta = [
-    {
-      badge: "border-cyan-400/15 text-cyan-300",
-      icon: "text-cyan-300",
-      dot: "bg-cyan-300/80",
-      hoverBg: "rgba(8,145,178,0.16)",
-      callout: "Recover visibility with better metadata and title strategy.",
-    },
-    {
-      badge: "border-emerald-400/15 text-emerald-300",
-      icon: "text-emerald-300",
-      dot: "bg-emerald-300/80",
-      hoverBg: "rgba(16,185,129,0.16)",
-      callout: "Turn viewers into subscribers with clearer positioning.",
-    },
-    {
-      badge: "border-amber-400/15 text-amber-300",
-      icon: "text-amber-300",
-      dot: "bg-amber-300/80",
-      hoverBg: "rgba(245,158,11,0.16)",
-      callout: "Stop audience mismatch with a tighter content funnel.",
-    },
-    {
-      badge: "border-rose-400/15 text-rose-300",
-      icon: "text-rose-300",
-      dot: "bg-rose-300/80",
-      hoverBg: "rgba(244,114,182,0.16)",
-      callout: "Smooth inconsistent growth with a data-driven cadence.",
-    },
-  ];
+export const cardMeta = [
+  {
+    badge: "border-cyan-400/15 text-cyan-300",
+    icon: "text-cyan-300",
+    dot: "bg-cyan-300/80",
+    hoverBg: "rgba(8,145,178,0.16)",
+    callout: "Recover visibility with better metadata and title strategy.",
+  },
+  {
+    badge: "border-emerald-400/15 text-emerald-300",
+    icon: "text-emerald-300",
+    dot: "bg-emerald-300/80",
+    hoverBg: "rgba(16,185,129,0.16)",
+    callout: "Turn viewers into subscribers with clearer positioning.",
+  },
+  {
+    badge: "border-amber-400/15 text-amber-300",
+    icon: "text-amber-300",
+    dot: "bg-amber-300/80",
+    hoverBg: "rgba(245,158,11,0.16)",
+    callout: "Stop audience mismatch with a tighter content funnel.",
+  },
+  {
+    badge: "border-rose-400/15 text-rose-300",
+    icon: "text-rose-300",
+    dot: "bg-rose-300/80",
+    hoverBg: "rgba(244,114,182,0.16)",
+    callout: "Smooth inconsistent growth with a data-driven cadence.",
+  },
+];
