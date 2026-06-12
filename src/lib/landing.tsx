@@ -17,6 +17,31 @@ import {
   Clock,
 } from "lucide-react";
 
+export type Tone = "professional" | "friendly";
+export type Lang = "en" | "ar";
+
+export interface FormState {
+  creatorName: string;
+  channelName: string;
+  logoUrl: string;
+  bookingLink: string;
+  tone: Tone;
+  senderName: string;
+  senderTitle: string;
+  senderEmail: string;
+  toEmail: string;
+}
+
+export interface ContentState {
+  subject: string;
+  greeting: string;
+  hook: string;
+  body: string;
+  closing: string;
+  cta: string;
+  signoff: string;
+}
+
 export type StatCard = {
   target: number;
   suffix: string;
