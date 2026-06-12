@@ -67,39 +67,89 @@ export function getDefaultContent(lang: Lang, tone: Tone, creatorName: string): 
   };
 }
 
-export function generateHTML(form: FormState, content: ContentState, lang: Lang): string {
+export function generateHTML(form: FormState, content: ContentState, lang: Lang, fullDocument: boolean = false): string {
   const dir = lang === "ar" ? "rtl" : "ltr";
   const fontFamily = "Manrope, Arial, sans-serif";
 
-  return `<!DOCTYPE html>
-<html lang="${lang}" dir="${dir}">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${content.subject}</title>
-</head>
-<body style="margin:0;padding:0;background:#f2f2f2;font-family:${fontFamily};">
-<div dir="${dir}" style="max-width:640px;margin:32px auto;background:#ffffff;border-radius:4px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-  ${form.logoUrl ? `<div style="padding:24px 40px 0;text-align:center;">
-    <img src="${form.logoUrl}" alt="Logo" style="max-height:64px;max-width:200px;object-fit:contain;" />
-  </div>` : ""}
-  <div style="padding:32px 40px;color:#2d3748;font-size:15px;line-height:1.7;">
-    <p style="margin:0 0 20px;">${content.greeting}</p>
-    <p style="margin:0 0 16px;">${content.hook}</p>
-    <p style="margin:0 0 24px;">${content.body}</p>
-    <p style="margin:0 0 28px;">${content.closing}</p>
-    ${form.bookingLink ? `<div style="text-align:center;margin:32px 0;">
-      <a href="${form.bookingLink}" style="display:inline-block;background:#2d3748;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-weight:600;font-size:15px;font-family:${fontFamily};">${content.cta}</a>
+  const contentHTML = `
+<div dir="${dir}" style="margin:0;padding:0;background:#f2f2f2;font-family:${fontFamily};">
+  <div dir="${dir}" style="max-width:600px;margin:16px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    ${form.logoUrl ? `<div style="padding:20px 20px 0;text-align:center;">
+      <img src="${form.logoUrl}" alt="Logo" style="max-height:60px;max-width:180px;object-fit:contain;" />
     </div>` : ""}
-    <p style="margin:24px 0 0;">${content.signoff}</p>
-    <p style="margin:6px 0 0;font-weight:600;color:#2d3748;">${form.senderName || "Your Name"}</p>
-    <p style="margin:2px 0 0;color:#718096;font-size:13px;">${form.senderTitle || "Brand Partnerships"}</p>
-    <p style="margin:2px 0 0;color:#718096;font-size:13px;">${form.senderEmail || "hello@yourbrand.com"}</p>
+    <div style="padding:24px 20px;color:#2d3748;font-size:15px;line-height:1.7;">
+      <p style="margin:0 0 18px;">${content.greeting}</p>
+      <p style="margin:0 0 14px;">${content.hook}</p>
+      <p style="margin:0 0 20px;">${content.body}</p>
+      <p style="margin:0 0 24px;">${content.closing}</p>
+      ${form.bookingLink ? `<div style="text-align:center;margin:28px 0;">
+        <a href="${form.bookingLink}" style="display:inline-block;background:#2d3748;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:50px;font-weight:600;font-size:14px;font-family:${fontFamily};">${content.cta}</a>
+      </div>` : ""}
+      <p style="margin:20px 0 0;">${content.signoff}</p>
+      <p style="margin:5px 0 0;font-weight:600;color:#2d3748;">${form.senderName || "Your Name"}</p>
+      <p style="margin:2px 0 0;color:#718096;font-size:13px;">${form.senderTitle || "Brand Partnerships"}</p>
+      <p style="margin:2px 0 0;color:#718096;font-size:13px;">${form.senderEmail || "hello@yourbrand.com"}</p>
+    </div>
+    <div style="padding:14px 20px;background:#f7fafc;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#a0aec0;">${
+        lang === "ar"
+          ? "تم إرسال هذا البريد كجزء من مبادرة التواصل مع المنشئين. للإلغاء، رد بـ \"إلغاء الاشتراك\"."
+          : "This email was sent as part of a creator outreach initiative. To unsubscribe, reply with \"Unsubscribe\"."
+      }</p>
+    </div>
   </div>
-  <div style="padding:16px 40px;background:#f7fafc;border-top:1px solid #e2e8f0;text-align:center;">
-    <p style="margin:0;font-size:11px;color:#a0aec0;">This email was sent as part of a brand outreach initiative. To unsubscribe, reply with "Unsubscribe".</p>
-  </div>
-</div>
+</div>`;
+
+  if (fullDocument) {
+    return `<!DOCTYPE html>
+<html lang="${lang}" dir="${dir}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${content.subject}</title>
+</head>
+<body style="margin:0;padding:0;">
+${contentHTML}
 </body>
 </html>`;
+  }
+
+  return contentHTML;
+}
+
+// Helper to copy HTML to clipboard in a way that preserves formatting for Gmail
+export async function copyHTMLToClipboard(html: string): Promise<void> {
+  const blob = new Blob([html], { type: 'text/html' });
+  const data = [new ClipboardItem({ [blob.type]: blob })];
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.write(data);
+      return;
+    } catch (e) {
+      // Fallback if ClipboardItem is not supported
+    }
+  }
+
+  // Fallback: use textarea to copy HTML as plain text
+  const textarea = document.createElement('textarea');
+  textarea.value = html;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '-9999px';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    const success = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    if (!success) {
+      throw new Error('Failed to copy');
+    }
+  } catch (err) {
+    document.body.removeChild(textarea);
+    throw err;
+  }
 }
 
 export function copyToClipboard(text: string): Promise<void> {

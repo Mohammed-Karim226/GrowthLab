@@ -19,7 +19,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, onTabChange, form, content, onFormUpdate, onContentUpdate, onToneChange, onResetContent, lang }: SidebarProps) {
   return (
-    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 overflow-y-auto" style={{ background: "#2d3748" }}>
+    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 overflow-y-auto bg-sidebar text-sidebar-foreground">
       <SidebarTabs activeTab={activeTab} onTabChange={onTabChange} lang={lang} />
       <div className="p-4 space-y-5">
         {activeTab === "settings" ? (

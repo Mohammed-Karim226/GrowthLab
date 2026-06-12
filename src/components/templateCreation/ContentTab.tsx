@@ -20,13 +20,12 @@ export default function ContentTab({ content, onUpdate, onReset, lang }: Content
     <>
       {/* Content Editor Tab */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold tracking-wide font-sora" style={{ color: "#a0aec0" }}>
+        <span className="text-xs font-bold tracking-wide text-muted-foreground">
           {isRTL ? "تحرير نص البريد الإلكتروني" : "EDIT EMAIL COPY"}
         </span>
         <button
           onClick={onReset}
-          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all"
-          style={{ background: "#1a2535", color: "#718096", border: "1px solid #2d3d52" }}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all bg-sidebar-accent text-muted-foreground border border-sidebar-border hover:text-sidebar-foreground"
           title={isRTL ? "إعادة تعيين للافتراضي" : "Reset to defaults"}>
           <RefreshCw size={11} />
           {isRTL ? "إعادة" : "Reset"}
@@ -84,7 +83,7 @@ export default function ContentTab({ content, onUpdate, onReset, lang }: Content
         />
       </SideSection>
 
-      <div className="rounded-lg p-3 text-xs" style={{ background: "#1a2535", color: "#718096", borderLeft: isRTL ? "none" : "3px solid #63b3ed", borderRight: isRTL ? "3px solid #63b3ed" : "none" }}>
+      <div className="rounded-lg p-3 text-xs bg-sidebar-accent text-muted-foreground border-l-3 rtl:border-l-0 rtl:border-r-3 border-sidebar-primary">
         {isRTL ? "✦ تعديلاتك تظهر مباشرةً في المعاينة. اضغط على \"إعادة\" للعودة إلى النص الافتراضي." : "✦ Your edits appear live in the preview. Press Reset to restore default copy."}
       </div>
     </>

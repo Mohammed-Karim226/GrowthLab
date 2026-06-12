@@ -14,8 +14,7 @@ export default function ContentTextArea({
   return (
     <div>
       <label
-        className="block text-xs font-semibold mb-1.5"
-        style={{ color: "#a0aec0" }}
+        className="block text-xs font-semibold mb-1.5 text-muted-foreground"
       >
         {label}
       </label>
@@ -23,13 +22,8 @@ export default function ContentTextArea({
         value={value}
         onChange={onChange}
         rows={rows}
-        className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all resize-y"
+        className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sidebar-ring transition-all resize-y bg-input text-foreground border border-border leading-relaxed"
         style={{
-          background: "#0f1923",
-          color: "#e2e8f0",
-          border: "1px solid #2d3d52",
-          fontFamily: "Manrope, sans-serif",
-          lineHeight: "1.6",
           minHeight: `${rows * 24}px`,
         }}
       />

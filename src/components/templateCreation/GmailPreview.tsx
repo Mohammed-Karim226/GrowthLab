@@ -17,7 +17,7 @@ interface GmailPreviewProps {
 export default function GmailPreview({ form, content, copied, onCopy, lang }: GmailPreviewProps) {
   const isRTL = lang === "ar";
   return (
-    <main className="flex-1 flex flex-col min-h-0 overflow-y-auto p-3 md:p-6" style={{ background: "#f0f2f5" }}>
+    <main className="flex-1 flex flex-col min-h-0 overflow-y-auto p-3 md:p-6 bg-background">
       <div className="w-full max-w-3xl mx-auto">
         <GmailPreviewHeader form={form} content={content} lang={lang} />
         <EmailBodyPreview form={form} content={content} lang={lang} />

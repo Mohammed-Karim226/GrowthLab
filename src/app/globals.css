@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @reference "tailwindcss";
-
 
 @layer base {
   :root {
@@ -38,10 +37,10 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 232 40% 20%;
     --sidebar-ring: 189 91% 37%;
-    --teal: #0891B2;
-    --slate-blue: #3B82F6;
-    --gold: #F59E0B;
-    --dark-bg: #0A0E27;
+    --teal: #0891b2;
+    --slate-blue: #3b82f6;
+    --gold: #f59e0b;
+    --dark-bg: #0a0e27;
   }
 }
 
@@ -57,14 +56,14 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Inter', sans-serif;
-    background-color: #0A0E27;
+    font-family: "Inter", sans-serif;
+    background-color: #0a0e27;
   }
 }
 
 @layer utilities {
   .font-satoshi {
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     font-weight: 700;
     letter-spacing: -0.03em;
   }
@@ -77,7 +76,9 @@
   }
 
   .glow-teal {
-    box-shadow: 0 0 20px rgba(8, 145, 178, 0.4), 0 0 40px rgba(8, 145, 178, 0.1);
+    box-shadow:
+      0 0 20px rgba(8, 145, 178, 0.4),
+      0 0 40px rgba(8, 145, 178, 0.1);
   }
 
   .glow-gold {
@@ -87,7 +88,11 @@
   .card-hover-glow {
     position: relative;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      border-color 0.3s ease,
+      background-color 0.3s ease;
   }
 
   .card-hover-glow::before {
@@ -112,14 +117,14 @@
   }
 
   .gradient-text-teal {
-    background: linear-gradient(135deg, #0891B2, #3B82F6);
+    background: linear-gradient(135deg, #0891b2, #3b82f6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-text-gold {
-    background: linear-gradient(135deg, #F59E0B, #FCD34D);
+    background: linear-gradient(135deg, #f59e0b, #fcd34d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -130,11 +135,49 @@
   }
 }
 @keyframes accordion-down {
-  from { height: 0; opacity: 0; }
-  to { height: var(--radix-accordion-content-height); opacity: 1; }
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
 }
 
 @keyframes accordion-up {
-  from { height: var(--radix-accordion-content-height); opacity: 1; }
-  to { height: 0; opacity: 0; }
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes marquee-rtl {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-marquee {
+  animation: marquee 42s linear infinite;
+}
+.animate-marquee-rtl {
+  animation: marquee-rtl 42s linear infinite;
+}
+.animate-marquee:hover,
+.animate-marquee-rtl:hover {
+  animation-play-state: paused;
 }

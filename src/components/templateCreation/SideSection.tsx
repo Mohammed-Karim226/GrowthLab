@@ -10,15 +10,13 @@ export default function SideSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl overflow-hidden" style={{ background: "#1a2535" }}>
+    <div className="rounded-xl overflow-hidden bg-sidebar-accent border border-sidebar-border">
       <div
-        className="flex items-center gap-2 px-4 py-2.5 border-b"
-        style={{ background: "#243044", borderColor: "#2d3d52" }}
+        className="flex items-center gap-2 px-4 py-2.5 border-b border-sidebar-border bg-sidebar"
       >
         <span className="text-sm">{icon}</span>
         <span
-          className="text-xs font-bold tracking-wide font-sora"
-          style={{ color: "#a0aec0" }}
+          className="text-xs font-bold tracking-wide text-muted-foreground"
         >
           {title.toUpperCase()}
         </span>

@@ -1,12 +1,14 @@
 "use client";
 
-import { ArrowRight, ChevronDown, Play, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Play, Sparkles, Star } from "lucide-react";
 import AnalyticsDashboard from "@/components/home/AnalyticsDashboard";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function HeroSection() {
+  const locale = useLocale();
+  const isRTL = locale === "ar";
   const t = useTranslations("hero");
 
   return (
@@ -60,7 +62,7 @@ export default function HeroSection() {
               className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#0891B2] to-[#0671A1] px-7 py-3.5 text-sm font-semibold text-white transition hover:opacity-95"
             >
               {t("ctaBook")}
-              <ArrowRight className="h-4 w-4" />
+              {isRTL ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
             </motion.a>
             <motion.a
               initial={{ opacity: 0, scale: 0.95 }}

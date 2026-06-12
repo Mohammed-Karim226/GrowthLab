@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useCallback, useEffect } from "react";
+import { useTheme } from "next-themes";
 import TopAppBar from "@/components/templateCreation/TopAppBar";
 import Sidebar from "@/components/templateCreation/Sidebar";
 import GmailPreview from "@/components/templateCreation/GmailPreview";
-import { toneMap, getDefaultContent, generateHTML, copyToClipboard } from "@/lib/utils";
+import { toneMap, getDefaultContent, generateHTML, copyHTMLToClipboard } from "@/lib/utils";
 import type { FormState, ContentState, Lang, Tone } from "@/lib/landing";
 
 export default function Home() {
+  const { theme, setTheme } = useTheme();
   const [lang, setLang] = useState<Lang>("en");
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<"settings" | "content">("settings");
@@ -61,21 +63,22 @@ export default function Home() {
   };
 
   const handleCopy = useCallback(() => {
-    const html = generateHTML(form, content, lang);
-    copyToClipboard(html).then(() => {
+    const html = generateHTML(form, content, lang, false); // false = no full document wrapper (Gmail-friendly)
+    copyHTMLToClipboard(html).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }).catch(() => {
-      // Last resort: open in new tab
-      const blob = new Blob([html], { type: "text/html" });
+      // Last resort: open HTML in new tab
+      const fullHtml = generateHTML(form, content, lang, true);
+      const blob = new Blob([fullHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     });
   }, [form, content, lang]);
 
   return (
-    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen flex flex-col" style={{ fontFamily: "Manrope, sans-serif", background: "#f0f2f5" }}>
-      <TopAppBar lang={lang} copied={copied} onLangToggle={handleLangToggle} onCopy={handleCopy} />
+    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen flex flex-col bg-background text-foreground">
+      <TopAppBar lang={lang} copied={copied} onLangToggle={handleLangToggle} onCopy={handleCopy} theme={theme} setTheme={setTheme} />
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         <Sidebar
           activeTab={activeTab}

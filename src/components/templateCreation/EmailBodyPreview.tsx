@@ -11,89 +11,108 @@ interface EmailBodyPreviewProps {
 export default function EmailBodyPreview({ form, content, lang }: EmailBodyPreviewProps) {
   const isRTL = lang === "ar";
   return (
-    <div className="shadow-lg" style={{ background: "#f2f2f2", padding: "24px 16px", minHeight: "480px" }}>
-      <div dir={isRTL ? "rtl" : "ltr"} style={{
-        maxWidth: "560px",
-        margin: "0 auto",
-        background: "#ffffff",
-        borderRadius: "4px",
-        overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        fontFamily: "Manrope, Arial, sans-serif",
-      }}>
-        {form.logoUrl && (
-          <div style={{ padding: "24px 40px 0", textAlign: "center" }}>
-            <img src={form.logoUrl} alt="Brand Logo"
-              style={{ maxHeight: "64px", maxWidth: "200px", objectFit: "contain" }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          </div>
-        )}
-        {!form.logoUrl && (
-          <div style={{ padding: "20px 32px 0", display: "flex", justifyContent: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f7fafc", borderRadius: "8px", padding: "10px 20px", border: "1px dashed #cbd5e0" }}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}>🏷️</div>
-              <span style={{ fontSize: "12px", color: "#a0aec0", fontFamily: "Manrope, sans-serif" }}>{isRTL ? "شعار علامتك التجارية" : "Your brand logo here"}</span>
-            </div>
-          </div>
-        )}
+    
+<div
+dir={isRTL ? "rtl" : "ltr"}
+className="mx-auto max-w-[600px] w-full overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+>
+{/* Brand Accent Bar */}
 
-        <div style={{ padding: "28px 36px 24px", color: "#2d3748", fontSize: "15px", lineHeight: "1.75" }}>
-          <p style={{ margin: "0 0 16px", fontWeight: "600" }}>{content.greeting}</p>
-          <p style={{ margin: "0 0 16px", color: "#4a5568", whiteSpace: "pre-wrap" }}>{content.hook}</p>
-          <p style={{ margin: "0 0 20px", color: "#4a5568", whiteSpace: "pre-wrap" }}>{content.body}</p>
-          <p style={{ margin: "0 0 28px", color: "#4a5568", whiteSpace: "pre-wrap" }}>{content.closing}</p>
 
-          {form.bookingLink && (
-            <div style={{ textAlign: "center", margin: "24px 0 28px" }}>
-              <a href={form.bookingLink}
-                style={{
-                  display: "inline-block",
-                  background: "#2d3748",
-                  color: "#ffffff",
-                  textDecoration: "none",
-                  padding: "13px 28px",
-                  borderRadius: "50px",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  fontFamily: "Manrope, sans-serif",
-                  letterSpacing: "0.3px",
-                }}>
-                {content.cta}
-              </a>
-            </div>
-          )}
-          {!form.bookingLink && (
-            <div style={{ textAlign: "center", margin: "24px 0 28px" }}>
-              <div style={{
-                display: "inline-block",
-                background: "#e2e8f0",
-                color: "#a0aec0",
-                padding: "13px 28px",
-                borderRadius: "50px",
-                fontSize: "13px",
-                fontFamily: "Manrope, sans-serif",
-                border: "1px dashed #cbd5e0"
-              }}>
-                {isRTL ? "← أضف رابط الحجز لعرض الزر" : "Add a booking link to show CTA →"}
-              </div>
-            </div>
-          )}
 
-          <p style={{ margin: "20px 0 4px", color: "#4a5568" }}>{content.signoff}</p>
-          <p style={{ margin: "0 0 2px", fontWeight: "700", color: "#2d3748", fontSize: "15px" }}>{form.senderName || (isRTL ? "اسمك هنا" : "Your Name")}</p>
-          <p style={{ margin: "0 0 2px", color: "#718096", fontSize: "13px" }}>{form.senderTitle || (isRTL ? "مدير الشراكات" : "Brand Partnerships")}</p>
-          <p style={{ margin: "0", color: "#718096", fontSize: "13px" }}>{form.senderEmail || "hello@yourbrand.com"}</p>
+    {/* Header */}
+    <div className="border-b border-border bg-background">
+    
+        <div className="w-full flex h-[90px] sm:h-[110px] items-center justify-center px-4 sm:px-8">
+          <img
+            src={ '/images/brandLogo.jpeg'}
+            alt="Brand Logo"
+            className="w-full max-h-[70px] sm:max-h-[85px] max-w-[240px] sm:max-w-[300px] object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
         </div>
+     
+    </div>
 
-        <div style={{ padding: "14px 36px", background: "#f7fafc", borderTop: "1px solid #e2e8f0", textAlign: "center" }}>
-          <p style={{ margin: "0", fontSize: "11px", color: "#a0aec0", fontFamily: "Manrope, sans-serif" }}>
+    {/* Email Content */}
+    <div className="px-4 sm:px-8 lg:px-12 py-6 sm:py-10 text-[14px] sm:text-[15px] leading-6 sm:leading-7 text-foreground">
+      {/* Greeting */}
+      <p className="mb-4 sm:mb-6 text-base font-semibold">
+        {content.greeting}
+      </p>
+
+      {/* Hook */}
+      <p className="mb-4 sm:mb-5 whitespace-pre-wrap text-muted-foreground">
+        {content.hook}
+      </p>
+
+      {/* Main Body */}
+      <p className="mb-6 sm:mb-8 whitespace-pre-wrap text-muted-foreground">
+        {content.body}
+      </p>
+
+      {/* Closing */}
+      <p className="mb-8 sm:mb-10 whitespace-pre-wrap text-muted-foreground">
+        {content.closing}
+      </p>
+
+      {/* CTA */}
+      {form.bookingLink ? (
+        <div className="my-8 sm:my-10 text-center">
+          <a
+            href={form.bookingLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] sm:min-h-[48px] items-center justify-center rounded-full bg-primary px-6 sm:px-8 py-2.5 sm:py-3 text-sm font-semibold text-primary-foreground no-underline shadow-sm transition-all hover:scale-[1.02] hover:bg-primary/90"
+          >
+            {content.cta}
+          </a>
+        </div>
+      ) : (
+        <div className="my-8 sm:my-10 text-center">
+          <div className="inline-flex items-center rounded-full border border-dashed border-border bg-muted px-6 sm:px-8 py-2.5 sm:py-3 text-[11px] sm:text-xs text-muted-foreground">
             {isRTL
-              ? "تم إرسال هذا البريد كجزء من مبادرة التواصل مع المنشئين. للإلغاء، رد بـ \"إلغاء الاشتراك\"."
-              : "This email was sent as part of a creator outreach initiative. To unsubscribe, reply with \"Unsubscribe\"."}
-          </p>
+              ? "← أضف رابط الحجز لإظهار زر الدعوة للإجراء"
+              : "Add a booking link to display the CTA button →"}
+          </div>
         </div>
+      )}
+
+      {/* Signature */}
+      <div className="mt-10 sm:mt-12 border-t border-border pt-6 sm:pt-8">
+        <p className="mb-2 sm:mb-3 text-muted-foreground">
+          {content.signoff}
+        </p>
+
+        <p className="mb-1 text-sm font-bold text-foreground">
+          {form.senderName ||
+            (isRTL ? "اسمك هنا" : "Your Name")}
+        </p>
+
+        <p className="mb-1 text-xs text-muted-foreground">
+          {form.senderTitle ||
+            (isRTL
+              ? "مدير الشراكات"
+              : "Brand Partnerships Manager")}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {form.senderEmail || "hello@yourbrand.com"}
+        </p>
       </div>
     </div>
+
+    {/* Footer */}
+    <div className="border-t border-border bg-muted/40 px-4 sm:px-8 py-4 sm:py-5">
+      <p className="text-center text-[10px] sm:text-[11px] leading-4 sm:leading-5 text-muted-foreground">
+        {isRTL
+          ? 'تم إرسال هذا البريد كجزء من مبادرة التواصل مع المنشئين. لإلغاء الاشتراك، يرجى الرد بكلمة "إلغاء الاشتراك".'
+          : 'This email was sent as part of a creator outreach initiative. To unsubscribe, simply reply with "Unsubscribe".'}
+      </p>
+    </div>
+  
+</div>    
   );
 }

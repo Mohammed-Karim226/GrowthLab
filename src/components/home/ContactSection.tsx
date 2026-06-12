@@ -27,7 +27,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function ContactSection() {
-  const prefersReducedMotion = useReducedMotion();
+  const disableContent = false;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const locale = useLocale();
@@ -146,7 +146,9 @@ export default function ContactSection() {
 
               <h3 className="text-3xl max-sm:text-2xl font-bold text-white mb-10">{t("formTitle")}</h3>
 
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+             {
+              disableContent ? (
+                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("firstNameLabel")}</FieldLabel>
@@ -280,6 +282,42 @@ export default function ContactSection() {
                   </div>
                 </motion.button>
               </form>
+              ):(
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex flex-col items-center justify-center gap-6 py-12"
+                >
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-cyan-400/20 to-violet-400/20 flex items-center justify-center border border-cyan-400/30">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    >
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="text-cyan-400">
+                        <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+                      </svg>
+                    </motion.div>
+                  </div>
+                  <div className="text-center space-y-3">
+                    <h4 className="text-2xl font-bold text-white">
+                      {isAr ? "بما انك اصبحت هنا" : "as you are here"}
+                    </h4>
+                    <p className="text-slate-400 text-lg w-full">
+                      {isAr 
+                        ? "📧تابع التواصل معنا من خلال الايميل الذي تتابع معنا عليه" 
+                        : "📧 Continue to communicate with us via the email address we use to contact you"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-400/30">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <span className="text-emerald-400 text-sm font-medium">
+                      {isAr ? "فريق العمل معك الان" : "Our team is with you now"}
+                    </span>
+                  </div>
+                </motion.div>
+              )
+             }
             </div>
           </motion.div>
         </div>

@@ -42,7 +42,7 @@ export default function SettingsTab({ form, onUpdate, onToneChange, lang }: Sett
       </SideSection>
 
       {/* Preview note */}
-      <div className="rounded-lg p-3 text-xs" style={{ background: "#1a2535", color: "#718096", borderLeft: isRTL ? "none" : "3px solid #4a5568", borderRight: isRTL ? "3px solid #4a5568" : "none" }}>
+      <div className="rounded-lg p-3 text-xs bg-sidebar-accent text-muted-foreground border-l-3 rtl:border-l-0 rtl:border-r-3 border-border">
         {isRTL ? "✦ المعاينة تتحدث آنياً — انسخ HTML لاستخدامه في Gmail أو أي عميل بريد" : "✦ Preview updates live — Copy HTML to use in Gmail or any mail client"}
       </div>
     </>
