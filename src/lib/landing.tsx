@@ -25,6 +25,7 @@ export interface FormState {
   channelName: string;
   logoUrl: string;
   bookingLink: string;
+  whatsappLink: string;
   tone: Tone;
   senderName: string;
   senderTitle: string;
@@ -39,6 +40,7 @@ export interface ContentState {
   body: string;
   closing: string;
   cta: string;
+  cta2: string;
   signoff: string;
 }
 
