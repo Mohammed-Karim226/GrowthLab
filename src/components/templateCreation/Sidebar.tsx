@@ -14,16 +14,17 @@ interface SidebarProps {
   onContentUpdate: (key: keyof ContentState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onToneChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onResetContent: () => void;
+  onLogoFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   lang: Lang;
 }
 
-export default function Sidebar({ activeTab, onTabChange, form, content, onFormUpdate, onContentUpdate, onToneChange, onResetContent, lang }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, form, content, onFormUpdate, onContentUpdate, onToneChange, onResetContent, onLogoFileUpload, lang }: SidebarProps) {
   return (
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 overflow-y-auto bg-sidebar text-sidebar-foreground">
       <SidebarTabs activeTab={activeTab} onTabChange={onTabChange} lang={lang} />
       <div className="p-4 space-y-5">
         {activeTab === "settings" ? (
-          <SettingsTab form={form} onUpdate={onFormUpdate} onToneChange={onToneChange} lang={lang} />
+          <SettingsTab form={form} onUpdate={onFormUpdate} onToneChange={onToneChange} onLogoFileUpload={onLogoFileUpload} lang={lang} />
         ) : (
           <ContentTab content={content} onUpdate={onContentUpdate} onReset={onResetContent} lang={lang} />
         )}

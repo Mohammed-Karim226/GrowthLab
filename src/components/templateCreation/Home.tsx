@@ -47,6 +47,16 @@ export default function Home() {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
+  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm((prev) => ({ ...prev, logoUrl: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const updateContent = (key: keyof ContentState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setContent((prev) => ({ ...prev, [key]: e.target.value }));
   };
@@ -90,6 +100,7 @@ export default function Home() {
           onContentUpdate={updateContent}
           onToneChange={handleToneChange}
           onResetContent={resetContent}
+          onLogoFileUpload={handleLogoFileUpload}
           lang={lang}
         />
         <GmailPreview form={form} content={content} copied={copied} onCopy={handleCopy} lang={lang} />
