@@ -3,11 +3,13 @@ import "./globals.css";
 import Providers from "@/providers/Providers";
 
 export const metadata: Metadata = {
-  title: "GrowthLab | YouTube Growth Strategy",
-  description: "A modern YouTube growth landing page built with Next.js, Tailwind CSS, and Framer Motion.",
+  title: "GrowthLab | Content Distribution & YouTube Growth",
+  description:
+    "Helping creators and brands expand their reach through strategic content distribution, audience acquisition, and sustainable YouTube growth.",
   openGraph: {
-    title: "GrowthLab | YouTube Growth Strategy",
-    description: "A modern YouTube growth landing page built with Next.js.",
+    title: "GrowthLab | Content Distribution & YouTube Growth",
+    description:
+      "Turn great content into measurable growth with data-driven distribution strategies that increase visibility, engagement, and subscribers.",
     type: "website",
   },
 };
