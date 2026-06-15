@@ -21,6 +21,13 @@ import TestimonialsSection from "./TestimonialsSection";
 import FaqSection from "./FaqSection";
 import ContactSection from "./ContactSection";
 
+/**
+ * Renders the localized landing page layout and coordinates page-level UI state.
+ *
+ * Manages which FAQ item is open and whether the page is scrolled (used to adjust the navbar). Registers a window scroll listener to update the scrolled state and supplies translated navigation labels to the NavBar. Composes the page from Hero, Stats, Problem, HowItWorks, Benefits, Testimonials, FAQ, Contact, and Footer sections.
+ *
+ * @returns The React element for the complete homepage layout
+ */
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [scrolled, setScrolled] = useState(false);
