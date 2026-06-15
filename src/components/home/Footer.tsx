@@ -23,7 +23,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-[#0891B2]" />
               <a
-                href={`mailto:${"sha080435@gmail.com"}`}
+                href={`mailto:${"growthlabagency2090@gmail.com"}`}
                 className="transition hover:text-white"
               >
                 growthlabagency2090@gmail.com

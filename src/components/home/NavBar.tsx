@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X, Youtube } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 type NavBarProps = {
   brand: string;
@@ -45,8 +46,9 @@ export default function NavBar({
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0891B2] to-[#3B82F6] text-white shadow-lg">
-            <Youtube className="h-5 w-5" />
+          <div className="flex h-12 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#edeff046] to-[#92949723] text-white shadow-lg">
+            {/* <Youtube className="h-5 w-5" /> */}
+            <Image src = "/images/strategy.png" alt="logo" width={40} height={40} />
           </div>
           <span className="font-satoshi text-lg text-white">{brand}</span>
         </div>
