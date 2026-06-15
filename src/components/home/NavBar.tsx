@@ -51,22 +51,22 @@ export default function NavBar({
           <span className="font-satoshi text-lg text-white">{brand}</span>
         </div>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-4 xl:gap-6 2xl:gap-8  md:flex">
           {navLinks.map((link) => (
             <a
               key={link.key}
               href={link.href}
-              className="text-slate-400 transition hover:text-white"
+              className="text-slate-400 transition hover:text-white text-sm xl:text-base 2xl:text-lg"
             >
               {link.label}
             </a>
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden lg:flex items-center gap-2 xl:gap-3">
           <Link
             href={localeSwitchHref}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white transition hover:border-[#0891B2]/50"
+            className="rounded-full border border-white/10 px-3 xl:px-4 2xl:px-5 py-2 text-sm font-medium text-white transition hover:border-[#0891B2]/50"
           >
             {localeSwitchLabel}
           </Link>
