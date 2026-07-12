@@ -1,7 +1,7 @@
 "use client";
 
 import SectionReveal from "@/components/home/SectionReveal";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
@@ -10,304 +10,417 @@ import {
   faYoutube,
 } from "@fortawesome/free-brands-svg-icons";
 import type { Testimonial } from "@/lib/landing";
-import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
 };
 
+const orbitSlots = [
+  "left-[4%] top-[18%]",
+  "left-[17%] bottom-[10%]",
+  "left-1/2 top-[4%] -translate-x-1/2",
+  "right-[17%] bottom-[10%]",
+  "right-[4%] top-[18%]",
+  "left-1/2 bottom-[2%] -translate-x-1/2",
+];
+
+const platformItems = [
+  {
+    name: "TikTok",
+    icon: faTiktok,
+    color: "#69C9D0",
+    glow: "shadow-[0_0_34px_rgba(105,201,208,0.16)]",
+  },
+  {
+    name: "Instagram",
+    icon: faInstagram,
+    color: "#E1306C",
+    glow: "shadow-[0_0_34px_rgba(225,48,108,0.18)]",
+  },
+  {
+    name: "YouTube",
+    icon: faYoutube,
+    color: "#FF3B30",
+    glow: "shadow-[0_0_34px_rgba(255,59,48,0.18)]",
+  },
+  {
+    name: "Facebook",
+    icon: faFacebook,
+    color: "#1877F2",
+    glow: "shadow-[0_0_34px_rgba(24,119,242,0.18)]",
+  },
+];
+
+function compactNumber(value: string) {
+  const numeric = Number(value.toLowerCase().replace("k", ""));
+  if (Number.isNaN(numeric)) return value;
+  return value.toLowerCase().includes("k") ? numeric * 1000 : numeric;
+}
+
 export default function TestimonialsSection({
   testimonials,
 }: TestimonialsSectionProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const locale = useLocale();
   const isRTL = locale === "ar";
-
   const t = useTranslations("testimonials");
+  const prefersReducedMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Only real testimonials
-  const realTestimonials = testimonials.slice(0, 2);
+  const stories = useMemo(() => testimonials.slice(0, 6), [testimonials]);
+  const active = stories[activeIndex] ?? stories[0];
 
-  // Predefined static rotation values (no Math.random() to avoid hydration errors)
-  const rotations = [-3, 5, -7, 4, -2, 6];
-  // Background floating cards (cycle through real ones)
-  const floatingCards = Array.from({ length: 6 }, (_, i) => ({
-    ...realTestimonials[i % realTestimonials.length],
-    id: i,
-    delay: i * 0.8,
-    xOffset: (i % 3) * 180 - 180, // spread horizontally
-    rotation: rotations[i % rotations.length],
-  }));
-
-  // Auto-rotate for main cards
   useEffect(() => {
-    if (realTestimonials.length === 0) return;
-    const interval = setInterval(() => {
-      setActiveIndex((prev) =>
-        prev === null ? 0 : (prev + 1) % realTestimonials.length
-      );
-    }, 4800);
-    return () => clearInterval(interval);
-  }, [realTestimonials.length]);
+    if (stories.length <= 1 || prefersReducedMotion) return;
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % stories.length);
+    }, 5200);
+    return () => window.clearInterval(interval);
+  }, [prefersReducedMotion, stories.length]);
+
+  if (!active) return null;
+
+  const before = compactNumber(active.before);
+  const after = compactNumber(active.after);
+  const lift =
+    typeof before === "number" && typeof after === "number" && before > 0
+      ? Math.round(((after - before) / before) * 100)
+      : null;
 
   return (
     <section
       id="testimonials"
-      className="relative py-20 overflow-hidden bg-[#05070F]"
+      className="relative overflow-hidden py-24 sm:py-28 lg:py-36"
     >
-      {/* Background Effects + Floating Cards */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.8px,transparent_1px)] [background-size:40px_40px] animate-[pulse_12s_ease-in-out_infinite]" />
-        
-        {/* Floating Background Cards */}
-        {floatingCards.map((item, i) => {
-          const idx = i % realTestimonials.length;
-          const nextRotation = item.rotation + 2;
-          return (
-            <motion.div
-              key={item.id}
-              initial={{
-                opacity: 0.07,
-                y: 100,
-                x: item.xOffset,
-                scale: 0.75,
-                rotate: item.rotation,
-              }}
-              animate={{
-                opacity: [0.06, 0.12, 0.06],
-                y: [100, -180],
-                x: [item.xOffset - 30, item.xOffset + 40],
-                rotate: [item.rotation, nextRotation],
-              }}
-              transition={{
-                duration: 28 + i * 3,
-                repeat: Infinity,
-                delay: item.delay,
-                ease: "linear",
-              }}
-              className="absolute hidden lg:block w-[260px] bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 text-xs pointer-events-none"
-              style={{
-                left: isRTL ? "auto" : `${38 + (i % 4) * 18}%`,
-                right: isRTL ? `${38 + (i % 4) * 18}%` : "auto",
-                top: `${20 + Math.floor(i / 3) * 35}%`,
-              }}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="size-8 rounded-full overflow-hidden ring-1 ring-white/20">
-                  <Image
-                    src={item.avatar}
-                    alt={item.name}
-                    width={32}
-                    height={32}
-                    className="object-cover"
-                  />
-                </div>
-                <div className="text-white/70 text-[13px]">
-                  {t(`items.${idx}.name`)}
-                </div>
-              </div>
-              <p className="italic text-slate-400 line-clamp-3 leading-snug">
-                “{t(`items.${idx}.quote`).slice(0, 95)}...”
-              </p>
-            </motion.div>
-          );
-        })}
-
-        {/* Glow Orbs */}
-        <div className="absolute top-10 left-10 w-96 h-96 bg-[#F59E0B] rounded-full blur-[120px] opacity-20 animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-[32rem] h-[32rem] bg-[#22D3EE] rounded-full blur-[150px] opacity-20 animate-pulse delay-1000" />
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(8,145,178,0.2),transparent_36%),radial-gradient(circle_at_18%_72%,rgba(245,158,11,0.15),transparent_28%),linear-gradient(180deg,rgba(5,7,15,0.15),rgba(3,6,20,0.78))]" />
+        <div className="absolute left-1/2 top-20 h-[48rem] w-[48rem] -translate-x-1/2 rounded-full border border-cyan-300/10" />
+        <div className="absolute left-1/2 top-28 h-[38rem] w-[38rem] -translate-x-1/2 rounded-full border border-white/5" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:72px_72px] opacity-30" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionReveal>
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              <p className="text-emerald-400 text-xs font-mono tracking-[3px] uppercase">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <div className="liquid-glass mx-auto mb-6 inline-flex items-center gap-3 rounded-full px-5 py-2">
+              <Radar className="h-4 w-4 text-cyan-300" />
+              <span className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
                 {t("badge")}
-              </p>
+              </span>
             </div>
 
-            <h2 className="font-satoshi text-5xl max-sm:text-4xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tighter mb-6">
+            <h2 className="font-satoshi text-4xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl">
               {t("titleLine1")}{" "}
-              <br />
-              {t("titleLine2Prefix")}{" "}
               <span className="bg-linear-to-r from-[#F59E0B] via-[#22D3EE] to-[#A855F7] bg-clip-text text-transparent">
+                {t("titleLine2Prefix")}
                 {t("titleLine2Highlight")}
+                {t("titleLine2Suffix")}
               </span>
-              {t("titleLine2Suffix")}
             </h2>
 
-            <p className="mx-auto max-w-lg text-lg text-slate-400">
+            <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-slate-400 sm:text-lg">
               {t("description")}
             </p>
           </div>
         </SectionReveal>
 
-        {/* Prominent Real Testimonials in Front */}
-        <div className="grid gap-8 md:gap-10 grid-cols-1 md:grid-cols-2 mb-24 relative z-10">
-          {realTestimonials.map((item, index) => (
-            <motion.div
-              key={item.name}
-              initial={{ opacity: 0, y: 80, rotateX: -20 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: 0.9,
-                delay: index * 0.12,
-                ease: [0.215, 0.61, 0.355, 1],
-              }}
-              whileHover={{
-                y: -20,
-                scale: 1.04,
-                transition: { duration: 0.6, ease: "easeOut" },
-              }}
-              onHoverStart={() => setActiveIndex(index)}
-              onHoverEnd={() => setActiveIndex(null)}
-              className="cursor-pointer group relative rounded-3xl border border-white/10 bg-linear-to-br from-[#0D1235] to-[#0A0E27] p-9 overflow-hidden h-full flex flex-col shadow-2xl shadow-black/60 z-20"
+        <div className="relative min-h-[720px] lg:min-h-[780px]">
+          <motion.div
+            aria-hidden
+            className="absolute left-1/2 top-1/2 hidden h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full lg:block"
+            animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+            transition={{ duration: 54, repeat: Infinity, ease: "linear" }}
+          >
+            <div className="absolute inset-0 rounded-full border border-dashed border-cyan-300/18" />
+            <div className="absolute inset-16 rounded-full border border-white/10" />
+            <div className="absolute inset-32 rounded-full border border-amber-300/10" />
+          </motion.div>
+
+          <div className="absolute inset-0 hidden lg:block">
+            {stories.map((item, index) => {
+              const isActive = index === activeIndex;
+              return (
+                <motion.button
+                  type="button"
+                  key={item.name}
+                  onClick={() => setActiveIndex(index)}
+                  onFocus={() => setActiveIndex(index)}
+                  className={cn(
+                    "liquid-glass group absolute w-[214px] rounded-[28px] p-3 text-left outline-none transition-all focus-visible:ring-4 focus-visible:ring-cyan-400/30",
+                    orbitSlots[index % orbitSlots.length],
+                    isActive
+                      ? "border-cyan-300/60 shadow-[0_24px_80px_rgba(34,211,238,0.2)]"
+                      : "opacity-70 hover:opacity-100",
+                    isRTL && "text-right"
+                  )}
+                  animate={
+                    prefersReducedMotion
+                      ? undefined
+                      : { y: isActive ? [-3, -12, -3] : [0, -7, 0] }
+                  }
+                  transition={{
+                    duration: 4 + index * 0.35,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/20">
+                      <Image
+                        src={item.avatar}
+                        alt={t(`items.${index}.name`)}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {t(`items.${index}.name`)}
+                      </p>
+                      <p className="truncate text-xs text-cyan-200/70">
+                        {t(`items.${index}.category`)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/[0.055] px-3 py-2">
+                    <span className="text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                      {t("now")}
+                    </span>
+                    <span className="text-sm font-bold text-emerald-300">
+                      {item.after}
+                    </span>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <SectionReveal delay={0.12}>
+            <motion.article
+              key={activeIndex}
+              initial={{ opacity: 0, scale: 0.96, y: 28 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="liquid-card relative z-10 mx-auto grid max-w-5xl overflow-hidden rounded-[40px] lg:grid-cols-[0.9fr_1.1fr]"
             >
-              <div className="absolute inset-0 bg-linear-to-br from-[#0891B2]/10 via-transparent to-[#F59E0B]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative min-h-[420px] overflow-hidden p-6 sm:p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_16%,rgba(245,158,11,0.22),transparent_30%),radial-gradient(circle_at_78%_80%,rgba(34,211,238,0.24),transparent_36%)]" />
+                <motion.div
+                  aria-hidden
+                  className="absolute -left-24 top-12 h-72 w-72 rounded-full border border-cyan-300/20"
+                  animate={prefersReducedMotion ? undefined : { rotate: -360 }}
+                  transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
+                />
 
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-linear-to-r from-transparent via-[#0891B2] to-transparent" />
-
-              <div className="mb-7 flex items-center gap-4">
-                <div className="relative flex justify-center items-center size-16 rounded-full overflow-hidden">
-                  <div className="absolute inset-0 bg-linear-to-br from-[#0891B2] to-[#F59E0B] rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition-all duration-500" />
-                  <Image
-                    src={item.avatar}
-                    alt={item.name}
-                    fill
-                    className="object-cover rounded-full"
-                    sizes="64px"
-                  />
-                </div>
-                <div>
-                  <p className="font-semibold text-2xl text-white tracking-tight">
-                    {t(`items.${index}.name`)}
-                  </p>
-                  <p className="text-sm text-slate-400">{item.category}</p>
-                </div>
-              </div>
-
-              <div className="flex-1 mb-9">
-                <p className="text-slate-200 leading-relaxed text-[15.5px]">
-                  “{t(`items.${index}.quote`)}”
-                </p>
-              </div>
-
-              <div className="space-y-5 mb-9">
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 text-xl">📈</div>
-                  <div>
-                    <p className="text-emerald-400 text-xs font-mono">{t("growth")}</p>
-                    <p className="text-white text-lg">{item.after}</p>
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                      <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.9)]" />
+                      {t("verified")}
+                    </div>
+                    <Sparkles className="h-5 w-5 text-amber-300" />
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 text-xl">👥</div>
-                  <div>
-                    <p className="text-emerald-400 text-xs font-mono">{t("audience")}</p>
-                    <p className="text-white text-lg">
-                      {isRTL ? `${item.after} ← ${item.before}` : `${item.before} → ${item.after}`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex justify-between text-[10px] font-mono tracking-widest text-slate-500 mb-2">
-                  <span>{t("before")}</span>
-                  <span>{t("now")}</span>
-                </div>
-                <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: "38%" }}
-                    whileInView={{ width: "94%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2.2, delay: 0.5 + index * 0.2 }}
-                    className="h-full bg-linear-to-r from-[#0891B2] via-[#22D3EE] to-[#F59E0B] rounded-full relative"
-                  >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_16px_#22D3EE] -mr-1.5" />
-                  </motion.div>
-                </div>
-              </div>
-
-              <div className={cn(
-                "absolute bottom-6 right-6 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-2xl border border-emerald-500/40 text-xs font-mono text-emerald-400 z-30",
-                isRTL && "left-6 right-auto"
-              )}>
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
-                <span>{t("verified")}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Scrolling Marquee */}
-        <div className="mb-20">
-          <p className="text-center text-slate-500 font-mono text-sm tracking-widest mb-6">{t("moreCreatorsTransformed")}</p>
-          <div className="overflow-hidden">
-            <div className={cn("flex gap-6 whitespace-nowrap py-3", isRTL ? "animate-marquee-rtl" : "animate-marquee")}>
-              {[...Array.from({ length: 8 }), ...Array.from({ length: 8 })].map((_, i) => {
-                const idx = i % realTestimonials.length;
-                const item = realTestimonials[idx];
-                return (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl px-7 py-5 max-w-[340px] opacity-90"
-                  >
-                    <p className="text-sm text-slate-400 italic line-clamp-3">“{t(`items.${idx}.quote`).slice(0, 105)}...”</p>
-                    <div className="mt-4 flex items-center gap-3">
-                      <Image src={item.avatar} alt={t(`items.${idx}.name`)} width={36} height={36} className="rounded-full ring-1 ring-white/20" />
-                      <div>
-                        <p className="text-white text-sm">{t(`items.${idx}.name`)}</p>
-                        <p className="text-emerald-400/80 text-xs">Verified</p>
+                  <div className="mx-auto my-10 grid place-items-center">
+                    <div className="relative h-52 w-52 sm:h-64 sm:w-64">
+                      <div className="absolute inset-0 rounded-[42px] bg-linear-to-br from-cyan-300/30 via-white/10 to-amber-300/30 blur-2xl" />
+                      <div className="absolute inset-4 rotate-6 rounded-[38px] border border-white/15 bg-white/5" />
+                      <div className="relative h-full w-full overflow-hidden rounded-[42px] border border-white/20 shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
+                        <Image
+                          src={active.avatar}
+                          alt={t(`items.${activeIndex}.name`)}
+                          fill
+                          className="object-cover"
+                          sizes="(min-width: 640px) 256px, 208px"
+                          priority={activeIndex === 0}
+                        />
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <MetricPill label={t("before")} value={active.before} />
+                    <MetricPill label={t("now")} value={active.after} active />
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative flex min-h-[420px] flex-col justify-between p-6 sm:p-8 lg:p-10">
+                <Quote className="h-10 w-10 text-cyan-300/70" />
+
+                <div>
+                  <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-cyan-200/80">
+                    {t(`items.${activeIndex}.category`)}
+                  </p>
+                  <h3 className="text-3xl font-semibold text-white sm:text-5xl">
+                    {t(`items.${activeIndex}.name`)}
+                  </h3>
+                  <p className="mt-8 text-xl leading-9 text-slate-100 sm:text-2xl sm:leading-10">
+                    "{t(`items.${activeIndex}.quote`)}"
+                  </p>
+                </div>
+
+                <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                  <SignalCard
+                    icon={<TrendingUp className="h-5 w-5" />}
+                    label={t("growth")}
+                    value={lift !== null ? `+${lift}%` : active.after}
+                    tone="cyan"
+                  />
+                  <SignalCard
+                    icon={<Users className="h-5 w-5" />}
+                    label={t("audience")}
+                    value={
+                      isRTL
+                        ? `${active.after} <- ${active.before}`
+                        : `${active.before} -> ${active.after}`
+                    }
+                    tone="gold"
+                  />
+                  <SignalCard
+                    icon={<Radar className="h-5 w-5" />}
+                    label={t("afterLabel")}
+                    value={active.after}
+                    tone="violet"
+                  />
+                </div>
+              </div>
+            </motion.article>
+          </SectionReveal>
         </div>
 
-        {/* Trusted Platforms */}
-        <SectionReveal delay={0.4}>
-          <div className="border-t border-white/10 pt-12">
-            <p className="text-center text-slate-500 font-mono text-sm tracking-widest mb-10">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:hidden">
+          {stories.map((item, index) => (
+            <button
+              type="button"
+              key={`mobile-${item.name}`}
+              onClick={() => setActiveIndex(index)}
+              className={cn(
+                "liquid-glass flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
+                index === activeIndex && "border-cyan-300/60",
+                isRTL && "text-right"
+              )}
+            >
+              <Image
+                src={item.avatar}
+                alt={t(`items.${index}.name`)}
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-2xl object-cover"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-white">
+                  {t(`items.${index}.name`)}
+                </p>
+                <p className="truncate text-xs text-slate-400">
+                  {`${item.before} -> ${item.after}`}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <SectionReveal delay={0.24}>
+          <div className="mt-20">
+            <p className="mb-8 text-center text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">
               {t("trustedByCreatorsOn")}
             </p>
-
-            <div className="flex flex-wrap justify-center gap-x-12 gap-y-10">
-              {[
-                { name: "TikTok", icon: faTiktok, hoverBg: "hover:bg-[#69C9D0]/10", hoverTextClass: "group-hover:text-[#69C9D0]" },
-                { name: "Instagram", icon: faInstagram, hoverBg: "hover:bg-[#E1306C]/10", hoverTextClass: "group-hover:text-[#E1306C]" },
-                { name: "YouTube", icon: faYoutube, hoverBg: "hover:bg-[#FF0000]/10", hoverTextClass: "group-hover:text-[#FF0000]" },
-                { name: "Facebook", icon: faFacebook, hoverBg: "hover:bg-[#1877F2]/10", hoverTextClass: "group-hover:text-[#1877F2]" },
-              ].map((platform, i) => (
+            <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-4">
+              {platformItems.map((platform) => (
                 <motion.div
-                  key={i}
-                  whileHover={{ y: -10, scale: 1.15 }}
-                  className="group flex flex-col items-center gap-4 cursor-pointer"
+                  key={platform.name}
+                  whileHover={
+                    prefersReducedMotion ? undefined : { y: -8, scale: 1.05 }
+                  }
+                  className={cn(
+                    "liquid-glass group flex min-h-16 items-center gap-3 rounded-full px-5",
+                    platform.glow
+                  )}
                 >
-                  <div className={`relative size-16 flex items-center justify-center bg-white/5 hover:bg-zinc-900 border border-white/10 rounded-3xl transition-all ${platform.hoverBg}`}>
-                    <FontAwesomeIcon icon={platform.icon} className={`h-10 w-10 text-white transition-colors ${platform.hoverTextClass}`} />
-                  </div>
-                  <p className="text-sm text-slate-400 group-hover:text-white">{platform.name}</p>
+                  <FontAwesomeIcon
+                    icon={platform.icon}
+                    className="h-6 w-6 transition-transform group-hover:scale-110"
+                    style={{ color: platform.color }}
+                  />
+                  <span className="text-sm font-medium text-slate-300 group-hover:text-white">
+                    {platform.name}
+                  </span>
                 </motion.div>
               ))}
             </div>
-
-            <p className="text-center text-[13px] text-slate-500 mt-14 font-light">
+            <p className="mt-8 text-center text-sm text-slate-500">
               {t("thousandsMore")}
             </p>
           </div>
         </SectionReveal>
       </div>
     </section>
+  );
+}
+
+function MetricPill({
+  label,
+  value,
+  active,
+}: {
+  label: string;
+  value: string;
+  active?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "liquid-glass rounded-[22px] p-4",
+        active && "border-emerald-300/35"
+      )}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-2 text-2xl font-bold",
+          active ? "text-emerald-300" : "text-white"
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function SignalCard({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  tone: "cyan" | "gold" | "violet";
+}) {
+  const toneClass = {
+    cyan: "text-cyan-300 border-cyan-300/20",
+    gold: "text-amber-300 border-amber-300/20",
+    violet: "text-violet-300 border-violet-300/20",
+  }[tone];
+
+  return (
+    <div className={cn("liquid-glass rounded-[24px] p-4", toneClass)}>
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
+        {icon}
+      </div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+    </div>
   );
 }

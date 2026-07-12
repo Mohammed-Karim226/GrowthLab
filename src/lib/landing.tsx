@@ -219,54 +219,13 @@ export const testimonials: Testimonial[] = [
   },
   {
     name: "MOhammed Rifaat",
-    category:
-      "Crime Awareness Education",
+    category: "Crime Awareness Education",
     avatar:
       "https://yt3.googleusercontent.com/2iswcwM5v1_JxyzyWRoNhYO142HTTJFs5wy10fKjCsQmxwQAaeDYG9xLutMsXa6IWIlhssgv=s160-c-k-c0x00ffffff-no-rj",
     before: "325k",
     after: "335k",
     quote:
       "I was plateaued for 6 weeks. One discovery call later, everything changed. Real ROI.",
-  },
-  {
-    name: "Noor ElKady",
-    category: "Lifestyle & Wellness",
-    avatar:
-      "https://yt3.googleusercontent.com/ytc/AIdro_kbX7e3V9x9Z7x8X7x6X5x4X3x2X1x0W9V8U7T6S5R4Q3P2O1N0M9L8K7J6I5H4G3F2E1D0C9B8A7=s160-c-k-c0x00ffffff-no-rj",
-    before: "22k",
-    after: "187k",
-    quote:
-      "Their analytics dashboard gave me visibility I never had. Growth went parabolic.",
-  },
-  {
-    name: "Mohamed Mo Fares",
-    category: "Gaming & Esports",
-    avatar:
-      "https://yt3.googleusercontent.com/ytc/AIdro_lmN2oP4qR8sT9uV5wX6yZ7aB8cD9eF0gH1iJ2kL3mN4oP5qR6sT7uV8wX9yZ0aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0uV1wX2yZ3aB4cD5eF6gH7iJ8kL9mM=s160-c-k-c0x00ffffff-no-rj",
-    before: "5k",
-    after: "43k",
-    quote:
-      "Worth every dollar. They treated my channel like a business, not a hobby.",
-  },
-  {
-    name: "Lina Marwan",
-    category: "Education & Study Tips",
-    avatar:
-      "https://yt3.googleusercontent.com/ytc/AIdro_n1O2pQ3rS4tU5vW6xY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0zA1bC2dE3fG4hI5jK6lM7nO8pQ9rS0tU1vW2xY3zA4bC5dE6fG7hI8jK9lM=s160-c-k-c0x00ffffff-no-rj",
-    before: "31k",
-    after: "210k",
-    quote:
-      "Retention went from 38% to 62%. The watch-time spike triggered a massive algorithm push.",
-  },
-  {
-    name: "Karim Hassan",
-    category: "Cooking & Home Recipes",
-    avatar:
-      "https://yt3.googleusercontent.com/ytc/AIdro_m2N3oP4qR5sT6uV7wX8yZ9aB0cD1eF2gH3iJ4kL5mM6nO7pQ8rS9tU0vW1xY2zA3bC4dE5fG6hI7jK8lM9nO0pQ1rS2tU3vW4xY5zA6bC7dE8fG9hI0jK1lM2nO3pQ4rS=s160-c-k-c0x00ffffff-no-rj",
-    before: "9k",
-    after: "71k",
-    quote:
-      "They found the exact niche angle I was missing. Channel exploded in 90 days.",
   },
 ];
 
