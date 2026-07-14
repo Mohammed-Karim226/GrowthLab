@@ -75,6 +75,26 @@
     border-bottom: 1px solid rgba(8, 145, 178, 0.15);
   }
 
+  .hero-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(to bottom, black 0%, black 76%, transparent 100%);
+  }
+
+  .button-primary {
+    background: linear-gradient(135deg, #22d3ee 0%, #1586c9 52%, #3854dc 100%);
+    box-shadow: 0 14px 34px rgba(20, 141, 212, 0.24), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  }
+
+  .button-primary:hover {
+    filter: saturate(1.12) brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 42px rgba(20, 141, 212, 0.34), inset 0 1px 0 rgba(255,255,255,0.28);
+  }
+
   .glow-teal {
     box-shadow:
       0 0 20px rgba(8, 145, 178, 0.4),

@@ -41,16 +41,16 @@ export default function NavBar({
   return (
     <nav
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? "glass shadow-lg" : "bg-transparent"
+        scrolled ? "border-b border-white/[0.07] bg-[#070b1e]/80 shadow-2xl shadow-black/20 backdrop-blur-2xl" : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#edeff046] to-[#92949723] text-white shadow-lg">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-cyan-950/30">
             {/* <Youtube className="h-5 w-5" /> */}
             <Image src = "/images/strategy.png" alt="logo" width={40} height={40} />
           </div>
-          <span className="font-satoshi text-lg text-white">{brand}</span>
+          <span className="font-satoshi text-lg tracking-tight text-white">{brand}</span>
         </div>
 
         <div className="hidden items-center gap-4 xl:gap-6 2xl:gap-8  md:flex">
@@ -58,7 +58,7 @@ export default function NavBar({
             <a
               key={link.key}
               href={link.href}
-              className="text-slate-400 transition hover:text-white text-sm xl:text-base 2xl:text-lg"
+              className="text-sm text-slate-400 transition hover:text-cyan-100 xl:text-base"
             >
               {link.label}
             </a>
@@ -68,19 +68,19 @@ export default function NavBar({
         <div className="hidden lg:flex items-center gap-2 xl:gap-3">
           <Link
             href={localeSwitchHref}
-            className="rounded-full border border-white/10 px-3 xl:px-4 2xl:px-5 py-2 text-sm font-medium text-white transition hover:border-[#0891B2]/50"
+            className="rounded-full border border-white/10 bg-white/[0.025] px-3 py-2 text-sm font-medium text-white transition hover:border-cyan-300/40 xl:px-4"
           >
             {localeSwitchLabel}
           </Link>
           <a
             href="#contact"
-            className="rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white transition hover:border-[#0891B2]/50"
+            className="rounded-full px-3 py-2 text-sm font-medium text-slate-300 transition hover:text-white xl:px-4"
           >
             {signInLabel}
           </a>
           <a
             href="#contact"
-            className="rounded-full bg-gradient-to-r from-[#0891B2] to-[#0671A1] px-5 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+            className="button-primary rounded-full px-4 py-2.5 text-sm font-semibold text-white xl:px-5"
           >
             {bookCallLabel}
           </a>
