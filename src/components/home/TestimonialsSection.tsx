@@ -1,21 +1,21 @@
 "use client";
 
 import SectionReveal from "@/components/home/SectionReveal";
-import { motion, useReducedMotion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { Testimonial } from "@/lib/landing";
+import { cn } from "@/lib/utils";
 import {
   faFacebook,
   faInstagram,
   faTiktok,
   faYoutube,
 } from "@fortawesome/free-brands-svg-icons";
-import type { Testimonial } from "@/lib/landing";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion, useReducedMotion } from "framer-motion";
+import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
@@ -270,7 +270,7 @@ export default function TestimonialsSection({
                   </p>
                 </div>
 
-                <div className="mt-10 grid gap-1 sm:grid-cols-3">
+                <div className="mt-10 grid gap-2 sm:grid-cols-4">
                   <SignalCard
                     icon={<TrendingUp className="h-5 w-5" />}
                     label={t("growth")}
@@ -299,6 +299,17 @@ export default function TestimonialsSection({
                     value={active.after}
                     tone="violet"
                   />
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="col-span-full mt-2 rounded-2xl bg-white/5 p-4 text-center border border-white/10"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Performance Summary
+                    </p>
+                    <p className="text-xs text-white">
+                      Consistent month-over-month growth.
+                    </p>
+                  </motion.div>
                 </div>
               </div>
             </motion.article>
