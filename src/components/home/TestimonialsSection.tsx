@@ -15,7 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
+import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
@@ -156,7 +156,7 @@ export default function TestimonialsSection({
                     isActive
                       ? "border-cyan-300/60 shadow-[0_24px_80px_rgba(34,211,238,0.2)]"
                       : "opacity-70 hover:opacity-100",
-                    isRTL && "text-right"
+                    isRTL && "text-right",
                   )}
                   animate={
                     prefersReducedMotion
@@ -215,7 +215,11 @@ export default function TestimonialsSection({
                   aria-hidden
                   className="absolute -left-24 top-12 h-72 w-72 rounded-full border border-cyan-300/20"
                   animate={prefersReducedMotion ? undefined : { rotate: -360 }}
-                  transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 38,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
 
                 <div className="relative flex h-full flex-col justify-between">
@@ -266,12 +270,18 @@ export default function TestimonialsSection({
                   </p>
                 </div>
 
-                <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                <div className="mt-10 grid gap-1 sm:grid-cols-3">
                   <SignalCard
                     icon={<TrendingUp className="h-5 w-5" />}
                     label={t("growth")}
                     value={lift !== null ? `+${lift}%` : active.after}
                     tone="cyan"
+                  />
+                  <SignalCard
+                    icon={<Eye className="h-5 w-5" />}
+                    label={t("monthlyViews")}
+                    value={active.monthlyViews?.toLocaleString() ?? "-"}
+                    tone="emerald"
                   />
                   <SignalCard
                     icon={<Users className="h-5 w-5" />}
@@ -304,7 +314,7 @@ export default function TestimonialsSection({
               className={cn(
                 "liquid-glass flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
                 index === activeIndex && "border-cyan-300/60",
-                isRTL && "text-right"
+                isRTL && "text-right",
               )}
             >
               <Image
@@ -340,7 +350,7 @@ export default function TestimonialsSection({
                   }
                   className={cn(
                     "liquid-glass group flex min-h-16 items-center gap-3 rounded-full px-5",
-                    platform.glow
+                    platform.glow,
                   )}
                 >
                   <FontAwesomeIcon
@@ -377,7 +387,7 @@ function MetricPill({
     <div
       className={cn(
         "liquid-glass rounded-[22px] p-4",
-        active && "border-emerald-300/35"
+        active && "border-emerald-300/35",
       )}
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -386,7 +396,7 @@ function MetricPill({
       <p
         className={cn(
           "mt-2 text-2xl font-bold",
-          active ? "text-emerald-300" : "text-white"
+          active ? "text-emerald-300" : "text-white",
         )}
       >
         {value}
@@ -404,16 +414,17 @@ function SignalCard({
   icon: ReactNode;
   label: string;
   value: string;
-  tone: "cyan" | "gold" | "violet";
+  tone: "cyan" | "gold" | "violet" | "emerald";
 }) {
   const toneClass = {
     cyan: "text-cyan-300 border-cyan-300/20",
     gold: "text-amber-300 border-amber-300/20",
     violet: "text-violet-300 border-violet-300/20",
+    emerald: "text-emerald-300 border-emerald-300/20",
   }[tone];
 
   return (
-    <div className={cn("liquid-glass rounded-[24px] p-4", toneClass)}>
+    <div className={cn("w-fit liquid-glass rounded-[24px] p-2", toneClass)}>
       <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
         {icon}
       </div>

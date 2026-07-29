@@ -78,6 +78,7 @@ export type Testimonial = {
   avatar: string;
   before: string;
   after: string;
+  monthlyViews?: number;
   quote: string;
 };
 
@@ -214,6 +215,7 @@ export const testimonials: Testimonial[] = [
       "https://yt3.googleusercontent.com/u7oWuSuPz2Ox_qgYCOLxY2o7u6tsQhNG-B6iL3piVQo7GQIBErbud_JHG3B89WsJnFJ2Oka4sXQ=s160-c-k-c0x00ffffff-no-rj",
     before: "490k",
     after: "573k",
+    monthlyViews: 11.0e6,
     quote:
       "The strategy they built doubled my CTR in 3 months. My channel finally has a clear direction.",
   },
@@ -224,6 +226,7 @@ export const testimonials: Testimonial[] = [
       "https://yt3.googleusercontent.com/2iswcwM5v1_JxyzyWRoNhYO142HTTJFs5wy10fKjCsQmxwQAaeDYG9xLutMsXa6IWIlhssgv=s160-c-k-c0x00ffffff-no-rj",
     before: "325k",
     after: "335k",
+    monthlyViews: 1.0e6,
     quote:
       "I was plateaued for 6 weeks. One discovery call later, everything changed. Real ROI.",
   },
