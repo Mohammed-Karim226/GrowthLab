@@ -304,10 +304,10 @@ export default function TestimonialsSection({
                     className="col-span-full mt-2 rounded-2xl bg-white/5 p-4 text-center border border-white/10"
                   >
                     <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                      Performance Summary
+                      {t("Performance Summary")}
                     </p>
-                    <p className="text-xs text-white">
-                      Consistent month-over-month growth.
+                    <p className="text-xs text-white uppercase">
+                      {t("consistent month-over-month growth")}
                     </p>
                   </motion.div>
                 </div>
