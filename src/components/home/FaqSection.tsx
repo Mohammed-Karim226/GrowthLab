@@ -20,7 +20,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
   return (
     <section id="faq" className="relative py-6 overflow-hidden bg-[#05070F]">
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.6px,transparent_1px)] background-size:[40px_40px] opacity-40" />
+        <div className="dot-overlay absolute inset-0 opacity-40" />
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-[#0891B2] rounded-full blur-[120px] opacity-20" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#22D3EE] rounded-full blur-[140px] opacity-20" />
       </div>

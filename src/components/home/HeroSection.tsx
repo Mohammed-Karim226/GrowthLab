@@ -59,7 +59,7 @@ export default function HeroSection() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6, duration: 0.9 }}
               href="#contact"
-              className="button-primary inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-semibold text-white"
+              className="button-primary button-shine inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-semibold text-white"
             >
               {t("ctaBook")}
               {isRTL ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
@@ -69,9 +69,11 @@ export default function HeroSection() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8, duration: 0.9 }}
               href="#how-it-works"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-7 py-4 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/[0.06]"
+              className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-7 py-4 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/[0.06]"
             >
-              <Play className="h-4 w-4" />
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 transition group-hover:bg-cyan-400/25">
+                <Play className="h-3 w-3 fill-current" />
+              </span>
               {t("ctaHowItWorks")}
             </motion.a>
           </div>
@@ -85,14 +87,15 @@ export default function HeroSection() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
                   key={index}
+                  className="transition-transform hover:z-10 hover:-translate-y-1"
                 >
                   <Image
-                    key={index}
                     src="/images/creator.png"
-                    alt="Profile placeholder"
-                    width={32}
-                    height={32}
-                    className="h-9 w-9 rounded-full border-2 border-[#070b1e] object-cover"
+                    alt=""
+                    aria-hidden
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 rounded-full border-2 border-[#070b1e] object-cover ring-1 ring-white/10"
                   />
                 </motion.div>
               ))}
@@ -107,7 +110,6 @@ export default function HeroSection() {
                     key={idx}
                   >
                     <Star
-                      key={idx}
                       className="h-3.5 w-3.5 text-[#F59E0B]"
                       fill="currentColor"
                       stroke="currentColor"

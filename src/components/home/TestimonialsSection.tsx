@@ -14,7 +14,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 type TestimonialsSectionProps = {
@@ -63,6 +63,8 @@ function compactNumber(value: string) {
   return value.toLowerCase().includes("k") ? numeric * 1000 : numeric;
 }
 
+const AUTOPLAY_MS = 5200;
+
 export default function TestimonialsSection({
   testimonials,
 }: TestimonialsSectionProps) {
@@ -71,17 +73,32 @@ export default function TestimonialsSection({
   const t = useTranslations("testimonials");
   const prefersReducedMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const stories = useMemo(() => testimonials.slice(0, 6), [testimonials]);
   const active = stories[activeIndex] ?? stories[0];
 
   useEffect(() => {
-    if (stories.length <= 1 || prefersReducedMotion) return;
+    if (stories.length <= 1 || prefersReducedMotion || isPaused) return;
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % stories.length);
-    }, 5200);
+    }, AUTOPLAY_MS);
     return () => window.clearInterval(interval);
-  }, [prefersReducedMotion, stories.length]);
+  }, [prefersReducedMotion, stories.length, isPaused]);
+
+  const goTo = (index: number) => {
+    setActiveIndex((index + stories.length) % stories.length);
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      goTo(activeIndex + (isRTL ? -1 : 1));
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      goTo(activeIndex + (isRTL ? 1 : -1));
+    }
+  };
 
   if (!active) return null;
 
@@ -129,7 +146,18 @@ export default function TestimonialsSection({
           </div>
         </SectionReveal>
 
-        <div className="relative min-h-[720px] lg:min-h-[780px]">
+        <div
+          className="relative min-h-[720px] lg:min-h-[780px]"
+          role="group"
+          aria-roledescription="carousel"
+          aria-label={t("badge")}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={() => setIsPaused(false)}
+        >
           <motion.div
             aria-hidden
             className="absolute left-1/2 top-1/2 hidden h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full lg:block"
@@ -148,14 +176,15 @@ export default function TestimonialsSection({
                 <motion.button
                   type="button"
                   key={item.name}
-                  onClick={() => setActiveIndex(index)}
-                  onFocus={() => setActiveIndex(index)}
+                  onClick={() => goTo(index)}
+                  aria-label={t(`items.${index}.name`)}
+                  aria-current={isActive}
                   className={cn(
                     "liquid-glass group absolute w-[214px] rounded-[28px] p-3 text-left outline-none transition-all focus-visible:ring-4 focus-visible:ring-cyan-400/30",
                     orbitSlots[index % orbitSlots.length],
                     isActive
                       ? "border-cyan-300/60 shadow-[0_24px_80px_rgba(34,211,238,0.2)]"
-                      : "opacity-70 hover:opacity-100",
+                      : "opacity-70 hover:opacity-100 hover:-translate-y-1",
                     isRTL && "text-right",
                   )}
                   animate={
@@ -265,9 +294,9 @@ export default function TestimonialsSection({
                   <h3 className="text-3xl font-semibold text-white sm:text-5xl">
                     {t(`items.${activeIndex}.name`)}
                   </h3>
-                  <p className="mt-8 text-xl leading-9 text-slate-100 sm:text-2xl sm:leading-10">
-                    "{t(`items.${activeIndex}.quote`)}"
-                  </p>
+                  <blockquote className="mt-8 text-xl leading-9 text-slate-100 sm:text-2xl sm:leading-10">
+                    &ldquo;{t(`items.${activeIndex}.quote`)}&rdquo;
+                  </blockquote>
                 </div>
 
                 <div className="mt-10 grid gap-2 sm:grid-cols-4">
@@ -288,8 +317,8 @@ export default function TestimonialsSection({
                     label={t("audience")}
                     value={
                       isRTL
-                        ? `${active.after} <- ${active.before}`
-                        : `${active.before} -> ${active.after}`
+                        ? `${active.after} ← ${active.before}`
+                        : `${active.before} → ${active.after}`
                     }
                     tone="gold"
                   />
@@ -316,15 +345,43 @@ export default function TestimonialsSection({
           </SectionReveal>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:hidden">
+        <div
+          className="mt-10 flex items-center justify-center gap-2.5"
+          role="tablist"
+          aria-label={t("badge")}
+        >
+          {stories.map((item, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <button
+                key={`dot-${item.name}`}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-label={t(`items.${index}.name`)}
+                onClick={() => goTo(index)}
+                className={cn(
+                  "h-2.5 rounded-full transition-all duration-500 focus-visible:ring-2 focus-visible:ring-cyan-400/60",
+                  isActive
+                    ? "w-10 bg-linear-to-r from-cyan-300 to-blue-500 shadow-[0_0_16px_rgba(34,211,238,0.55)]"
+                    : "w-2.5 bg-white/20 hover:bg-white/40",
+                )}
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:hidden">
           {stories.map((item, index) => (
             <button
               type="button"
               key={`mobile-${item.name}`}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => goTo(index)}
+              aria-current={index === activeIndex}
               className={cn(
-                "liquid-glass flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
-                index === activeIndex && "border-cyan-300/60",
+                "liquid-glass hover-lift flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
+                index === activeIndex &&
+                  "border-cyan-300/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]",
                 isRTL && "text-right",
               )}
             >
@@ -340,7 +397,9 @@ export default function TestimonialsSection({
                   {t(`items.${index}.name`)}
                 </p>
                 <p className="truncate text-xs text-slate-400">
-                  {`${item.before} -> ${item.after}`}
+                  {isRTL
+                    ? `${item.after} ← ${item.before}`
+                    : `${item.before} → ${item.after}`}
                 </p>
               </div>
             </button>
@@ -435,14 +494,19 @@ function SignalCard({
   }[tone];
 
   return (
-    <div className={cn("w-fit liquid-glass rounded-[24px] p-2", toneClass)}>
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
+    <div
+      className={cn(
+        "liquid-glass hover-lift h-full rounded-[24px] p-4",
+        toneClass,
+      )}
+    >
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
         {icon}
       </div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+      <p className="mt-1.5 text-lg font-semibold text-white">{value}</p>
     </div>
   );
 }

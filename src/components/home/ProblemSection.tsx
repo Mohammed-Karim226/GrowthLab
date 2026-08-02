@@ -32,7 +32,7 @@ export default function ProblemSection({ problems }: ProblemSectionProps) {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {problems.map((item, index) => (
             <SectionReveal key={index} delay={index * 0.1}>
-              <div className="group card-hover-glow h-full rounded-3xl border border-white/10 bg-[#0D1235]/90 p-6">
+              <div className="group card-hover-glow relative h-full rounded-3xl border border-white/10 bg-[#0D1235]/90 p-6">
                 <div
                   aria-hidden="true"
                   className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -48,7 +48,7 @@ export default function ProblemSection({ problems }: ProblemSectionProps) {
                       {t("issuePrefix")} {index + 1}
                     </span>
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-3xl bg-[#08102a]/80 ${cardMeta[index % cardMeta.length].icon}`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-3xl bg-[#08102a]/80 transition-transform duration-300 group-hover:scale-110 ${cardMeta[index % cardMeta.length].icon}`}
                     >
                       {item.icon}
                     </div>
@@ -57,7 +57,7 @@ export default function ProblemSection({ problems }: ProblemSectionProps) {
                   <h3 className="text-white font-semibold text-lg mb-3">
                     {t(`items.${index}.title`)}
                   </h3>
-                  <p className="text-slate-400 w-full h-16 text-sm leading-relaxed">
+                  <p className="min-h-16 text-sm leading-relaxed text-slate-400">
                     {t(`items.${index}.desc`)}
                   </p>
 
