@@ -75,6 +75,7 @@ export default function TestimonialsSection({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+
   const stories = useMemo(() => testimonials.slice(0, 6), [testimonials]);
   const active = stories[activeIndex] ?? stories[0];
 
@@ -324,7 +325,7 @@ export default function TestimonialsSection({
                   />
                   <SignalCard
                     icon={<Radar className="h-5 w-5" />}
-                    label={t("afterLabel")}
+                    label={t("afterLabel", { days: active.afterDays })}
                     value={active.after}
                     tone="violet"
                   />
