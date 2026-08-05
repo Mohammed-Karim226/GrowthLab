@@ -57,7 +57,7 @@ export default function ContactSection() {
 
   return (
     <section id="contact" className="relative pt-2 pb-10 overflow-hidden bg-[#030614]">
-      <div className="absolute inset-0 bg-[radial-gradient(#0891B2_0.7px,transparent_1px)] background-size:[60px_60px] opacity-40" />
+      <div className="dot-overlay-lg pointer-events-none absolute inset-0 opacity-40" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">

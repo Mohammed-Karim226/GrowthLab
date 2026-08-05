@@ -18,13 +18,14 @@ export default function StatsBar({ stats }: StatsBarProps) {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="grid gap-8 text-center sm:grid-cols-3 cursor-pointer"
+          className="grid gap-8 text-center sm:grid-cols-3"
         >
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="relative group rounded-3xl border border-white/6 bg-[#0A0E27]/80 p-6 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] hover:border-white/10"
+              className="group relative overflow-hidden rounded-3xl border border-white/[0.06] bg-[#0A0E27]/80 p-6 transition-all duration-300 ease-out hover:border-white/15 motion-safe:hover:-translate-y-1"
             >
               <div
                 aria-hidden
@@ -35,15 +36,24 @@ export default function StatsBar({ stats }: StatsBarProps) {
                 }}
               />
               <div
-                className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
                 style={{ background: `${stat.color}20`, color: stat.color }}
               >
                 {stat.icon}
               </div>
-              <p className="text-4xl font-semibold text-white">
+              <p className="text-4xl font-semibold tracking-tight text-white">
                 <AnimatedCounter target={stat.target} suffix={stat.suffix} />
               </p>
-              <p className="mt-3 text-sm text-slate-400">{t(`items.${index}.label`)}</p>
+              <p className="mt-3 text-sm text-slate-400">
+                {t(`items.${index}.label`)}
+              </p>
+              <div
+                aria-hidden
+                className="absolute inset-x-6 bottom-0 h-px origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${stat.color}, transparent)`,
+                }}
+              />
             </div>
           ))}
         </motion.div>

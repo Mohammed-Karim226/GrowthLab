@@ -1,21 +1,21 @@
 "use client";
 
 import SectionReveal from "@/components/home/SectionReveal";
-import { motion, useReducedMotion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { Testimonial } from "@/lib/landing";
+import { cn } from "@/lib/utils";
 import {
   faFacebook,
   faInstagram,
   faTiktok,
   faYoutube,
 } from "@fortawesome/free-brands-svg-icons";
-import type { Testimonial } from "@/lib/landing";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion, useReducedMotion } from "framer-motion";
+import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
@@ -63,6 +63,8 @@ function compactNumber(value: string) {
   return value.toLowerCase().includes("k") ? numeric * 1000 : numeric;
 }
 
+const AUTOPLAY_MS = 5200;
+
 export default function TestimonialsSection({
   testimonials,
 }: TestimonialsSectionProps) {
@@ -71,17 +73,33 @@ export default function TestimonialsSection({
   const t = useTranslations("testimonials");
   const prefersReducedMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
 
   const stories = useMemo(() => testimonials.slice(0, 6), [testimonials]);
   const active = stories[activeIndex] ?? stories[0];
 
   useEffect(() => {
-    if (stories.length <= 1 || prefersReducedMotion) return;
+    if (stories.length <= 1 || prefersReducedMotion || isPaused) return;
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % stories.length);
-    }, 5200);
+    }, AUTOPLAY_MS);
     return () => window.clearInterval(interval);
-  }, [prefersReducedMotion, stories.length]);
+  }, [prefersReducedMotion, stories.length, isPaused]);
+
+  const goTo = (index: number) => {
+    setActiveIndex((index + stories.length) % stories.length);
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      goTo(activeIndex + (isRTL ? -1 : 1));
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      goTo(activeIndex + (isRTL ? 1 : -1));
+    }
+  };
 
   if (!active) return null;
 
@@ -129,7 +147,18 @@ export default function TestimonialsSection({
           </div>
         </SectionReveal>
 
-        <div className="relative min-h-[720px] lg:min-h-[780px]">
+        <div
+          className="relative min-h-[720px] lg:min-h-[780px]"
+          role="group"
+          aria-roledescription="carousel"
+          aria-label={t("badge")}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={() => setIsPaused(false)}
+        >
           <motion.div
             aria-hidden
             className="absolute left-1/2 top-1/2 hidden h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full lg:block"
@@ -148,15 +177,16 @@ export default function TestimonialsSection({
                 <motion.button
                   type="button"
                   key={item.name}
-                  onClick={() => setActiveIndex(index)}
-                  onFocus={() => setActiveIndex(index)}
+                  onClick={() => goTo(index)}
+                  aria-label={t(`items.${index}.name`)}
+                  aria-current={isActive}
                   className={cn(
                     "liquid-glass group absolute w-[214px] rounded-[28px] p-3 text-left outline-none transition-all focus-visible:ring-4 focus-visible:ring-cyan-400/30",
                     orbitSlots[index % orbitSlots.length],
                     isActive
                       ? "border-cyan-300/60 shadow-[0_24px_80px_rgba(34,211,238,0.2)]"
-                      : "opacity-70 hover:opacity-100",
-                    isRTL && "text-right"
+                      : "opacity-70 hover:opacity-100 hover:-translate-y-1",
+                    isRTL && "text-right",
                   )}
                   animate={
                     prefersReducedMotion
@@ -215,7 +245,11 @@ export default function TestimonialsSection({
                   aria-hidden
                   className="absolute -left-24 top-12 h-72 w-72 rounded-full border border-cyan-300/20"
                   animate={prefersReducedMotion ? undefined : { rotate: -360 }}
-                  transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 38,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
 
                 <div className="relative flex h-full flex-col justify-between">
@@ -261,12 +295,12 @@ export default function TestimonialsSection({
                   <h3 className="text-3xl font-semibold text-white sm:text-5xl">
                     {t(`items.${activeIndex}.name`)}
                   </h3>
-                  <p className="mt-8 text-xl leading-9 text-slate-100 sm:text-2xl sm:leading-10">
-                    "{t(`items.${activeIndex}.quote`)}"
-                  </p>
+                  <blockquote className="mt-8 text-xl leading-9 text-slate-100 sm:text-2xl sm:leading-10">
+                    &ldquo;{t(`items.${activeIndex}.quote`)}&rdquo;
+                  </blockquote>
                 </div>
 
-                <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                <div className="mt-10 grid gap-2 sm:grid-cols-4">
                   <SignalCard
                     icon={<TrendingUp className="h-5 w-5" />}
                     label={t("growth")}
@@ -274,37 +308,82 @@ export default function TestimonialsSection({
                     tone="cyan"
                   />
                   <SignalCard
+                    icon={<Eye className="h-5 w-5" />}
+                    label={t("monthlyViews")}
+                    value={active.monthlyViews?.toLocaleString() ?? "-"}
+                    tone="emerald"
+                  />
+                  <SignalCard
                     icon={<Users className="h-5 w-5" />}
                     label={t("audience")}
                     value={
                       isRTL
-                        ? `${active.after} <- ${active.before}`
-                        : `${active.before} -> ${active.after}`
+                        ? `${active.after} ← ${active.before}`
+                        : `${active.before} → ${active.after}`
                     }
                     tone="gold"
                   />
                   <SignalCard
                     icon={<Radar className="h-5 w-5" />}
-                    label={t("afterLabel")}
+                    label={t("afterLabel", { days: active.afterDays })}
                     value={active.after}
                     tone="violet"
                   />
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="col-span-full mt-2 rounded-2xl bg-white/5 p-4 text-center border border-white/10"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      {t("Performance Summary")}
+                    </p>
+                    <p className="text-xs text-white uppercase">
+                      {t("consistent month-over-month growth")}
+                    </p>
+                  </motion.div>
                 </div>
               </div>
             </motion.article>
           </SectionReveal>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:hidden">
+        <div
+          className="mt-10 flex items-center justify-center gap-2.5"
+          role="tablist"
+          aria-label={t("badge")}
+        >
+          {stories.map((item, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <button
+                key={`dot-${item.name}`}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-label={t(`items.${index}.name`)}
+                onClick={() => goTo(index)}
+                className={cn(
+                  "h-2.5 rounded-full transition-all duration-500 focus-visible:ring-2 focus-visible:ring-cyan-400/60",
+                  isActive
+                    ? "w-10 bg-linear-to-r from-cyan-300 to-blue-500 shadow-[0_0_16px_rgba(34,211,238,0.55)]"
+                    : "w-2.5 bg-white/20 hover:bg-white/40",
+                )}
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:hidden">
           {stories.map((item, index) => (
             <button
               type="button"
               key={`mobile-${item.name}`}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => goTo(index)}
+              aria-current={index === activeIndex}
               className={cn(
-                "liquid-glass flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
-                index === activeIndex && "border-cyan-300/60",
-                isRTL && "text-right"
+                "liquid-glass hover-lift flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
+                index === activeIndex &&
+                  "border-cyan-300/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]",
+                isRTL && "text-right",
               )}
             >
               <Image
@@ -319,7 +398,9 @@ export default function TestimonialsSection({
                   {t(`items.${index}.name`)}
                 </p>
                 <p className="truncate text-xs text-slate-400">
-                  {`${item.before} -> ${item.after}`}
+                  {isRTL
+                    ? `${item.after} ← ${item.before}`
+                    : `${item.before} → ${item.after}`}
                 </p>
               </div>
             </button>
@@ -340,7 +421,7 @@ export default function TestimonialsSection({
                   }
                   className={cn(
                     "liquid-glass group flex min-h-16 items-center gap-3 rounded-full px-5",
-                    platform.glow
+                    platform.glow,
                   )}
                 >
                   <FontAwesomeIcon
@@ -377,7 +458,7 @@ function MetricPill({
     <div
       className={cn(
         "liquid-glass rounded-[22px] p-4",
-        active && "border-emerald-300/35"
+        active && "border-emerald-300/35",
       )}
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -386,7 +467,7 @@ function MetricPill({
       <p
         className={cn(
           "mt-2 text-2xl font-bold",
-          active ? "text-emerald-300" : "text-white"
+          active ? "text-emerald-300" : "text-white",
         )}
       >
         {value}
@@ -404,23 +485,29 @@ function SignalCard({
   icon: ReactNode;
   label: string;
   value: string;
-  tone: "cyan" | "gold" | "violet";
+  tone: "cyan" | "gold" | "violet" | "emerald";
 }) {
   const toneClass = {
     cyan: "text-cyan-300 border-cyan-300/20",
     gold: "text-amber-300 border-amber-300/20",
     violet: "text-violet-300 border-violet-300/20",
+    emerald: "text-emerald-300 border-emerald-300/20",
   }[tone];
 
   return (
-    <div className={cn("liquid-glass rounded-[24px] p-4", toneClass)}>
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
+    <div
+      className={cn(
+        "liquid-glass hover-lift h-full rounded-[24px] p-4",
+        toneClass,
+      )}
+    >
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
         {icon}
       </div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+      <p className="mt-1.5 text-lg font-semibold text-white">{value}</p>
     </div>
   );
 }

@@ -20,7 +20,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(103,232,249,0.18)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(34,211,238,0.15)_0%,transparent_65%)]" />
-      <div className="absolute inset-0 bg-grid-white/[0.035] bg-size:[60px_60px]" />
+      <div className="grid-overlay absolute inset-0 opacity-60" />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <SectionReveal>
