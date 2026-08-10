@@ -1,0 +1,263 @@
+/**
+ * Hand-maintained mirror of supabase/migrations/0001_init.sql.
+ *
+ * Kept hand-written rather than generated so the schema contract is reviewable
+ * in the same PR as the migration. If you change the migration, change this.
+ */
+
+export type Platform = "facebook" | "instagram" | "tiktok" | "youtube";
+
+export const PLATFORMS: readonly Platform[] = [
+  "facebook",
+  "instagram",
+  "tiktok",
+  "youtube",
+] as const;
+
+export type UserRole = "admin" | "client";
+
+export type ReportStatus =
+  | "draft"
+  | "processing"
+  | "needs_review"
+  | "approved"
+  | "published"
+  | "archived"
+  | "failed";
+
+export type BatchStatus =
+  | "draft"
+  | "uploading"
+  | "uploaded"
+  | "processing"
+  | "needs_review"
+  | "approved"
+  | "failed";
+
+export type MetricSource = "ai" | "manual" | "calculated" | "imported";
+
+export type AnalysisStatus = "pending" | "processing" | "completed" | "failed";
+
+export type ClientRow = {
+  id: string;
+  name: string;
+  contact_email: string | null;
+  company_name: string | null;
+  avatar_url: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProfileRow = {
+  id: string;
+  role: UserRole;
+  client_id: string | null;
+  full_name: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReportRow = {
+  id: string;
+  client_id: string;
+  title: string;
+  period_start: string;
+  period_end: string;
+  current_published_version_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Shape stored in report_versions.ai_summary. Validated by Zod before write. */
+export type AiSummaryPayload = {
+  summary: string;
+  went_well: string[];
+  what_changed: string[];
+  needs_attention: string[];
+  recommendations: string[];
+  generated_at: string;
+};
+
+export type ReportVersionRow = {
+  id: string;
+  report_id: string;
+  version_number: number;
+  status: ReportStatus;
+  summary: string | null;
+  ai_summary: AiSummaryPayload | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  published_at: string | null;
+};
+
+export type InsightBatchRow = {
+  id: string;
+  report_version_id: string;
+  platform: Platform;
+  status: BatchStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InsightImageRow = {
+  id: string;
+  insight_batch_id: string;
+  storage_path: string;
+  original_filename: string | null;
+  mime_type: string | null;
+  file_size: number | null;
+  sort_order: number;
+  uploaded_by: string | null;
+  uploaded_at: string;
+};
+
+export type AiAnalysisRow = {
+  id: string;
+  insight_batch_id: string;
+  provider: string;
+  model: string;
+  attempt: number;
+  status: AnalysisStatus;
+  raw_response: string | null;
+  structured_response: unknown;
+  error_message: string | null;
+  image_count: number;
+  created_by: string | null;
+  created_at: string;
+  completed_at: string | null;
+};
+
+export type MetricRow = {
+  id: string;
+  report_version_id: string;
+  insight_batch_id: string | null;
+  platform: Platform;
+  metric_name: string;
+  metric_value: number | null;
+  metric_unit: string;
+  metric_date: string | null;
+  source: MetricSource;
+  confidence: number | null;
+  needs_review: boolean;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AuditLogRow = {
+  id: string;
+  actor_id: string | null;
+  action: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+};
+
+/** Columns the database fills in for us on insert. */
+type Generated = "id" | "created_at" | "updated_at";
+
+type InsertOf<Row, Optional extends keyof Row = never> = Omit<
+  Row,
+  Extract<Generated, keyof Row> | Optional
+> &
+  Partial<Pick<Row, Extract<Generated, keyof Row> | Optional>>;
+
+type Table<Row, Insert> = {
+  Row: Row;
+  Insert: Insert;
+  Update: Partial<Insert>;
+  Relationships: [];
+};
+
+export type Database = {
+  public: {
+    Tables: {
+      clients: Table<
+        ClientRow,
+        InsertOf<
+          ClientRow,
+          "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active"
+        >
+      >;
+      profiles: Table<
+        ProfileRow,
+        InsertOf<ProfileRow, "role" | "client_id" | "full_name"> & { id: string }
+      >;
+      reports: Table<
+        ReportRow,
+        InsertOf<ReportRow, "current_published_version_id" | "created_by">
+      >;
+      report_versions: Table<
+        ReportVersionRow,
+        InsertOf<
+          ReportVersionRow,
+          "status" | "summary" | "ai_summary" | "created_by" | "published_at"
+        >
+      >;
+      insight_batches: Table<
+        InsightBatchRow,
+        InsertOf<InsightBatchRow, "status" | "notes">
+      >;
+      insight_images: Table<
+        InsightImageRow,
+        Omit<InsightImageRow, "id" | "uploaded_at"> & {
+          id?: string;
+          uploaded_at?: string;
+        }
+      >;
+      ai_analyses: Table<
+        AiAnalysisRow,
+        InsertOf<
+          AiAnalysisRow,
+          | "attempt"
+          | "status"
+          | "raw_response"
+          | "structured_response"
+          | "error_message"
+          | "image_count"
+          | "created_by"
+          | "completed_at"
+        >
+      >;
+      metrics: Table<
+        MetricRow,
+        InsertOf<
+          MetricRow,
+          | "insight_batch_id"
+          | "metric_value"
+          | "metric_unit"
+          | "metric_date"
+          | "source"
+          | "confidence"
+          | "needs_review"
+          | "note"
+        >
+      >;
+      audit_logs: Table<
+        AuditLogRow,
+        Omit<AuditLogRow, "id" | "created_at"> & { id?: string; created_at?: string }
+      >;
+    };
+    Views: Record<never, never>;
+    Functions: {
+      auth_role: { Args: Record<never, never>; Returns: UserRole };
+      auth_client_id: { Args: Record<never, never>; Returns: string | null };
+      is_admin: { Args: Record<never, never>; Returns: boolean };
+    };
+    Enums: {
+      platform_type: Platform;
+      user_role: UserRole;
+      report_status: ReportStatus;
+      batch_status: BatchStatus;
+      metric_source: MetricSource;
+      analysis_status: AnalysisStatus;
+    };
+    CompositeTypes: Record<never, never>;
+  };
+};
