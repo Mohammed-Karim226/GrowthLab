@@ -13,6 +13,7 @@ import { listPublishedPeriods, loadMetrics, loadPublishedPeriod } from "@/lib/po
 import { comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
+import PortalHero from "@/components/portal/PortalHero";
 
 export const dynamic = "force-dynamic";
 
@@ -56,37 +57,39 @@ export default async function PortalReportPage({
   );
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <div className="space-y-4">
         <Link
           href={`/${locale}/portal/reports`}
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition-colors hover:text-slate-200"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.025] px-3 py-1.5 text-[10px] font-medium text-[#85837b] transition-colors hover:border-[#d8be78]/15 hover:text-[#d8c58e]"
         >
           <ArrowLeft className="size-3.5 rtl:rotate-180" aria-hidden />
           {tReports("backToReports")}
         </Link>
 
-        <header className="space-y-1.5">
-          <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{period.title}</h1>
-          <p className="text-sm text-slate-400">
-            {formatDateRange(period.periodStart, period.periodEnd, locale)}
-          </p>
-          <p className="text-xs text-slate-500">
-            {period.publishedAt
+        <PortalHero
+          compact
+          eyebrow={t("latestPeriod")}
+          title={period.title}
+          period={formatDateRange(period.periodStart, period.periodEnd, locale)}
+          publishedLabel={
+            period.publishedAt
               ? t("publishedOn", { date: formatDate(period.publishedAt, locale) })
-              : t("versionNote", { number: period.versionNumber })}
-          </p>
-          <p className="text-xs text-slate-500">
-            {previous
+              : t("versionNote", { number: period.versionNumber })
+          }
+          comparisonLabel={
+            previous
               ? t("comparedTo", {
                   period: formatDateRange(previous.periodStart, previous.periodEnd, locale),
                 })
-              : t("noComparison")}
-          </p>
-        </header>
+              : t("noComparison")
+          }
+        />
       </div>
 
       <KpiGrid locale={locale} comparison={comparison} />
+
+      <InsightsPanel summary={period.summary} aiSummary={period.aiSummary} />
 
       <PlatformComparisonChart
         locale={locale}
@@ -106,8 +109,6 @@ export default async function PortalReportPage({
       />
 
       <MetricsTable locale={locale} metrics={comparison.metrics} />
-
-      <InsightsPanel summary={period.summary} aiSummary={period.aiSummary} />
     </div>
   );
 }

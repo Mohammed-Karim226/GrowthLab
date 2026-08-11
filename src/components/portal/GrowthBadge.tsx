@@ -32,7 +32,7 @@ export default function GrowthBadge({
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded-full border border-white/10 px-2 py-0.5 text-xs text-slate-300",
+          "inline-flex items-center gap-1 rounded-full border border-[#d8be78]/15 bg-[#d8be78]/[0.055] px-2 py-0.5 text-[10px] font-medium text-[#d8c58e]",
           className
         )}
       >
@@ -48,10 +48,10 @@ export default function GrowthBadge({
     <span
       dir="ltr"
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs tabular-nums",
-        growth.direction === "up" && "bg-emerald-500/10 text-emerald-300",
-        growth.direction === "down" && "bg-rose-500/10 text-rose-300",
-        growth.direction === "flat" && "bg-white/[0.06] text-slate-300",
+        "inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold tabular-nums",
+        growth.direction === "up" && "border-[#54d8ac]/10 bg-[#54d8ac]/[0.07] text-[#68dcb7]",
+        growth.direction === "down" && "border-[#ed8f6d]/10 bg-[#ed8f6d]/[0.07] text-[#ef9a7a]",
+        growth.direction === "flat" && "border-white/[0.06] bg-white/[0.035] text-[#8a8880]",
         className
       )}
     >

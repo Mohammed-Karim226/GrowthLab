@@ -1,6 +1,6 @@
 "use client";
 
-import { Line, LineChart } from "recharts";
+import { Area, AreaChart } from "recharts";
 import { useTranslations } from "next-intl";
 
 import type { Locale } from "@/lib/i18n";
@@ -11,22 +11,14 @@ import {
   ChartTooltip,
   Tooltip,
   categoryAxis,
+  chartGradient,
   chartGrid,
   valueAxis,
 } from "./chart-parts";
 
 type Series = keyof typeof CHART_COLORS;
-
 const SERIES: Series[] = ["views", "reach", "engagement", "followers"];
 
-/**
- * Totals across every platform, one point per published period.
- *
- * Needs at least two points to say anything about a trend, so a single period
- * renders the empty state instead of a one-dot line. `connectNulls` is off:
- * a period that never reported a metric leaves a gap rather than a straight
- * line implying continuity (plan §16).
- */
 export default function PerformanceLineChart({
   locale,
   points,
@@ -35,7 +27,6 @@ export default function PerformanceLineChart({
   points: TrendPoint[];
 }) {
   const t = useTranslations("portal.charts");
-
   const active = SERIES.filter((series) =>
     points.some((point) => point[series] !== null && point[series] !== undefined)
   );
@@ -44,29 +35,50 @@ export default function PerformanceLineChart({
     <ChartFrame
       title={t("trendTitle")}
       hint={t("trendHint")}
+      action={active.length > 0 ? (
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5">
+          {active.map((series) => (
+            <span key={series} className="inline-flex items-center gap-1.5 text-[10px] text-[#77766f]">
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: CHART_COLORS[series] }} />
+              {t(`series.${series}` as never)}
+            </span>
+          ))}
+        </div>
+      ) : undefined}
       isEmpty={points.length < 2 || active.length === 0}
       emptyLabel={t("trendEmpty")}
     >
-      <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+      <AreaChart data={points} margin={{ top: 12, right: 8, bottom: 0, left: 8 }}>
+        <defs>
+          {active.map((series) => chartGradient(`performance-${series}`, CHART_COLORS[series], series === "views" ? 0.22 : 0.1))}
+          <filter id="performance-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor={CHART_COLORS.views} floodOpacity="0.28" />
+          </filter>
+        </defs>
         {chartGrid()}
         {categoryAxis(locale)}
         {valueAxis(locale)}
         <Tooltip content={<ChartTooltip locale={locale} />} />
         {active.map((series) => (
-          <Line
+          <Area
             key={series}
             type="monotone"
             dataKey={series}
             name={t(`series.${series}` as never)}
             stroke={CHART_COLORS[series]}
-            strokeWidth={2}
-            dot={{ r: 2.5, strokeWidth: 0, fill: CHART_COLORS[series] }}
-            activeDot={{ r: 4 }}
+            strokeWidth={series === "views" ? 2.8 : 1.9}
+            fill={`url(#performance-${series})`}
+            fillOpacity={1}
+            filter={series === "views" ? "url(#performance-glow)" : undefined}
+            dot={{ r: 2.2, strokeWidth: 2, stroke: "#11120f", fill: CHART_COLORS[series] }}
+            activeDot={{ r: 5, strokeWidth: 3, stroke: "#11120f" }}
             connectNulls={false}
-            isAnimationActive={false}
+            isAnimationActive
+            animationDuration={1050}
+            animationEasing="ease-out"
           />
         ))}
-      </LineChart>
+      </AreaChart>
     </ChartFrame>
   );
 }

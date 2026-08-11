@@ -2,6 +2,8 @@
 
 import { AlertCircle, ArrowRight, Lightbulb, Sparkles, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 import type { AiSummaryPayload } from "@/types/database";
 
@@ -20,59 +22,78 @@ export default function InsightsPanel({
   aiSummary: AiSummaryPayload | null;
 }) {
   const t = useTranslations("portal.insights");
+  const tUi = useTranslations("portal.ui");
 
+  const reduceMotion = useReducedMotion();
   const groups = [
-    { key: "wentWell", icon: TrendingUp, items: aiSummary?.went_well ?? [] },
-    { key: "whatChanged", icon: ArrowRight, items: aiSummary?.what_changed ?? [] },
-    { key: "needsAttention", icon: AlertCircle, items: aiSummary?.needs_attention ?? [] },
-    { key: "recommendations", icon: Lightbulb, items: aiSummary?.recommendations ?? [] },
+    { key: "wentWell", icon: TrendingUp, items: aiSummary?.went_well ?? [], color: "text-[#62dcb5]", bg: "bg-[#54d8ac]/10" },
+    { key: "whatChanged", icon: ArrowRight, items: aiSummary?.what_changed ?? [], color: "text-[#a9a4ff]", bg: "bg-[#8d87f5]/10" },
+    { key: "needsAttention", icon: AlertCircle, items: aiSummary?.needs_attention ?? [], color: "text-[#ef9978]", bg: "bg-[#ed8f6d]/10" },
+    { key: "recommendations", icon: Lightbulb, items: aiSummary?.recommendations ?? [], color: "text-[#e2c87e]", bg: "bg-[#d8be78]/10" },
   ].filter((group) => group.items.length > 0);
 
   const headline = aiSummary?.summary?.trim() || summary?.trim() || null;
   const isEmpty = !headline && groups.length === 0;
 
   return (
-    <section className="space-y-3">
-      <div className="space-y-1">
-        <h2 className="flex items-center gap-2 font-satoshi text-base text-white">
-          <Sparkles className="size-4 text-slate-400" aria-hidden />
-          {t("title")}
-        </h2>
-        <p className="text-xs text-slate-400">{t("hint")}</p>
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-2 text-[9px] font-semibold tracking-[0.2em] text-[#b9a363] uppercase">
+            <Sparkles className="size-3.5" aria-hidden />
+            {tUi("executiveIntelligence")}
+          </p>
+          <h2 className="mt-1 font-satoshi text-xl tracking-[-0.03em] text-[#f2efe7]">{t("title")}</h2>
+        </div>
+        <p className="max-w-lg text-[11px] leading-relaxed text-[#77766f]">{t("hint")}</p>
       </div>
 
       {isEmpty ? (
-        <p className="rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-400">
+        <p className="rounded-2xl border border-dashed border-white/[0.08] bg-black/10 px-4 py-10 text-center text-sm text-[#77766f]">
           {t("empty")}
         </p>
       ) : (
-        <div className="space-y-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+        <div className="portal-insights relative overflow-hidden rounded-[28px] border border-white/[0.065] p-5 sm:p-7">
+          <div aria-hidden className="absolute -top-32 start-1/3 size-72 rounded-full bg-[#d8be78]/[0.055] blur-[100px]" />
           {headline && (
-            <p className="text-sm leading-relaxed whitespace-pre-line text-slate-200">{headline}</p>
+            <div className="relative mb-6 border-s-2 border-[#d8be78]/45 ps-5 sm:ps-6">
+              <p className="max-w-5xl text-base leading-8 whitespace-pre-line text-[#d8d4c9] sm:text-lg sm:leading-9">
+                {headline}
+              </p>
+            </div>
           )}
 
           {groups.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {groups.map((group) => {
+            <div className="relative grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {groups.map((group, groupIndex) => {
                 const Icon = group.icon;
                 return (
-                  <div key={group.key} className="space-y-2">
-                    <h3 className="flex items-center gap-2 text-xs tracking-wide text-slate-500 uppercase">
-                      <Icon className="size-3.5" aria-hidden />
+                  <motion.div
+                    key={group.key}
+                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.42, delay: groupIndex * 0.06 }}
+                    className="rounded-[20px] border border-white/[0.055] bg-black/15 p-4"
+                  >
+                    <span className={cn("mb-4 flex size-9 items-center justify-center rounded-xl", group.bg, group.color)}>
+                      <Icon className="size-4" strokeWidth={1.8} aria-hidden />
+                    </span>
+                    <h3 className="mb-3 text-[10px] font-semibold tracking-[0.12em] text-[#aaa69c] uppercase">
                       {t(group.key as never)}
                     </h3>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-2.5">
                       {group.items.map((item, index) => (
                         <li
                           key={`${group.key}-${index}`}
-                          className="flex gap-2 text-sm leading-relaxed text-slate-300"
+                          className="flex gap-2.5 text-xs leading-relaxed text-[#918f87]"
                         >
-                          <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-slate-600" />
+                          <span aria-hidden className={cn("mt-1.5 size-1 shrink-0 rounded-full", group.bg, group.color)} />
                           {item}
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>

@@ -326,6 +326,23 @@
   },
   "portal": {
     "brand": "GrowthLab",
+    "ui": {
+      "clientIntelligence": "ذكاء العميل",
+      "secureWorkspace": "مساحة عمل آمنة",
+      "verifiedBy": "موثّق من GrowthLab",
+      "comparisonStatus": "حالة المقارنة",
+      "reviewedData": "بيانات مُراجَعة",
+      "publishedReport": "تقرير منشور",
+      "privateAccess": "وصول خاص",
+      "performancePulse": "نبض الأداء",
+      "channelIntelligence": "ذكاء المنصات",
+      "connectedChannel": "منصة متصلة",
+      "executiveIntelligence": "الملخص التنفيذي",
+      "dataLedger": "سجل البيانات",
+      "reportArchive": "أرشيف التقارير",
+      "verifiedReports": "{count} تقارير موثّقة",
+      "latest": "الأحدث"
+    },
     "nav": {
       "label": "أقسام البوابة",
       "overview": "لوحة الأداء",

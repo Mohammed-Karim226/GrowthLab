@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FileText, LayoutDashboard, Menu, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  BarChart3,
+  ChevronRight,
+  FileBarChart,
+  Menu,
+  ShieldCheck,
+  Sparkles,
+  X,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
@@ -17,24 +25,17 @@ type PortalShellProps = {
 };
 
 const NAV = [
-  { key: "overview", href: "", icon: LayoutDashboard },
-  { key: "reports", href: "/reports", icon: FileText },
+  { key: "overview", href: "", icon: BarChart3 },
+  { key: "reports", href: "/reports", icon: FileBarChart },
 ] as const;
 
-/**
- * Client chrome, deliberately the same shape as the admin shell so the two
- * surfaces feel like one product.
- *
- * The nav is presentation only: every page behind it calls `requireClient`
- * again, and RLS filters the rows a second time (plan §43).
- */
 export default function PortalShell({ clientName, clientEmail, children }: PortalShellProps) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-
   const base = `/${locale}/portal`;
+  const initial = clientName.trim().charAt(0).toUpperCase() || "G";
 
   function isActive(href: string) {
     const full = `${base}${href}`;
@@ -42,10 +43,14 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
   }
 
   const nav = (
-    <nav className="flex flex-col gap-1" aria-label={t("nav.label")}>
+    <nav className="space-y-2" aria-label={t("nav.label")}>
+      <p className="px-3 pb-2 text-[10px] font-semibold tracking-[0.24em] text-[#77766f] uppercase">
+        {t("nav.label")}
+      </p>
       {NAV.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.href);
+
         return (
           <Link
             key={item.key}
@@ -53,14 +58,33 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
             onClick={() => setMenuOpen(false)}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-              active
-                ? "bg-white/[0.08] text-white"
-                : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+              "group relative flex items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-3 text-sm font-medium transition-colors",
+              active ? "text-[#f8f5ec]" : "text-[#8f8e88] hover:text-[#dedbd1]"
             )}
           >
-            <Icon className="size-4 shrink-0" aria-hidden />
-            {t(`nav.${item.key}` as never)}
+            {active && (
+              <span
+                className="absolute inset-0 rounded-2xl border border-white/[0.08] bg-white/[0.055] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+              />
+            )}
+            <span
+              className={cn(
+                "relative flex size-9 shrink-0 items-center justify-center rounded-xl border transition-all",
+                active
+                  ? "border-[#d8be78]/25 bg-[#d8be78]/10 text-[#e5cd8c]"
+                  : "border-white/[0.06] bg-white/[0.025] text-[#77766f] group-hover:border-white/10 group-hover:text-[#c9c5ba]"
+              )}
+            >
+              <Icon className="size-[17px]" strokeWidth={1.8} aria-hidden />
+            </span>
+            <span className="relative flex-1">{t(`nav.${item.key}` as never)}</span>
+            <ChevronRight
+              className={cn(
+                "relative size-3.5 transition-all rtl:rotate-180",
+                active ? "text-[#d8be78]" : "-translate-x-1 text-transparent group-hover:translate-x-0 group-hover:text-[#77766f]"
+              )}
+              aria-hidden
+            />
           </Link>
         );
       })}
@@ -68,82 +92,129 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
   );
 
   const identity = (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="truncate text-sm text-white">{clientName}</p>
-      {clientEmail && (
-        <p dir="ltr" className="truncate text-xs text-slate-500">
-          {clientEmail}
-        </p>
-      )}
-      <SignOutButton className="mt-3 w-full" />
+    <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="flex items-center gap-3">
+        <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ead69e] to-[#a8863f] text-sm font-bold text-[#17150f] shadow-[0_8px_24px_rgba(216,190,120,0.14)]">
+          {initial}
+          <span className="absolute -end-0.5 -bottom-0.5 size-3 rounded-full border-2 border-[#11110f] bg-[#4adeb0]" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-[#f3f0e8]">{clientName}</p>
+          {clientEmail && (
+            <p dir="ltr" className="truncate text-[11px] text-[#77766f]">
+              {clientEmail}
+            </p>
+          )}
+        </div>
+      </div>
+      <SignOutButton className="mt-3 h-9 w-full rounded-xl border-white/[0.07] bg-black/10 text-[#9e9b92] hover:bg-white/[0.05] hover:text-white" />
     </div>
   );
 
+  const brand = (
+    <Link href={base} className="group flex items-center gap-3">
+      <span className="relative flex size-10 items-center justify-center overflow-hidden rounded-[14px] border border-[#d8be78]/25 bg-[#d8be78]/10 text-[#ead69e] shadow-[0_12px_36px_rgba(216,190,120,0.1)]">
+        <Sparkles className="size-[19px] transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" strokeWidth={1.7} />
+        <span className="absolute inset-x-2 bottom-0 h-px bg-gradient-to-r from-transparent via-[#ead69e] to-transparent" />
+      </span>
+      <span>
+        <span className="block font-satoshi text-[17px] leading-none tracking-[-0.03em] text-[#f6f2e8]">
+          {t("brand")}
+        </span>
+        <span className="mt-1 block text-[8px] font-semibold tracking-[0.26em] text-[#817b6c] uppercase">
+          {t("ui.clientIntelligence")}
+        </span>
+      </span>
+    </Link>
+  );
+
   return (
-    <div className="relative min-h-screen bg-[#070b1e] text-slate-200">
-      <div aria-hidden className="pointer-events-none fixed inset-0 hero-grid opacity-40" />
+    <div className="portal-shell relative min-h-screen overflow-x-hidden bg-[#090a08] text-[#d8d5cc]">
+      <div aria-hidden className="portal-ambient pointer-events-none fixed inset-0" />
+      <div aria-hidden className="portal-noise pointer-events-none fixed inset-0 opacity-40" />
 
       <div className="relative flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 flex-col justify-between border-e border-white/[0.06] bg-white/[0.02] p-5 lg:flex">
-          <div className="space-y-8">
-            <Link href={`/${locale}`} className="flex items-center gap-2.5">
-              <Image src="/images/strategy.png" alt="" width={26} height={26} />
-              <span className="font-satoshi text-base text-white">{t("brand")}</span>
-            </Link>
-            {nav}
+        <aside className="fixed inset-y-0 start-0 z-30 hidden w-[278px] flex-col border-e border-white/[0.055] bg-[#0c0d0b]/90 p-5 backdrop-blur-2xl lg:flex">
+          <div className="mb-10 px-2 pt-1">{brand}</div>
+          <div className="flex-1">{nav}</div>
+
+          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-[#54d8ac]/10 bg-[#54d8ac]/[0.045] px-3 py-2.5 text-[10px] font-medium tracking-[0.12em] text-[#78d9b9] uppercase">
+            <ShieldCheck className="size-4" strokeWidth={1.8} aria-hidden />
+            <span>{t("ui.secureWorkspace")}</span>
           </div>
           {identity}
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 lg:hidden">
-            <Link href={base} className="flex items-center gap-2">
-              <Image src="/images/strategy.png" alt="" width={22} height={22} />
-              <span className="font-satoshi text-sm text-white">{t("brand")}</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-label={t("nav.open")}
-              className="rounded-lg border border-white/10 p-2 text-slate-300"
-            >
-              <Menu className="size-4" aria-hidden />
-            </button>
+        <div className="flex min-w-0 flex-1 flex-col lg:ps-[278px]">
+          <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-white/[0.055] bg-[#090a08]/80 px-4 backdrop-blur-2xl sm:px-6 lg:px-9">
+            <div className="lg:hidden">{brand}</div>
+            <div className="hidden items-center gap-2 lg:flex">
+              <span className="size-1.5 animate-pulse rounded-full bg-[#55deb0] shadow-[0_0_14px_rgba(85,222,176,0.75)]" />
+              <span className="text-[10px] font-semibold tracking-[0.18em] text-[#85837c] uppercase">
+                {t("nav.label")}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="hidden items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[10px] text-[#8f8c84] sm:flex">
+                <ShieldCheck className="size-3.5 text-[#d8be78]" strokeWidth={1.8} />
+                {t("ui.verifiedBy")}
+              </div>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                aria-label={t("nav.open")}
+                className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2.5 text-[#c8c4b9] transition-colors hover:bg-white/[0.07] lg:hidden"
+              >
+                <Menu className="size-4" aria-hidden />
+              </button>
+            </div>
           </header>
 
-          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-            {children}
+          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-9 lg:py-9 xl:px-12">
+            <div className="mx-auto w-full max-w-[1500px]">{children}</div>
           </main>
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label={t("nav.close")}
-            onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-          />
-          <div className="absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col justify-between border-e border-white/10 bg-[#080d24] p-5">
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <span className="font-satoshi text-base text-white">{t("brand")}</span>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <button
+              type="button"
+              aria-label={t("nav.close")}
+              onClick={() => setMenuOpen(false)}
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              className="absolute inset-y-0 start-0 flex w-[304px] max-w-[88vw] flex-col border-e border-white/[0.08] bg-[#0c0d0b] p-5 shadow-2xl"
+            >
+              <div className="mb-10 flex items-center justify-between">
+                {brand}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}
                   aria-label={t("nav.close")}
-                  className="rounded-lg border border-white/10 p-1.5 text-slate-300"
+                  className="rounded-xl border border-white/[0.08] p-2 text-[#9d9a91]"
                 >
                   <X className="size-4" aria-hidden />
                 </button>
               </div>
-              {nav}
-            </div>
-            {identity}
-          </div>
-        </div>
-      )}
+              <div className="flex-1">{nav}</div>
+              {identity}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

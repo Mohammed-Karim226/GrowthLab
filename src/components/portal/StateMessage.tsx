@@ -34,14 +34,14 @@ export default function StateMessage({
 
   return (
     <div className="flex min-h-[50vh] items-center justify-center px-4 py-16">
-      <div className="max-w-md space-y-4 text-center">
-        <span className="mx-auto flex size-11 items-center justify-center rounded-full border border-amber-400/20 bg-amber-400/[0.07]">
-          <AlertTriangle className="size-5 text-amber-300" aria-hidden />
+      <div className="portal-chart-card max-w-md space-y-5 rounded-[28px] border border-white/[0.065] p-7 text-center">
+        <span className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-[#d8be78]/15 bg-[#d8be78]/[0.07]">
+          <AlertTriangle className="size-5 text-[#dbc37d]" aria-hidden />
         </span>
 
         <div className="space-y-2">
-          <h1 className="font-satoshi text-lg text-white">{title}</h1>
-          <p className="text-sm leading-relaxed text-slate-400">{body}</p>
+          <h1 className="font-satoshi text-xl tracking-[-0.03em] text-[#f1eee6]">{title}</h1>
+          <p className="text-sm leading-relaxed text-[#85837b]">{body}</p>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -59,7 +59,7 @@ export default function StateMessage({
           )}
         </div>
 
-        {digest && <p className="text-xs text-slate-600">{t("errorReference", { id: digest })}</p>}
+        {digest && <p className="text-[10px] text-[#5f5e58]">{t("errorReference", { id: digest })}</p>}
       </div>
     </div>
   );

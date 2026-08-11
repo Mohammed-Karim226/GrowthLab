@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight } from "lucide-react";
+import { FileBarChart, Sparkles } from "lucide-react";
 
 import KpiGrid from "@/components/portal/KpiGrid";
 import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
@@ -14,6 +13,7 @@ import { buildMetricSeries } from "@/lib/portal/series";
 import { buildTrendSeries, comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
+import PortalHero from "@/components/portal/PortalHero";
 
 export const dynamic = "force-dynamic";
 
@@ -40,14 +40,23 @@ export default async function PortalOverviewPage({
   if (periods.length === 0) {
     return (
       <div className="space-y-6">
-        <header className="space-y-1.5">
-          <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{t("title")}</h1>
-          <p className="max-w-xl text-sm text-slate-400">{t("subtitle")}</p>
+        <header className="portal-hero portal-reveal relative overflow-hidden rounded-[30px] border border-white/[0.07] px-6 py-10 sm:px-10 sm:py-14">
+          <div aria-hidden className="portal-hero-grid absolute inset-0 opacity-70" />
+          <div className="relative max-w-2xl">
+            <span className="mb-6 flex size-12 items-center justify-center rounded-2xl border border-[#d8be78]/15 bg-[#d8be78]/[0.07] text-[#dcc580]">
+              <Sparkles className="size-5" strokeWidth={1.7} aria-hidden />
+            </span>
+            <h1 className="font-satoshi text-3xl tracking-[-0.045em] text-[#f4f0e7] sm:text-5xl">{t("title")}</h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#85837b]">{t("subtitle")}</p>
+          </div>
         </header>
 
-        <div className="rounded-2xl border border-dashed border-white/10 px-6 py-16 text-center">
-          <p className="text-sm text-slate-300">{t("noReports")}</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">{t("noReportsHint")}</p>
+        <div className="rounded-[28px] border border-dashed border-white/[0.08] bg-black/10 px-6 py-16 text-center">
+          <span className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.025] text-[#8d8a82]">
+            <FileBarChart className="size-5" strokeWidth={1.7} aria-hidden />
+          </span>
+          <p className="mt-5 text-sm font-medium text-[#cac6bc]">{t("noReports")}</p>
+          <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#77766f]">{t("noReportsHint")}</p>
         </div>
       </div>
     );
@@ -76,40 +85,32 @@ export default async function PortalOverviewPage({
   );
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1.5">
-          <p className="text-xs tracking-wide text-slate-500 uppercase">{t("latestPeriod")}</p>
-          <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{latest.title}</h1>
-          <p className="text-sm text-slate-400">
-            {formatDateRange(latest.periodStart, latest.periodEnd, locale)}
-          </p>
-          <p className="text-xs text-slate-500">
-            {latest.publishedAt
-              ? t("publishedOn", { date: formatDate(latest.publishedAt, locale) })
-              : t("versionNote", { number: latest.versionNumber })}
-          </p>
-          <p className="text-xs text-slate-500">
-            {previous
-              ? t("comparedTo", {
-                  period: formatDateRange(previous.periodStart, previous.periodEnd, locale),
-                })
-              : t("noComparison")}
-          </p>
-        </div>
-
-        <Link
-          href={`/${locale}/portal/reports/${latest.reportId}`}
-          className="button-primary button-shine inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white"
-        >
-          {t("viewReport")}
-          <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
-        </Link>
-      </header>
+    <div className="space-y-12">
+      <PortalHero
+        eyebrow={t("latestPeriod")}
+        title={latest.title}
+        period={formatDateRange(latest.periodStart, latest.periodEnd, locale)}
+        publishedLabel={
+          latest.publishedAt
+            ? t("publishedOn", { date: formatDate(latest.publishedAt, locale) })
+            : t("versionNote", { number: latest.versionNumber })
+        }
+        comparisonLabel={
+          previous
+            ? t("comparedTo", {
+                period: formatDateRange(previous.periodStart, previous.periodEnd, locale),
+              })
+            : t("noComparison")
+        }
+        action={{
+          href: `/${locale}/portal/reports/${latest.reportId}`,
+          label: t("viewReport"),
+        }}
+      />
 
       <KpiGrid locale={locale} comparison={comparison} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <PerformanceLineChart locale={locale} points={trend} />
         <PlatformComparisonChart
           locale={locale}

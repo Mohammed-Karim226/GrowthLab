@@ -326,6 +326,23 @@
   },
   "portal": {
     "brand": "GrowthLab",
+    "ui": {
+      "clientIntelligence": "Client intelligence",
+      "secureWorkspace": "Secure workspace",
+      "verifiedBy": "GrowthLab verified",
+      "comparisonStatus": "Comparison status",
+      "reviewedData": "Reviewed data",
+      "publishedReport": "Published report",
+      "privateAccess": "Private access",
+      "performancePulse": "Performance pulse",
+      "channelIntelligence": "Channel intelligence",
+      "connectedChannel": "Connected channel",
+      "executiveIntelligence": "Executive intelligence",
+      "dataLedger": "Data ledger",
+      "reportArchive": "Report archive",
+      "verifiedReports": "{count} verified reports",
+      "latest": "Latest"
+    },
     "nav": {
       "label": "Portal sections",
       "overview": "Dashboard",

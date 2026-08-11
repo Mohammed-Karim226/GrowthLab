@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, LockKeyhole } from "lucide-react";
+import { Loader2, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,15 @@ export default function LoginForm({ expectedRole }: LoginFormProps) {
 
   // Stays true through the redirect so the button cannot be double-submitted.
   const busy = mutation.isPending || mutation.isSuccess;
+  const premium = expectedRole === "client";
 
   return (
     <form onSubmit={handleSubmit} noValidate className="w-full">
       <FieldGroup className="gap-5">
         <Field>
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+          <FieldLabel htmlFor="email" className={premium ? "text-[#aaa69d]" : undefined}>
+            {t("email")}
+          </FieldLabel>
           <Input
             id="email"
             name="email"
@@ -84,11 +87,14 @@ export default function LoginForm({ expectedRole }: LoginFormProps) {
             aria-invalid={errorKey ? true : undefined}
             disabled={busy}
             placeholder={t("emailPlaceholder")}
+            className={premium ? "h-12 rounded-xl border-white/[0.08] bg-black/20 text-[#f0ede5] placeholder:text-[#5f5e58] focus-visible:ring-[#d8be78]/40" : undefined}
           />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
+          <FieldLabel htmlFor="password" className={premium ? "text-[#aaa69d]" : undefined}>
+            {t("password")}
+          </FieldLabel>
           <Input
             id="password"
             name="password"
@@ -98,6 +104,7 @@ export default function LoginForm({ expectedRole }: LoginFormProps) {
             dir="ltr"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            className={premium ? "h-12 rounded-xl border-white/[0.08] bg-black/20 text-[#f0ede5] placeholder:text-[#5f5e58] focus-visible:ring-[#d8be78]/40" : undefined}
             aria-invalid={errorKey ? true : undefined}
             disabled={busy}
             placeholder="••••••••"
@@ -111,7 +118,9 @@ export default function LoginForm({ expectedRole }: LoginFormProps) {
         <Button
           type="submit"
           disabled={busy}
-          className="button-primary button-shine h-11 w-full rounded-full text-sm font-semibold text-white"
+          className={premium
+            ? "portal-gold-button h-12 w-full rounded-full text-sm font-semibold text-[#17150f]"
+            : "button-primary button-shine h-11 w-full rounded-full text-sm font-semibold text-white"}
         >
           {busy ? (
             <>
@@ -132,13 +141,56 @@ export function LoginShell({
   title,
   subtitle,
   footnote,
+  premium = false,
   children,
 }: {
   title: string;
   subtitle: string;
   footnote?: string;
+  premium?: boolean;
   children: React.ReactNode;
 }) {
+  const tPortal = useTranslations("portal.ui");
+
+  if (premium) {
+    return (
+      <main className="portal-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-[#090a08] px-4 py-16">
+        <div aria-hidden className="portal-ambient pointer-events-none absolute inset-0" />
+        <div aria-hidden className="portal-noise pointer-events-none absolute inset-0 opacity-50" />
+        <div aria-hidden className="portal-hero-grid pointer-events-none absolute inset-0 opacity-40" />
+        <div aria-hidden className="pointer-events-none absolute -top-44 start-1/2 size-[34rem] -translate-x-1/2 rounded-full bg-[#d8be78]/[0.07] blur-[120px]" />
+
+        <div className="portal-reveal relative w-full max-w-[450px] overflow-hidden rounded-[30px] border border-white/[0.075] bg-[#0e0f0c]/90 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-9">
+          <div aria-hidden className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-[#d8be78]/60 to-transparent" />
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="relative flex size-14 items-center justify-center rounded-[18px] border border-[#d8be78]/20 bg-[#d8be78]/[0.08] text-[#e0ca8a] shadow-[0_16px_44px_rgba(216,190,120,0.1)]">
+              <Sparkles className="size-6" strokeWidth={1.7} aria-hidden />
+              <span className="absolute -end-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-[#0e0f0c] bg-[#54d8ac] text-[#0a1511]">
+                <ShieldCheck className="size-3" strokeWidth={2.2} aria-hidden />
+              </span>
+            </div>
+            <div>
+              <p className="mb-2 text-[9px] font-semibold tracking-[0.24em] text-[#8d8060] uppercase">
+                GrowthLab · {tPortal("privateAccess")}
+              </p>
+              <h1 className="font-satoshi text-3xl tracking-[-0.045em] text-[#f4f0e7]">{title}</h1>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#85837b]">{subtitle}</p>
+            </div>
+          </div>
+
+          <div className="mt-8">{children}</div>
+
+          {footnote && (
+            <p className="mt-6 flex items-center justify-center gap-1.5 border-t border-white/[0.055] pt-5 text-center text-[10px] text-[#6d6c65]">
+              <LockKeyhole className="size-3 text-[#a89158]" aria-hidden />
+              {footnote}
+            </p>
+          )}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070b1e] px-4 py-16">
       <div aria-hidden className="pointer-events-none absolute inset-0 hero-grid opacity-60" />

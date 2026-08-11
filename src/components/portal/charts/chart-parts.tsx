@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Activity } from "lucide-react";
 import {
   CartesianGrid,
   ResponsiveContainer,
@@ -22,10 +23,10 @@ import { directionOf, type Locale } from "@/lib/i18n";
  */
 
 export const CHART_COLORS = {
-  views: "#7c8cff",
-  reach: "#43d9c4",
-  engagement: "#f6a94a",
-  followers: "#c084fc",
+  views: "#dec378",
+  reach: "#55dcb1",
+  engagement: "#ef9371",
+  followers: "#9f99f4",
 } as const;
 
 export const PLATFORM_COLORS: Record<string, string> = {
@@ -36,11 +37,11 @@ export const PLATFORM_COLORS: Record<string, string> = {
 };
 
 export const AXIS_STYLE = {
-  fill: "#94a3b8",
+  fill: "#77766f",
   fontSize: 11,
 } as const;
 
-export const GRID_STROKE = "rgba(148, 163, 184, 0.14)";
+export const GRID_STROKE = "rgba(255, 255, 255, 0.065)";
 
 export function isRtl(locale: Locale) {
   return directionOf(locale) === "rtl";
@@ -53,6 +54,7 @@ export function ChartFrame({
   action,
   isEmpty,
   emptyLabel,
+  responsive = true,
   children,
 }: {
   title: string;
@@ -60,20 +62,28 @@ export function ChartFrame({
   action?: ReactNode;
   isEmpty: boolean;
   emptyLabel: string;
+  responsive?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h2 className="font-satoshi text-base text-white">{title}</h2>
-          <p className="text-xs text-slate-400">{hint}</p>
+    <section className="portal-chart-card portal-reveal group relative overflow-hidden rounded-[26px] border border-white/[0.065] p-4 sm:p-6">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d8be78]/35 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute -top-24 -end-20 size-56 rounded-full bg-[#d8be78]/[0.035] blur-[80px]" />
+      <div className="relative flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.065] bg-white/[0.035] text-[#c9b16f]">
+            <Activity className="size-4" strokeWidth={1.7} aria-hidden />
+          </span>
+          <div className="space-y-1">
+            <h2 className="font-satoshi text-lg tracking-[-0.025em] text-[#f2efe7]">{title}</h2>
+            <p className="max-w-lg text-[11px] leading-relaxed text-[#77766f]">{hint}</p>
+          </div>
         </div>
         {action}
       </div>
 
       {isEmpty ? (
-        <p className="mt-6 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-400">
+        <p className="mt-6 rounded-2xl border border-dashed border-white/[0.08] bg-black/10 px-4 py-10 text-center text-sm text-[#77766f]">
           {emptyLabel}
         </p>
       ) : (
@@ -84,11 +94,13 @@ export function ChartFrame({
         <div
           role="img"
           aria-label={`${title}. ${hint}`}
-          className="mt-5 h-64 w-full sm:h-72"
+          className="relative mt-6 h-72 w-full overflow-hidden rounded-[20px] border border-white/[0.045] bg-black/10 p-2 sm:h-80 sm:p-3"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            {children as React.ReactElement}
-          </ResponsiveContainer>
+          {responsive ? (
+            <ResponsiveContainer width="100%" height="100%">
+              {children as React.ReactElement}
+            </ResponsiveContainer>
+          ) : children}
         </div>
       )}
     </section>
@@ -123,7 +135,17 @@ export function valueAxis(locale: Locale) {
 }
 
 export function chartGrid() {
-  return <CartesianGrid stroke={GRID_STROKE} vertical={false} />;
+  return <CartesianGrid stroke={GRID_STROKE} vertical={false} strokeDasharray="3 8" />;
+}
+
+export function chartGradient(id: string, color: string, opacity = 0.24) {
+  return (
+    <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor={color} stopOpacity={opacity} />
+      <stop offset="68%" stopColor={color} stopOpacity={opacity * 0.25} />
+      <stop offset="100%" stopColor={color} stopOpacity={0} />
+    </linearGradient>
+  );
 }
 
 type Payload = NonNullable<TooltipProps<number, string>["payload"]>;
@@ -153,9 +175,9 @@ export function ChartTooltip({
   return (
     <div
       dir={directionOf(locale)}
-      className="rounded-xl border border-white/10 bg-[#0b1030]/95 px-3 py-2 text-xs shadow-lg backdrop-blur"
+      className="rounded-2xl border border-white/[0.09] bg-[#11120f]/95 px-3.5 py-3 text-xs shadow-[0_18px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl"
     >
-      <p className="mb-1.5 text-slate-300">{label}</p>
+      <p className="mb-2 font-medium text-[#ddd9ce]">{label}</p>
       <ul className="space-y-1">
         {rows.map((entry) => (
           <li key={String(entry.dataKey)} className="flex items-center gap-2">
@@ -164,8 +186,8 @@ export function ChartTooltip({
               className="size-2 shrink-0 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-slate-400">{entry.name}</span>
-            <span className="ms-auto tabular-nums text-slate-100">
+            <span className="text-[#85837c]">{entry.name}</span>
+            <span className="ms-auto tabular-nums text-[#f2efe8]">
               {formatCompact(Number(entry.value), locale)}
             </span>
           </li>
@@ -176,7 +198,7 @@ export function ChartTooltip({
 }
 
 export function tooltipCursor() {
-  return { fill: "rgba(148, 163, 184, 0.08)" };
+  return { fill: "rgba(216, 190, 120, 0.055)" };
 }
 
 export { Tooltip };

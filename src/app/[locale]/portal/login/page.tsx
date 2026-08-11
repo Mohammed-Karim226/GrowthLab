@@ -38,6 +38,7 @@ export default async function PortalLoginPage({
 
   return (
     <LoginShell
+      premium
       title={t("portalTitle")}
       subtitle={t("portalSubtitle")}
       footnote={t("noSelfSignup")}
