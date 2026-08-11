@@ -131,7 +131,7 @@ export default async function ReportWorkspacePage({
           {t("backToClient")}
         </Link>
 
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header className="admin-section-header flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1.5">
             <p className="text-xs text-slate-500">{report.clients?.name}</p>
             <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{report.title}</h1>

@@ -131,7 +131,7 @@ export default function CreateClientDialog({
           onOpenChange(next);
         }}
       >
-        <DialogContent>
+        <DialogContent className="vip-dialog">
           <DialogHeader>
             <DialogTitle>{t("credentials.title")}</DialogTitle>
             <DialogDescription>{t("credentials.description")}</DialogDescription>
@@ -187,7 +187,7 @@ export default function CreateClientDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent>
+      <DialogContent className="vip-dialog">
         <DialogHeader>
           <DialogTitle>{t("create.title")}</DialogTitle>
           <DialogDescription>{t("create.description")}</DialogDescription>

@@ -35,7 +35,7 @@ export default async function AdminClientsPage({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-1.5">
+      <header className="admin-section-header space-y-1.5">
         <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{t("title")}</h1>
         <p className="max-w-xl text-sm text-slate-400">{t("subtitle")}</p>
       </header>

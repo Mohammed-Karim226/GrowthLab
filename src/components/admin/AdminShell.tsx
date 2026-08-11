@@ -5,7 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { LayoutDashboard, Menu, Users, X } from "lucide-react";
+import {
+  Crown,
+  LayoutDashboard,
+  Menu,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  X,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
@@ -41,7 +49,7 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
   }
 
   const nav = (
-    <nav className="flex flex-col gap-1" aria-label={t("nav.label")}>
+    <nav className="flex flex-col gap-1.5" aria-label={t("nav.label")}>
       {NAV.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.href);
@@ -52,14 +60,17 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
             onClick={() => setMenuOpen(false)}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+              "admin-nav-item group relative flex items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-3 text-sm transition-all duration-300",
               active
-                ? "bg-white/[0.08] text-white"
-                : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                ? "is-active text-[#fff6d8]"
+                : "text-slate-400 hover:text-slate-100"
             )}
           >
-            <Icon className="size-4 shrink-0" aria-hidden />
-            {t(`nav.${item.key}` as never)}
+            <span className="admin-nav-icon relative z-10 flex size-8 shrink-0 items-center justify-center rounded-xl">
+              <Icon className="size-4" aria-hidden />
+            </span>
+            <span className="relative z-10">{t(`nav.${item.key}` as never)}</span>
+            {active && <Sparkles className="relative z-10 ms-auto size-3.5 text-[#f8d675]" aria-hidden />}
           </Link>
         );
       })}
@@ -67,27 +78,49 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
   );
 
   const identity = (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="truncate text-sm text-white">{adminName}</p>
-      {adminEmail && (
-        <p dir="ltr" className="truncate text-xs text-slate-500">
-          {adminEmail}
-        </p>
-      )}
+    <div className="admin-identity relative overflow-hidden rounded-2xl p-3.5">
+      <div className="relative z-10 flex items-center gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-[#efd787]/20 bg-[#efd787]/10 text-[#f4d77d]">
+          <ShieldCheck className="size-4.5" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <div className="mb-0.5 flex items-center gap-1.5">
+            <p className="truncate text-sm font-medium text-white">{adminName}</p>
+            <Crown className="size-3 shrink-0 text-[#f4d77d]" aria-hidden />
+          </div>
+          {adminEmail && (
+            <p dir="ltr" className="truncate text-[11px] text-slate-500">
+              {adminEmail}
+            </p>
+          )}
+        </div>
+      </div>
       <SignOutButton className="mt-3 w-full" />
     </div>
   );
 
   return (
-    <div className="relative min-h-screen bg-[#070b1e] text-slate-200">
-      <div aria-hidden className="pointer-events-none fixed inset-0 hero-grid opacity-40" />
+    <div className="admin-vip relative min-h-screen overflow-hidden bg-[#050711] text-slate-200">
+      <div aria-hidden className="admin-vip-ambient pointer-events-none fixed inset-0" />
+      <div aria-hidden className="admin-vip-orb admin-vip-orb-one pointer-events-none fixed" />
+      <div aria-hidden className="admin-vip-orb admin-vip-orb-two pointer-events-none fixed" />
+      <div aria-hidden className="pointer-events-none fixed inset-0 hero-grid opacity-25" />
+      <div aria-hidden className="admin-vip-noise pointer-events-none fixed inset-0" />
 
       <div className="relative flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 flex-col justify-between border-e border-white/[0.06] bg-white/[0.02] p-5 lg:flex">
-          <div className="space-y-8">
-            <Link href={`/${locale}`} className="flex items-center gap-2.5">
-              <Image src="/images/strategy.png" alt="" width={26} height={26} />
-              <span className="font-satoshi text-base text-white">{t("brand")}</span>
+        <aside className="admin-vip-sidebar hidden w-72 shrink-0 flex-col justify-between p-5 lg:flex">
+          <div className="space-y-9">
+            <Link href={`/${locale}`} className="group flex items-center gap-3 px-1">
+              <span className="admin-vip-logo relative flex size-11 items-center justify-center rounded-2xl">
+                <Image src="/images/strategy.png" alt="" width={25} height={25} className="relative z-10" />
+                <Crown className="absolute -end-1 -top-1 z-20 size-3.5 rotate-12 text-[#f8d675] drop-shadow-[0_0_8px_rgba(248,214,117,.65)]" aria-hidden />
+              </span>
+              <span>
+                <span className="block font-satoshi text-base text-white">{t("brand")}</span>
+                <span className="mt-0.5 flex items-center gap-1 text-[9px] font-semibold tracking-[0.22em] text-[#d5b85e] uppercase">
+                  <Sparkles className="size-2.5" aria-hidden /> {t("vipConsole")}
+                </span>
+              </span>
             </Link>
             {nav}
           </div>
@@ -95,23 +128,25 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 lg:hidden">
+          <header className="admin-vip-mobile-header flex items-center justify-between gap-3 px-4 py-3 lg:hidden">
             <Link href={`/${locale}/admin`} className="flex items-center gap-2">
-              <Image src="/images/strategy.png" alt="" width={22} height={22} />
+              <span className="admin-vip-logo flex size-9 items-center justify-center rounded-xl">
+                <Image src="/images/strategy.png" alt="" width={20} height={20} />
+              </span>
               <span className="font-satoshi text-sm text-white">{t("brand")}</span>
             </Link>
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label={t("nav.open")}
-              className="rounded-lg border border-white/10 p-2 text-slate-300"
+              className="rounded-xl border border-[#e9cd72]/15 bg-[#e9cd72]/[0.06] p-2.5 text-[#ead581] transition-colors hover:bg-[#e9cd72]/10"
             >
               <Menu className="size-4" aria-hidden />
             </button>
           </header>
 
-          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-            {children}
+          <main className="admin-vip-main scrollbar-slim min-w-0 flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-10 lg:py-9 xl:px-12">
+            <div className="mx-auto w-full max-w-[96rem]">{children}</div>
           </main>
         </div>
       </div>
@@ -124,10 +159,13 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
             onClick={() => setMenuOpen(false)}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
-          <div className="absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col justify-between border-e border-white/10 bg-[#080d24] p-5">
+          <div className="admin-vip-drawer absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col justify-between p-5">
             <div className="space-y-8">
               <div className="flex items-center justify-between">
-                <span className="font-satoshi text-base text-white">{t("brand")}</span>
+                <span className="flex items-center gap-2 font-satoshi text-base text-white">
+                  <Crown className="size-4 text-[#f4d77d]" aria-hidden />
+                  {t("brand")}
+                </span>
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}

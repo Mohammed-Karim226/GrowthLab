@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Plus, Search, Users } from "lucide-react";
+import { Crown, Search, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,7 @@ export default function ClientsView({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative w-full max-w-xs">
+        <div className="admin-search relative w-full max-w-sm">
           <Search
             aria-hidden
             className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
@@ -80,12 +80,12 @@ export default function ClientsView({
           onClick={() => setDialogOpen(true)}
           className="button-primary button-shine h-10 rounded-full px-5 text-sm font-semibold text-white"
         >
-          <Plus className="size-4" aria-hidden />
+          <Crown className="size-4" aria-hidden />
           {t("newClient")}
         </Button>
       </div>
 
-      <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
+      <Card className="admin-table-card">
         <CardContent className="p-0 sm:p-2">
           {clients.length === 0 ? (
             <EmptyState title={t("empty")} hint={t("emptyHint")} />

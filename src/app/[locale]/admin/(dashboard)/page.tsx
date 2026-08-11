@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, FileText, Users } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Crown,
+  FileCheck2,
+  Files,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+  Users,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,33 +73,40 @@ export default async function AdminOverviewPage({
   ).length;
 
   const stats = [
-    { key: "totalClients", value: clients.length, icon: Users },
-    { key: "activeClients", value: clients.filter((client) => client.is_active).length, icon: Users },
-    { key: "totalReports", value: totalReports ?? 0, icon: FileText },
-    { key: "awaitingReview", value: awaitingReview, icon: FileText },
+    { key: "totalClients", value: clients.length, icon: Users, tone: "violet" },
+    { key: "activeClients", value: clients.filter((client) => client.is_active).length, icon: UserCheck, tone: "emerald" },
+    { key: "totalReports", value: totalReports ?? 0, icon: Files, tone: "gold" },
+    { key: "awaitingReview", value: awaitingReview, icon: ShieldCheck, tone: "cyan" },
   ] as const;
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1.5">
+      <header className="admin-page-hero relative flex flex-wrap items-end justify-between gap-5 overflow-hidden rounded-3xl p-5 sm:p-7">
+        <div className="relative z-10 space-y-2">
+          <span className="admin-vip-eyebrow inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase">
+            <Crown className="size-3" aria-hidden /> {t("overview.vipIntelligence")}
+          </span>
           <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{t("overview.title")}</h1>
           <p className="max-w-xl text-sm text-slate-400">{t("overview.subtitle")}</p>
         </div>
         <Link
           href={`/${locale}/admin/clients`}
-          className="button-primary button-shine inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white"
+          className="button-primary button-shine relative z-10 inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#171204]"
         >
+          <Sparkles className="size-4" aria-hidden />
           {t("overview.quickCreate")}
           <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
         </Link>
+        <div aria-hidden className="admin-hero-crown absolute -end-7 -top-10 opacity-[0.07]">
+          <Crown className="size-48 rotate-12" strokeWidth={1} />
+        </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.key} className="liquid-card border-white/[0.06] bg-white/[0.02]">
+            <Card key={stat.key} className={`admin-stat-card admin-stat-${stat.tone}`}>
               <CardContent className="flex items-center justify-between gap-4 p-5">
                 <div className="space-y-1">
                   <p className="text-xs tracking-wide text-slate-500 uppercase">
@@ -97,8 +114,8 @@ export default async function AdminOverviewPage({
                   </p>
                   <p className="font-satoshi text-2xl text-white">{stat.value}</p>
                 </div>
-                <span className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400">
-                  <Icon className="size-4" aria-hidden />
+                <span className="admin-stat-icon flex size-11 items-center justify-center rounded-2xl">
+                  <Icon className="size-5" aria-hidden />
                 </span>
               </CardContent>
             </Card>
@@ -106,9 +123,14 @@ export default async function AdminOverviewPage({
         })}
       </div>
 
-      <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
+      <Card className="admin-reports-card">
         <CardHeader>
-          <CardTitle className="text-base text-white">{t("overview.recentReports")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base text-white">
+            <span className="flex size-8 items-center justify-center rounded-xl border border-[#ead178]/15 bg-[#ead178]/[0.07] text-[#efd77f]">
+              <FileCheck2 className="size-4" aria-hidden />
+            </span>
+            {t("overview.recentReports")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {reports.length === 0 ? (
@@ -124,7 +146,7 @@ export default async function AdminOverviewPage({
                   <li key={report.id}>
                     <Link
                       href={`/${locale}/admin/reports/${report.id}`}
-                      className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:text-white"
+                      className="admin-report-row group flex flex-wrap items-center justify-between gap-3 rounded-xl px-3 py-3.5 transition-all hover:text-white"
                     >
                       <div className="min-w-0 space-y-0.5">
                         <p className="truncate text-sm text-slate-200">{report.title}</p>
@@ -142,6 +164,7 @@ export default async function AdminOverviewPage({
                         <span className="text-xs text-slate-500">
                           {formatDate(report.updated_at, locale)}
                         </span>
+                        <ArrowUpRight className="size-3.5 text-slate-600 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#efd77f] rtl:-scale-x-100" aria-hidden />
                       </div>
                     </Link>
                   </li>

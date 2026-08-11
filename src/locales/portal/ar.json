@@ -102,6 +102,7 @@
   },
   "admin": {
     "brand": "GrowthLab",
+    "vipConsole": "لوحة VIP",
     "nav": {
       "label": "أقسام الإدارة",
       "overview": "نظرة عامة",
@@ -110,6 +111,7 @@
       "close": "إغلاق القائمة"
     },
     "overview": {
+      "vipIntelligence": "ذكاء VIP",
       "title": "نظرة عامة",
       "subtitle": "العملاء وفترات التقارير وما يحتاج إلى انتباهك.",
       "totalClients": "العملاء",

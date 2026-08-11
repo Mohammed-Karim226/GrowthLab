@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CalendarRange, ChevronRight, Plus } from "lucide-react";
+import { CalendarRange, ChevronRight, Crown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export default function ClientReports({
 
   return (
     <>
-      <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
+      <Card className="admin-reports-card">
         <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-base text-white">{t("reports")}</CardTitle>
           <Button
@@ -52,7 +52,7 @@ export default function ClientReports({
             onClick={() => setDialogOpen(true)}
             className="button-primary rounded-full text-white"
           >
-            <Plus className="size-3.5" aria-hidden />
+            <Crown className="size-3.5" aria-hidden />
             {t("newReport")}
           </Button>
         </CardHeader>

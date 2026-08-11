@@ -69,7 +69,7 @@ export default async function ClientDetailPage({
           {t("backToClients")}
         </Link>
 
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header className="admin-section-header flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1.5">
             <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{client.name}</h1>
             {client.company_name && (

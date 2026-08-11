@@ -102,6 +102,7 @@
   },
   "admin": {
     "brand": "GrowthLab",
+    "vipConsole": "VIP Console",
     "nav": {
       "label": "Admin sections",
       "overview": "Overview",
@@ -110,6 +111,7 @@
       "close": "Close menu"
     },
     "overview": {
+      "vipIntelligence": "VIP Intelligence",
       "title": "Overview",
       "subtitle": "Clients, reporting periods and what still needs your attention.",
       "totalClients": "Clients",
