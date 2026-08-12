@@ -105,11 +105,11 @@ function PlatformCard({
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="portal-platform-card group overflow-hidden rounded-[24px] border border-white/[0.065]"
+      className="portal-platform-card group overflow-hidden rounded-[28px] border border-white/[0.13]"
     >
       <div className="flex items-center gap-3 border-b border-white/[0.055] px-5 py-4">
-        <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-[14px]", style.surface, style.color)}>
-          <FontAwesomeIcon icon={style.icon} className="size-[17px]" aria-hidden />
+        <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-[17px] border border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,.2),0_12px_30px_rgba(0,0,0,.18)]", style.surface, style.color)}>
+          <FontAwesomeIcon icon={style.icon} className="size-[20px]" aria-hidden />
         </span>
         <div>
           <h3 className="font-satoshi text-[15px] tracking-[-0.02em] text-[#f1eee6]">{tPlatforms(comparison.platform)}</h3>
@@ -120,9 +120,9 @@ function PlatformCard({
         </span>
       </div>
 
-      <dl className="grid grid-cols-2 gap-px bg-white/[0.045]">
+      <dl className="grid grid-cols-2 gap-2 bg-transparent p-2.5 sm:p-3">
         {headline.map((entry) => (
-          <div key={entry.key} className="space-y-2 bg-[#10110e] px-5 py-4">
+          <div key={entry.key} className="min-w-0 space-y-2 rounded-[16px] border border-white/[0.075] bg-white/[0.035] px-3 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,.08)] sm:rounded-[18px] sm:px-4 sm:py-4">
             <dt className="text-[9px] font-medium tracking-[0.1em] text-[#696861] uppercase">{tKpi(entry.key as never)}</dt>
             <dd className="flex flex-wrap items-center gap-2">
               {entry.value === null ? (
@@ -132,7 +132,7 @@ function PlatformCard({
                   —
                 </span>
               ) : (
-                <span className="font-satoshi text-lg tracking-[-0.03em] tabular-nums text-[#efede6]">
+                <span className="min-w-0 break-words font-satoshi text-base tracking-[-0.03em] tabular-nums text-[#efede6] sm:text-lg">
                   {formatNumber(entry.value, locale)}
                 </span>
               )}

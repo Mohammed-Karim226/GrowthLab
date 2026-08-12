@@ -24,7 +24,7 @@ export default function DashboardSkeleton() {
         {t("loading")}
       </span>
 
-      <Skeleton className="h-72 rounded-[30px] bg-white/[0.035]" />
+      <Skeleton className="portal-glass-panel h-72 rounded-[34px] bg-white/[0.06]" />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 6 }).map((_, index) => (

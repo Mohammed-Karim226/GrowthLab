@@ -30,15 +30,15 @@ export default function PlatformComparisonChart({ locale, platforms }: { locale:
   const leader = data[0];
 
   const picker = (
-    <div className="flex gap-1 rounded-full border border-white/[0.07] bg-black/20 p-1">
+    <div className="flex min-w-max gap-1 rounded-full border border-white/[0.07] bg-black/20 p-1">
       {available.map(({ key, icon: Icon }) => <button key={key} type="button" onClick={() => setSelected(key)} aria-label={t(`series.${key}` as never)} aria-pressed={key === measure} className={cn("flex size-8 items-center justify-center rounded-full transition-all", key === measure ? "bg-[#e4ce91] text-[#17150f] shadow-[0_8px_22px_rgba(216,190,120,0.2)]" : "text-[#6f6e68] hover:bg-white/[0.05] hover:text-[#d6d1c6]")}><Icon className="size-3.5" strokeWidth={1.9} aria-hidden /></button>)}
     </div>
   );
 
   return (
     <ChartFrame title={t("comparisonTitle")} hint={t("comparisonHint")} action={picker} isEmpty={data.length === 0} emptyLabel={t("comparisonEmpty")} responsive={false}>
-      <div className="grid h-full min-h-0 items-center gap-5 lg:grid-cols-[minmax(280px,0.85fr)_minmax(300px,1.15fr)]">
-        <div className="relative mx-auto size-[245px] sm:size-[270px]">
+      <div className="grid min-h-0 items-center gap-4 sm:gap-5 lg:grid-cols-[minmax(280px,0.85fr)_minmax(300px,1.15fr)]">
+        <div className="relative mx-auto size-[210px] min-w-0 sm:size-[270px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <defs>{data.map((entry) => <filter key={entry.platform} id={`glow-${entry.platform}`} x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={PLATFORM_COLORS[entry.platform]} floodOpacity="0.3" /></filter>)}</defs>
@@ -55,11 +55,11 @@ export default function PlatformComparisonChart({ locale, platforms }: { locale:
           </div>
         </div>
 
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-2.5 sm:grid-cols-2">
           {data.map((entry, index) => {
             const share = total > 0 ? (entry.value / total) * 100 : 0;
             const color = PLATFORM_COLORS[entry.platform];
-            return <article key={entry.platform} className="group relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-white/[0.022] p-4 transition-all hover:-translate-y-0.5 hover:border-white/[0.11] hover:bg-white/[0.04]">
+            return <article key={entry.platform} className="group relative min-w-0 overflow-hidden rounded-[18px] border border-white/[0.06] bg-white/[0.022] p-3.5 transition-all hover:-translate-y-0.5 hover:border-white/[0.11] hover:bg-white/[0.04] sm:rounded-[20px] sm:p-4">
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-[14px]" style={{ color, backgroundColor: `${color}17` }}><FontAwesomeIcon icon={PLATFORM_ICONS[entry.platform]} className="size-[17px]" aria-hidden /></span>
                 <div className="min-w-0"><p className="truncate text-xs font-medium text-[#d8d4c9]">{entry.label}</p><p className="mt-0.5 text-[9px] text-[#62615b]">#{index + 1}</p></div>

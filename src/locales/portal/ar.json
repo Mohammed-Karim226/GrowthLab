@@ -408,6 +408,21 @@
       "needsAttention": "يحتاج إلى انتباه",
       "recommendations": "التوصيات"
     },
+    "intelligence": {
+      "eyebrow": "إحاطة ذكاء VIP",
+      "title": "الإشارة خلف الأرقام",
+      "hint": "قراءة مختصرة لبيانات الأداء الموثقة تبرز ما يستحق الاهتمام أولاً.",
+      "verified": "تحليل موثق",
+      "leadingChannel": "المنصة الرائدة",
+      "leadsIn": "تتصدر في {metric}",
+      "strongestMovement": "أقوى تغير",
+      "coverage": "تغطية البيانات",
+      "coverageValue": "تم التحقق عبر {platforms} منصات",
+      "headlineSignal": "الإشارة الرئيسية",
+      "sourceNote": "مستمد من الأرقام المراجعة",
+      "noComparison": "لا توجد فترة سابقة لتحليل التغير",
+      "unavailable": "لا تتوفر بيانات كافية"
+    },
     "reports": {
       "title": "تقاريرك",
       "subtitle": "كل تقرير نُشر لك، الأحدث أولاً.",
@@ -421,7 +436,9 @@
       "overviewSection": "نظرة عامة",
       "insightsSection": "الرؤى",
       "channelsSection": "المنصات",
-      "detailsSection": "كل التفاصيل"
+      "detailsSection": "كل التفاصيل",
+      "premiumReport": "تحليل أداء متميز",
+      "premiumReportHint": "تمت مراجعته والتحقق منه ونشره بشكل خاص لحسابك."
     },
     "detail": {
       "metricsTitle": "الأرقام المرصودة",

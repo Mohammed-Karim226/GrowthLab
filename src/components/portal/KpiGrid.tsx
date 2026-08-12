@@ -97,7 +97,7 @@ export default function KpiGrid({
         <span className="hidden h-px flex-1 bg-gradient-to-r from-white/[0.07] to-transparent sm:block" />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const accent = ACCENTS[index];
@@ -111,7 +111,7 @@ export default function KpiGrid({
               viewport={{ once: true, amount: 0.35 }}
               transition={{ duration: 0.5, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "portal-metric-card group relative min-h-[168px] overflow-hidden rounded-[24px] border border-white/[0.065] p-5 sm:p-6",
+                "portal-metric-card group relative min-h-[150px] min-w-0 overflow-hidden rounded-[22px] border border-white/[0.13] p-4 sm:min-h-[168px] sm:rounded-[28px] sm:p-6",
                 featured && "xl:col-span-2 xl:min-h-[184px]"
               )}
             >
@@ -131,7 +131,7 @@ export default function KpiGrid({
               />
               <div aria-hidden className="portal-orbit absolute -end-10 -bottom-14 size-40 rounded-full border border-white/[0.035]" />
 
-              <div className="relative flex h-full flex-col justify-between gap-7">
+              <div className="relative flex h-full flex-col justify-between gap-5 sm:gap-7">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-semibold tracking-[0.13em] text-[#7d7b74] uppercase">
@@ -139,8 +139,8 @@ export default function KpiGrid({
                     </p>
                     <span className="mt-2 block h-px w-7 bg-white/[0.09]" />
                   </div>
-                  <span className={cn("flex size-10 items-center justify-center rounded-[14px]", accent.bg, accent.text)}>
-                    <Icon className="size-[18px]" strokeWidth={1.7} aria-hidden />
+                  <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-[15px] border border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,.22),0_12px_28px_rgba(0,0,0,.2)] transition-transform duration-300 group-hover:scale-105 sm:size-12 sm:rounded-[17px]", accent.bg, accent.text)}>
+                    <Icon className="size-[17px] sm:size-[20px]" strokeWidth={1.65} aria-hidden />
                   </span>
                 </div>
 
@@ -149,7 +149,7 @@ export default function KpiGrid({
                     <p
                       className={cn(
                         "font-satoshi leading-none tracking-[-0.055em] tabular-nums text-[#f7f4ed]",
-                        featured ? "text-[40px] sm:text-[46px]" : "text-[34px]"
+                        featured ? "text-[28px] sm:text-[46px]" : "text-[25px] sm:text-[34px]"
                       )}
                     >
                       {card.value}

@@ -1,12 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import GrowthBadge from "@/components/portal/GrowthBadge";
 import { formatMetricValue, humanizeMetricName } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { MetricComparison } from "@/lib/analytics/comparisons";
 import { PLATFORMS } from "@/types/database";
+
+const PLATFORM_ICONS = { facebook: faFacebook, instagram: faInstagram, tiktok: faTiktok, youtube: faYoutube };
+const PLATFORM_COLOR = { facebook: "#6f9cff", instagram: "#ef7ba8", tiktok: "#62dfd4", youtube: "#f27676" };
 
 export default function MetricsTable({ locale, metrics }: { locale: Locale; metrics: MetricComparison[] }) {
   const t = useTranslations("portal.detail");
@@ -34,10 +39,10 @@ export default function MetricsTable({ locale, metrics }: { locale: Locale; metr
       ) : (
         <div className="grid gap-5 xl:grid-cols-2">
           {grouped.map((group) => (
-            <article key={group.platform} className="overflow-hidden rounded-[24px] border border-white/[0.065] bg-[#0e0f0c] shadow-[0_20px_55px_rgba(0,0,0,0.16)]">
-              <div className="flex items-center gap-3 border-b border-white/[0.055] bg-white/[0.018] px-5 py-4">
-                <span className="flex size-8 items-center justify-center rounded-xl border border-[#d8be78]/15 bg-[#d8be78]/[0.07]">
-                  <span className="size-1.5 rounded-full bg-[#d8be78] shadow-[0_0_10px_rgba(216,190,120,0.6)]" />
+            <article key={group.platform} className="portal-platform-card overflow-hidden rounded-[28px] border border-white/[0.13] shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+              <div className="flex items-center gap-3 border-b border-white/[0.08] bg-white/[0.035] px-5 py-4">
+                <span className="flex size-11 items-center justify-center rounded-[16px] border border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,.2),0_12px_28px_rgba(0,0,0,.18)]" style={{ color: PLATFORM_COLOR[group.platform], backgroundColor: `${PLATFORM_COLOR[group.platform]}16` }}>
+                  <FontAwesomeIcon icon={PLATFORM_ICONS[group.platform]} className="size-[18px]" aria-hidden />
                 </span>
                 <h3 className="text-[11px] font-semibold tracking-[0.12em] text-[#aaa69d] uppercase">{tPlatforms(group.platform)}</h3>
                 <span className="ms-auto rounded-full border border-white/[0.06] bg-white/[0.025] px-2.5 py-1 text-[9px] tabular-nums text-[#77766f]">{group.rows.length}</span>
@@ -47,9 +52,9 @@ export default function MetricsTable({ locale, metrics }: { locale: Locale; metr
                 {group.rows.map((row) => {
                   const label = tMetrics.has(row.metricName as never) ? tMetrics(row.metricName as never) : humanizeMetricName(row.metricName);
                   return (
-                    <div key={`${row.platform}:${row.metricName}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-5 py-4 transition-colors hover:bg-white/[0.018]">
+                    <div key={`${row.platform}:${row.metricName}`} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-white/[0.045] sm:gap-x-4 sm:px-5">
                       <dt className="min-w-0 text-xs font-medium text-[#aaa79e]">{label}</dt>
-                      <dd className="text-end font-satoshi text-lg tracking-[-0.03em] tabular-nums text-[#f0ede5]">
+                      <dd className="max-w-[46vw] break-words text-end font-satoshi text-base tracking-[-0.03em] tabular-nums text-[#f0ede5] sm:max-w-none sm:text-lg">
                         {row.current === null ? t("notReported") : formatMetricValue(row.current, row.unit, locale)}
                       </dd>
                       <div className="text-[9px] tracking-wide text-[#5f5e58] uppercase">

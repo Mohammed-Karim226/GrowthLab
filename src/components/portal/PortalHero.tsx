@@ -37,8 +37,8 @@ export default function PortalHero({
   return (
     <header
       className={cn(
-        "portal-hero portal-reveal relative overflow-hidden rounded-[30px] border border-white/[0.07]",
-        compact ? "px-5 py-6 sm:px-7" : "px-5 py-7 sm:px-8 sm:py-9 lg:px-10"
+        "portal-hero portal-glass-panel portal-reveal relative overflow-hidden rounded-[34px] border border-white/[0.14]",
+        compact ? "px-4 py-5 sm:px-7 sm:py-6" : "px-4 py-6 sm:px-8 sm:py-9 lg:px-10"
       )}
     >
       <div aria-hidden className="portal-hero-grid absolute inset-0 opacity-70" />
@@ -54,7 +54,7 @@ export default function PortalHero({
           <h1
             className={cn(
               "max-w-[900px] font-satoshi leading-[1.02] tracking-[-0.045em] text-[#f6f2e9]",
-              compact ? "text-3xl sm:text-4xl" : "text-3xl sm:text-5xl lg:text-[56px]"
+              compact ? "text-[28px] sm:text-4xl" : "text-[30px] sm:text-5xl lg:text-[56px]"
             )}
           >
             {title}

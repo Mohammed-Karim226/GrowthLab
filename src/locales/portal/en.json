@@ -408,6 +408,21 @@
       "needsAttention": "Needs attention",
       "recommendations": "Recommendations"
     },
+    "intelligence": {
+      "eyebrow": "VIP intelligence briefing",
+      "title": "The signal behind the numbers",
+      "hint": "A concise read of verified performance data, designed to surface what deserves attention first.",
+      "verified": "Verified intelligence",
+      "leadingChannel": "Leading channel",
+      "leadsIn": "Leading in {metric}",
+      "strongestMovement": "Strongest movement",
+      "coverage": "Data coverage",
+      "coverageValue": "Verified across {platforms} platforms",
+      "headlineSignal": "Headline signal",
+      "sourceNote": "Derived from reviewed figures",
+      "noComparison": "No earlier period for movement analysis",
+      "unavailable": "Not enough reported data"
+    },
     "reports": {
       "title": "Your reports",
       "subtitle": "Every report published to you, newest first.",
@@ -421,7 +436,9 @@
       "overviewSection": "Overview",
       "insightsSection": "Insights",
       "channelsSection": "Channels",
-      "detailsSection": "All details"
+      "detailsSection": "All details",
+      "premiumReport": "Premium performance intelligence",
+      "premiumReportHint": "Reviewed, verified and privately published for your account."
     },
     "detail": {
       "metricsTitle": "Reported figures",

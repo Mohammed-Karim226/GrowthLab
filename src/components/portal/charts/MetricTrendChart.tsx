@@ -32,7 +32,7 @@ export default function MetricTrendChart({ locale, series }: { locale: Locale; s
   </div> : undefined;
 
   return <ChartFrame title={t("metricTitle")} hint={t("metricHint")} action={picker} isEmpty={!active} emptyLabel={t("trendEmpty")} responsive={false}>
-    <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="grid min-h-0 gap-3 sm:gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
       <div className="relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-gradient-to-br from-white/[0.045] to-transparent p-5">
         <div aria-hidden className="absolute -end-8 -top-8 size-28 rounded-full bg-[#d8be78]/10 blur-3xl" />
         <span className="relative flex size-10 items-center justify-center rounded-[14px] border border-[#d8be78]/15 bg-[#d8be78]/10 text-[#dec378]"><ChartNoAxesColumnIncreasing className="size-[18px]" strokeWidth={1.8} aria-hidden /></span>
@@ -43,7 +43,7 @@ export default function MetricTrendChart({ locale, series }: { locale: Locale; s
           <span className="text-[9px] text-[#5f5e58]">{tDetail("previous")}</span>
         </div>
       </div>
-      <div className="min-h-[230px] rounded-[20px] border border-white/[0.05] bg-[#090a08]/50 p-2">
+      <div className="h-[250px] min-w-0 rounded-[18px] border border-white/[0.05] bg-[#090a08]/50 p-2 sm:h-[280px] sm:rounded-[20px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={active?.points ?? []} margin={{ top: 20, right: 12, bottom: 4, left: 8 }} barCategoryGap="28%">
             <defs><linearGradient id="metric-columns" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f0d993" /><stop offset="100%" stopColor="#9e7e3e" /></linearGradient></defs>

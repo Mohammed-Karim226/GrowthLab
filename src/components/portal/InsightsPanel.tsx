@@ -53,10 +53,11 @@ export default function InsightsPanel({
           {t("empty")}
         </p>
       ) : (
-        <div className="portal-insights relative overflow-hidden rounded-[28px] border border-white/[0.065] p-5 sm:p-7">
+        <div className="portal-insights relative overflow-hidden rounded-[32px] border border-white/[0.14] p-5 sm:p-7">
           <div aria-hidden className="absolute -top-32 start-1/3 size-72 rounded-full bg-[#d8be78]/[0.055] blur-[100px]" />
           {headline && (
-            <div className="relative mb-6 border-s-2 border-[#d8be78]/45 ps-5 sm:ps-6">
+            <div className="relative mb-7 overflow-hidden rounded-[24px] border border-white/[0.1] bg-white/[0.055] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,.13)] sm:p-6">
+              <Sparkles className="absolute end-5 top-5 size-5 text-[#d8c27c]/40" aria-hidden />
               <p className="max-w-5xl text-base leading-8 whitespace-pre-line text-[#d8d4c9] sm:text-lg sm:leading-9">
                 {headline}
               </p>
@@ -74,10 +75,11 @@ export default function InsightsPanel({
                     whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.35 }}
                     transition={{ duration: 0.42, delay: groupIndex * 0.06 }}
-                    className="rounded-[20px] border border-white/[0.055] bg-black/15 p-4"
+                    className="group relative overflow-hidden rounded-[24px] border border-white/[0.11] bg-white/[0.045] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_20px_45px_rgba(0,0,0,.14)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-white/[0.18] hover:bg-white/[0.07]"
                   >
-                    <span className={cn("mb-4 flex size-9 items-center justify-center rounded-xl", group.bg, group.color)}>
-                      <Icon className="size-4" strokeWidth={1.8} aria-hidden />
+                    <div aria-hidden className={cn("absolute -end-10 -top-10 size-28 rounded-full opacity-50 blur-3xl", group.bg)} />
+                    <span className={cn("relative mb-5 flex size-12 items-center justify-center rounded-[17px] border border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,.22),0_12px_30px_rgba(0,0,0,.18)]", group.bg, group.color)}>
+                      <Icon className="size-5" strokeWidth={1.65} aria-hidden />
                     </span>
                     <h3 className="mb-3 text-[10px] font-semibold tracking-[0.12em] text-[#aaa69c] uppercase">
                       {t(group.key as never)}

@@ -42,14 +42,14 @@ export default function PerformanceLineChart({ locale, points }: { locale: Local
 
   return (
     <ChartFrame title={t("trendTitle")} hint={t("trendHint")} isEmpty={points.length < 2 || available.length === 0} emptyLabel={t("trendEmpty")} responsive={false}>
-      <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <div className="grid min-h-0 gap-3 sm:gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
         <div className="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:content-start">
           {available.map(({ key, icon: Icon }) => {
             const value = points.at(-1)?.[key] ?? null;
             const selectedMetric = key === active;
             return (
               <button key={key} type="button" onClick={() => setSelected(key)} aria-pressed={selectedMetric} className={cn(
-                "group flex min-w-0 items-center gap-3 rounded-[18px] border p-3 text-start transition-all duration-300",
+                "group flex min-w-0 items-center gap-2.5 rounded-[16px] border p-2.5 text-start transition-all duration-300 sm:gap-3 sm:rounded-[18px] sm:p-3",
                 selectedMetric ? "border-white/[0.12] bg-white/[0.07] shadow-[0_16px_35px_rgba(0,0,0,0.2)]" : "border-white/[0.05] bg-white/[0.018] hover:bg-white/[0.04]"
               )}>
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[13px]" style={{ color, backgroundColor: `${color}16`, boxShadow: selectedMetric ? `0 0 28px ${color}20` : undefined }}>
@@ -64,7 +64,7 @@ export default function PerformanceLineChart({ locale, points }: { locale: Local
           })}
         </div>
 
-        <div className="relative min-h-[230px] overflow-hidden rounded-[20px] border border-white/[0.05] bg-[#090a08]/50">
+        <div className="relative h-[250px] min-w-0 overflow-hidden rounded-[18px] border border-white/[0.05] bg-[#090a08]/50 sm:h-[280px] sm:rounded-[20px]">
           <div className="absolute start-4 top-4 z-10 sm:start-5 sm:top-5">
             <p className="text-[9px] font-semibold tracking-[0.16em] text-[#696861] uppercase">{t(`series.${active}` as never)}</p>
             <div className="mt-1 flex items-end gap-2">

@@ -26,7 +26,7 @@ export default async function PortalReportsPage({
 
   return (
     <div className="space-y-8">
-      <header className="portal-reveal flex flex-col justify-between gap-6 rounded-[28px] border border-white/[0.065] bg-white/[0.02] px-5 py-7 sm:flex-row sm:items-end sm:px-8 sm:py-9">
+      <header className="portal-glass-panel portal-reveal flex flex-col justify-between gap-6 rounded-[34px] border border-white/[0.14] px-5 py-7 sm:flex-row sm:items-end sm:px-8 sm:py-9">
         <div className="max-w-2xl">
           <span className="mb-5 flex size-11 items-center justify-center rounded-2xl border border-[#d8be78]/15 bg-[#d8be78]/[0.07] text-[#dac37f]">
             <FileBarChart className="size-5" strokeWidth={1.7} aria-hidden />

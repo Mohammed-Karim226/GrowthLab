@@ -129,12 +129,15 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
   );
 
   return (
-    <div className="portal-shell relative min-h-screen overflow-x-hidden bg-[#090a08] text-[#d8d5cc]">
+    <div className="portal-shell portal-liquid relative min-h-screen overflow-x-hidden bg-[#05070d] text-[#e7e8ee]">
       <div aria-hidden className="portal-ambient pointer-events-none fixed inset-0" />
       <div aria-hidden className="portal-noise pointer-events-none fixed inset-0 opacity-40" />
+      <div aria-hidden className="portal-aurora portal-aurora-one pointer-events-none fixed" />
+      <div aria-hidden className="portal-aurora portal-aurora-two pointer-events-none fixed" />
+      <div aria-hidden className="portal-aurora portal-aurora-three pointer-events-none fixed" />
 
       <div className="relative flex min-h-screen">
-        <aside className="fixed inset-y-0 start-0 z-30 hidden w-[278px] flex-col border-e border-white/[0.055] bg-[#0c0d0b]/90 p-5 backdrop-blur-2xl lg:flex">
+        <aside className="portal-glass-sidebar fixed inset-y-4 start-4 z-30 hidden w-[270px] flex-col rounded-[32px] border border-white/[0.13] p-5 lg:flex">
           <div className="mb-10 px-2 pt-1">{brand}</div>
           <div className="flex-1">{nav}</div>
 
@@ -145,8 +148,8 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
           {identity}
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col lg:ps-[278px]">
-          <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-white/[0.055] bg-[#090a08]/80 px-4 backdrop-blur-2xl sm:px-6 lg:px-9">
+        <div className="flex min-w-0 flex-1 flex-col lg:ps-[302px]">
+          <header className="portal-glass-topbar sticky top-3 z-20 mx-3 mt-3 flex h-[64px] items-center justify-between rounded-[22px] border border-white/[0.12] px-4 sm:mx-5 sm:px-6 lg:mx-8 lg:px-6">
             <div className="lg:hidden">{brand}</div>
             <div className="hidden items-center gap-2 lg:flex">
               <span className="size-1.5 animate-pulse rounded-full bg-[#55deb0] shadow-[0_0_14px_rgba(85,222,176,0.75)]" />
@@ -171,7 +174,7 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
             </div>
           </header>
 
-          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-9 lg:py-9 xl:px-12">
+          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-7 sm:px-6 sm:py-9 lg:px-8 lg:py-10 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">{children}</div>
           </main>
         </div>
@@ -196,7 +199,7 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
               transition={{ type: "spring", stiffness: 360, damping: 34 }}
-              className="absolute inset-y-0 start-0 flex w-[304px] max-w-[88vw] flex-col border-e border-white/[0.08] bg-[#0c0d0b] p-5 shadow-2xl"
+              className="portal-glass-sidebar absolute inset-y-3 start-3 flex w-[304px] max-w-[calc(100vw-24px)] flex-col rounded-[30px] border border-white/[0.13] p-4 shadow-2xl sm:p-5"
             >
               <div className="mb-10 flex items-center justify-between">
                 {brand}
