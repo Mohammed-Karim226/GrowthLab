@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart3, BookOpenText, ChartNoAxesCombined, ListTree } from "lucide-react";
 
 import KpiGrid from "@/components/portal/KpiGrid";
 import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
@@ -87,28 +87,35 @@ export default async function PortalReportPage({
         />
       </div>
 
-      <KpiGrid locale={locale} comparison={comparison} />
+      <nav aria-label={tReports("reportNavigation")} className="portal-report-nav sticky top-3 z-20 flex gap-1.5 overflow-x-auto rounded-2xl border border-white/[0.07] bg-[#0d0e0c]/90 p-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+        {[
+          { href: "#overview", label: tReports("overviewSection"), icon: ChartNoAxesCombined },
+          { href: "#insights", label: tReports("insightsSection"), icon: BookOpenText },
+          { href: "#channels", label: tReports("channelsSection"), icon: BarChart3 },
+          { href: "#details", label: tReports("detailsSection"), icon: ListTree },
+        ].map(({ href, label, icon: Icon }) => (
+          <a key={href} href={href} className="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-[10px] font-medium text-[#77766f] transition-colors hover:bg-white/[0.045] hover:text-[#e0c981]">
+            <Icon className="size-3.5" strokeWidth={1.8} aria-hidden />{label}
+          </a>
+        ))}
+      </nav>
 
-      <InsightsPanel summary={period.summary} aiSummary={period.aiSummary} />
-
-      <PlatformComparisonChart
-        locale={locale}
-        platforms={comparison.platforms.map((platform) => ({
-          platform: platform.platform,
-          views: platform.current.views,
-          reach: platform.current.reach,
-          engagement: platform.current.engagement,
-          followers: platform.current.followers,
-        }))}
-      />
-
-      <PlatformBreakdown
-        locale={locale}
-        platforms={comparison.platforms}
-        metrics={comparison.metrics}
-      />
-
-      <MetricsTable locale={locale} metrics={comparison.metrics} />
+      <div id="overview" className="scroll-mt-24"><KpiGrid locale={locale} comparison={comparison} /></div>
+      <div id="insights" className="scroll-mt-24"><InsightsPanel summary={period.summary} aiSummary={period.aiSummary} /></div>
+      <div id="channels" className="scroll-mt-24 space-y-10">
+        <PlatformComparisonChart
+          locale={locale}
+          platforms={comparison.platforms.map((platform) => ({
+            platform: platform.platform,
+            views: platform.current.views,
+            reach: platform.current.reach,
+            engagement: platform.current.engagement,
+            followers: platform.current.followers,
+          }))}
+        />
+        <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
+      </div>
+      <div id="details" className="scroll-mt-24"><MetricsTable locale={locale} metrics={comparison.metrics} /></div>
     </div>
   );
 }

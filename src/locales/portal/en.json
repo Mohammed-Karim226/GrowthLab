@@ -416,7 +416,12 @@
       "published": "Published",
       "open": "Open",
       "backToReports": "Back to reports",
-      "backToOverview": "Back to dashboard"
+      "backToOverview": "Back to dashboard",
+      "reportNavigation": "Report sections",
+      "overviewSection": "Overview",
+      "insightsSection": "Insights",
+      "channelsSection": "Channels",
+      "detailsSection": "All details"
     },
     "detail": {
       "metricsTitle": "Reported figures",

@@ -416,7 +416,12 @@
       "published": "تاريخ النشر",
       "open": "فتح",
       "backToReports": "العودة إلى التقارير",
-      "backToOverview": "العودة إلى لوحة الأداء"
+      "backToOverview": "العودة إلى لوحة الأداء",
+      "reportNavigation": "أقسام التقرير",
+      "overviewSection": "نظرة عامة",
+      "insightsSection": "الرؤى",
+      "channelsSection": "المنصات",
+      "detailsSection": "كل التفاصيل"
     },
     "detail": {
       "metricsTitle": "الأرقام المرصودة",

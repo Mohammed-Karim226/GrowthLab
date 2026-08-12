@@ -66,16 +66,16 @@ export function ChartFrame({
   children: ReactNode;
 }) {
   return (
-    <section className="portal-chart-card portal-reveal group relative overflow-hidden rounded-[26px] border border-white/[0.065] p-4 sm:p-6">
+    <section className="portal-chart-card portal-reveal group relative overflow-hidden rounded-[28px] border border-white/[0.075] p-4 sm:p-6">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d8be78]/35 to-transparent" />
       <div aria-hidden className="pointer-events-none absolute -top-24 -end-20 size-56 rounded-full bg-[#d8be78]/[0.035] blur-[80px]" />
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.065] bg-white/[0.035] text-[#c9b16f]">
+          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#d8be78]/15 bg-[#d8be78]/[0.07] text-[#d9bf77] shadow-[0_10px_30px_rgba(0,0,0,0.16)]">
             <Activity className="size-4" strokeWidth={1.7} aria-hidden />
           </span>
           <div className="space-y-1">
-            <h2 className="font-satoshi text-lg tracking-[-0.025em] text-[#f2efe7]">{title}</h2>
+            <h2 className="font-satoshi text-xl tracking-[-0.035em] text-[#f4f1e9]">{title}</h2>
             <p className="max-w-lg text-[11px] leading-relaxed text-[#77766f]">{hint}</p>
           </div>
         </div>
@@ -92,9 +92,9 @@ export function ChartFrame({
         // figures are available as text in the platform breakdown and the report
         // metrics table.
         <div
-          role="img"
-          aria-label={`${title}. ${hint}`}
-          className="relative mt-6 h-72 w-full overflow-hidden rounded-[20px] border border-white/[0.045] bg-black/10 p-2 sm:h-80 sm:p-3"
+          role={responsive ? "img" : undefined}
+          aria-label={responsive ? `${title}. ${hint}` : undefined}
+          className="portal-chart-plot relative mt-6 h-72 w-full overflow-hidden rounded-[22px] border border-white/[0.055] bg-black/15 p-2 sm:h-80 sm:p-3"
         >
           {responsive ? (
             <ResponsiveContainer width="100%" height="100%">
