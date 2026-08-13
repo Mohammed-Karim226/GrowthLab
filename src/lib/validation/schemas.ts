@@ -29,6 +29,19 @@ export const createClientSchema = z
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 
+export const createAccountSchema = z.object({
+  platform: platformSchema,
+  pageName: z.string().trim().min(1).max(160),
+  pageId: z.string().trim().max(160).optional().or(z.literal("")),
+  stage: z.string().trim().max(80).optional().or(z.literal("")),
+}).strict();
+
+export const updateAccountSchema = z.object({
+  pageName: z.string().trim().min(1).max(160).optional(),
+  pageId: z.string().trim().max(160).nullable().optional(),
+  stage: z.string().trim().max(80).nullable().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
+
 export const updateClientSchema = z
   .object({
     name: z.string().trim().min(2).max(120).optional(),

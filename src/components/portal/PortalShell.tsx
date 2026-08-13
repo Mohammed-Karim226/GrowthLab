@@ -14,6 +14,9 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { AccountRow, Platform } from "@/types/database";
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
@@ -21,15 +24,33 @@ import SignOutButton from "@/components/auth/SignOutButton";
 type PortalShellProps = {
   clientName: string;
   clientEmail: string | null;
+  accounts: AccountRow[];
   children: React.ReactNode;
 };
+
+const PLATFORM_ICONS = { facebook: faFacebook, instagram: faInstagram, tiktok: faTiktok, youtube: faYoutube };
+const PLATFORM_COLORS: Record<Platform, string> = { facebook: "#79a7ff", instagram: "#f19ac7", tiktok: "#8de6e5", youtube: "#ff8d8d" };
+
+function accountHref(account: AccountRow) {
+  const value = account.page_id?.trim() || account.page_name?.trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  const handle = value.replace(/^@/, "");
+  const paths: Record<Platform, string> = {
+    facebook: `https://www.facebook.com/${encodeURIComponent(handle)}`,
+    instagram: `https://www.instagram.com/${encodeURIComponent(handle)}`,
+    tiktok: `https://www.tiktok.com/@${encodeURIComponent(handle)}`,
+    youtube: `https://www.youtube.com/@${encodeURIComponent(handle)}`,
+  };
+  return paths[account.platform];
+}
 
 const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
   { key: "reports", href: "/reports", icon: FileBarChart },
 ] as const;
 
-export default function PortalShell({ clientName, clientEmail, children }: PortalShellProps) {
+export default function PortalShell({ clientName, clientEmail, accounts, children }: PortalShellProps) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const pathname = usePathname();
@@ -91,6 +112,30 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
     </nav>
   );
 
+  const activeAccounts = accounts.filter((account) => account.stage?.toLowerCase() !== "inactive");
+  const accountsNav = (
+    <section className="mt-7 border-t border-white/[0.07] pt-6" aria-label={t("nav.accounts")}>
+      <div className="mb-3 flex items-center justify-between px-3">
+        <p className="text-[10px] font-semibold tracking-[0.24em] text-[#77766f] uppercase">{t("nav.accounts")}</p>
+        <span className="rounded-full border border-[#54d8ac]/20 bg-[#54d8ac]/10 px-2 py-0.5 text-[9px] font-semibold text-[#78d9b9]">{activeAccounts.length}</span>
+      </div>
+      <div className="space-y-1.5">
+        {activeAccounts.map((account) => {
+          const href = accountHref(account);
+          const Icon = PLATFORM_ICONS[account.platform];
+          const label = account.page_name || account.page_id || t(`platforms.${account.platform}` as never);
+          if (!href) return null;
+          return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#aaa79d] transition-colors hover:bg-white/[0.05] hover:text-white">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.035]" style={{ color: PLATFORM_COLORS[account.platform] }}><FontAwesomeIcon icon={Icon} className="size-3.5" aria-hidden /></span>
+            <span className="min-w-0 flex-1 truncate">{label}</span>
+            <span className="size-1.5 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
+          </a>;
+        })}
+        {activeAccounts.length === 0 && <p className="px-3 text-[11px] leading-relaxed text-[#77766f]">{t("nav.noAccounts")}</p>}
+      </div>
+    </section>
+  );
+
   const identity = (
     <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex items-center gap-3">
@@ -137,15 +182,20 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
       <div aria-hidden className="portal-aurora portal-aurora-three pointer-events-none fixed" />
 
       <div className="relative flex min-h-screen">
-        <aside className="portal-glass-sidebar fixed inset-y-4 start-4 z-30 hidden w-[270px] flex-col rounded-[32px] border border-white/[0.13] p-5 lg:flex">
-          <div className="mb-10 px-2 pt-1">{brand}</div>
-          <div className="flex-1">{nav}</div>
-
-          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-[#54d8ac]/10 bg-[#54d8ac]/[0.045] px-3 py-2.5 text-[10px] font-medium tracking-[0.12em] text-[#78d9b9] uppercase">
-            <ShieldCheck className="size-4" strokeWidth={1.8} aria-hidden />
-            <span>{t("ui.secureWorkspace")}</span>
+        <aside className="portal-glass-sidebar fixed inset-y-4 start-4 z-30 hidden min-h-0 w-[270px] flex-col overflow-hidden rounded-[32px] border border-white/[0.13] p-5 lg:flex">
+          <div className="mb-7 shrink-0 px-2 pt-1">{brand}</div>
+          <div className="scrollbar-slim min-h-0 flex-1 overflow-y-auto pe-1">
+            {nav}
+            {accountsNav}
           </div>
-          {identity}
+
+          <div className="shrink-0 border-t border-white/[0.07] pt-3">
+            <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-[#54d8ac]/10 bg-[#54d8ac]/[0.045] px-3 py-2.5 text-[10px] font-medium tracking-[0.12em] text-[#78d9b9] uppercase">
+              <ShieldCheck className="size-4" strokeWidth={1.8} aria-hidden />
+              <span>{t("ui.secureWorkspace")}</span>
+            </div>
+            {identity}
+          </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col lg:ps-[302px]">
@@ -199,9 +249,9 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
               transition={{ type: "spring", stiffness: 360, damping: 34 }}
-              className="portal-glass-sidebar absolute inset-y-3 start-3 flex w-[304px] max-w-[calc(100vw-24px)] flex-col rounded-[30px] border border-white/[0.13] p-4 shadow-2xl sm:p-5"
+              className="portal-glass-sidebar absolute inset-y-3 start-3 flex min-h-0 w-[304px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-[30px] border border-white/[0.13] p-4 shadow-2xl sm:p-5"
             >
-              <div className="mb-10 flex items-center justify-between">
+              <div className="mb-7 flex shrink-0 items-center justify-between">
                 {brand}
                 <button
                   type="button"
@@ -212,8 +262,11 @@ export default function PortalShell({ clientName, clientEmail, children }: Porta
                   <X className="size-4" aria-hidden />
                 </button>
               </div>
-              <div className="flex-1">{nav}</div>
-              {identity}
+              <div className="scrollbar-slim min-h-0 flex-1 overflow-y-auto pe-1">
+                {nav}
+                {accountsNav}
+              </div>
+              <div className="shrink-0 border-t border-white/[0.07] pt-3">{identity}</div>
             </motion.div>
           </motion.div>
         )}

@@ -36,6 +36,7 @@ const ANALYZABLE_STATUSES = ["uploaded", "needs_review", "failed"] as const;
 type BatchLookup = {
   id: string;
   platform: Platform;
+  account_id: string | null;
   status: string;
   notes: string | null;
   report_version_id: string;
@@ -53,7 +54,7 @@ export const POST = withAdmin("analyzeInsights", async (session, request) => {
   const { data: batch, error: batchError } = await supabase
     .from("insight_batches")
     .select(
-      "id, platform, status, notes, report_version_id, report_versions(id, status, report_id), insight_images(id, storage_path, mime_type, sort_order)"
+      "id, platform, account_id, status, notes, report_version_id, report_versions(id, status, report_id), insight_images(id, storage_path, mime_type, sort_order)"
     )
     .eq("id", insightBatchId)
     .maybeSingle<BatchLookup>();
@@ -210,6 +211,7 @@ export const POST = withAdmin("analyzeInsights", async (session, request) => {
     entity_id: batch.id,
     metadata: {
       platform: batch.platform,
+      account_id: batch.account_id,
       analysis_id: analysis.id,
       attempt: lastAttempt + 1,
       ...summary,

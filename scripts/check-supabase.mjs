@@ -49,9 +49,10 @@ console.log("\nReachability");
 const { error: authError } = await service.auth.admin.listUsers({ page: 1, perPage: 1 });
 console.log(`  auth admin API   ${authError ? `FAILED — ${authError.message}` : "ok"}`);
 
-console.log("\nMigration 0001");
+console.log("\nDatabase schema");
 const TABLES = [
   "clients",
+  "accounts",
   "profiles",
   "reports",
   "report_versions",
@@ -90,5 +91,5 @@ console.log(
 );
 
 const applied = missing.length === 0 && Boolean(insights);
-console.log(`\n${applied ? "Migration 0001 is applied." : "Migration 0001 has NOT been applied."}`);
+console.log(`\n${applied ? "Required schema is applied." : "Required schema is incomplete."}`);
 process.exit(applied ? 0 : 2);

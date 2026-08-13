@@ -85,7 +85,7 @@ export default async function PortalOverviewPage({
   );
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       <PortalHero
         eyebrow={t("latestPeriod")}
         title={latest.title}

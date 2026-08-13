@@ -295,6 +295,18 @@
         "liveNow": "Live for the client since {date}"
       }
     },
+    "accounts": {
+      "title": "Social accounts",
+      "platform": "Platform",
+      "namePlaceholder": "Page or profile name",
+      "idPlaceholder": "Platform page ID (optional)",
+      "add": "Add account",
+      "empty": "No social accounts added yet.",
+      "created": "Account added",
+      "deleted": "Account removed",
+      "delete": "Delete account",
+      "deleteConfirm": "Remove this account?"
+    },
     "errors": {
       "emailTaken": "That email already has an account.",
       "versionLocked": "This version is published and can no longer be edited.",
@@ -318,6 +330,9 @@
       "tooManyFiles": "Too many files at once. Upload up to 12 at a time.",
       "allFilesRejected": "None of those files could be uploaded.",
       "invalidUpload": "That upload could not be read.",
+      "accountExists": "That platform account already exists for this client.",
+      "accountInUse": "This account already has report uploads and cannot be removed.",
+      "accountPlatformMismatch": "The selected account does not match this platform.",
       "notFound": "We could not find that.",
       "forbidden": "You do not have access to this.",
       "unauthorized": "Please sign in again.",
@@ -350,7 +365,10 @@
       "overview": "Dashboard",
       "reports": "Reports",
       "open": "Open menu",
-      "close": "Close menu"
+      "close": "Close menu",
+      "accounts": "Active accounts",
+      "activeAccount": "Active account",
+      "noAccounts": "No active accounts connected yet."
     },
     "overview": {
       "title": "Performance dashboard",
@@ -421,7 +439,20 @@
       "headlineSignal": "Headline signal",
       "sourceNote": "Derived from reviewed figures",
       "noComparison": "No earlier period for movement analysis",
-      "unavailable": "Not enough reported data"
+      "unavailable": "Not enough reported data",
+      "progressTitle": "What is working",
+      "progressHint": "A verified signal to build on",
+      "progressDetail": "{metric} improved by {change} this period. This is a strong foundation for the next growth step.",
+      "progressSteady": "Performance is holding steady. Consistency gives us a reliable base to improve from.",
+      "challengeTitle": "Where to focus",
+      "challengeHint": "An opportunity, not a setback",
+      "challengeDetail": "{metric} moved {change}. We are treating this as a clear opportunity and will focus the next plan on recovery.",
+      "challengeClear": "No material decline was detected in the reviewed metrics this period.",
+      "outlookTitle": "The outlook",
+      "outlookHint": "The next move is clear",
+      "outlookRecovery": "The {metric} signal gives us a focused recovery target. With consistent execution, this is a change we can turn around.",
+      "outlookMomentum": "Momentum in {metric} gives us a promising platform to scale what is already working.",
+      "outlookFoundation": "The reviewed data gives us a dependable foundation. The next period will turn these insights into focused action."
     },
     "reports": {
       "title": "Your reports",

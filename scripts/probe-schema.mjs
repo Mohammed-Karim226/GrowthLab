@@ -39,13 +39,13 @@ const service = createClient(url, secretKey, options);
 const anon = createClient(url, anonKey, options);
 
 console.log("Row counts (service role, bypasses RLS)");
-for (const table of ["clients", "profiles", "reports", "report_versions", "metrics"]) {
+for (const table of ["clients", "accounts", "profiles", "reports", "report_versions", "insight_batches", "metrics"]) {
   const { count, error } = await service.from(table).select("*", { head: true, count: "exact" });
   console.log(`  ${table.padEnd(16)} ${error ? `error: ${error.message}` : `${count} row(s)`}`);
 }
 
 console.log("\nRLS enforcement (anon key — every one of these must be denied or empty)");
-for (const table of ["clients", "profiles", "reports", "report_versions", "metrics"]) {
+for (const table of ["clients", "accounts", "profiles", "reports", "report_versions", "insight_batches", "metrics"]) {
   const { data, error } = await anon.from(table).select("id").limit(1);
   const rows = data?.length ?? 0;
   console.log(

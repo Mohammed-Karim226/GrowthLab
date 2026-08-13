@@ -77,6 +77,29 @@ create trigger clients_set_updated_at before update on public.clients
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- accounts
+--   Social accounts (Facebook page, Instagram profile, etc.) owned by a client.
+-- ---------------------------------------------------------------------------
+create table if not exists public.accounts (
+  id          uuid primary key default gen_random_uuid(),
+  client_id   uuid not null references public.clients (id) on delete cascade,
+  platform    public.platform_type not null,
+  page_name   text,
+  page_id     text,
+  stage       text,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists accounts_client_idx on public.accounts (client_id);
+create unique index if not exists accounts_client_platform_page_idx
+  on public.accounts (client_id, platform, page_id) where page_id is not null;
+
+drop trigger if exists accounts_set_updated_at on public.accounts;
+create trigger accounts_set_updated_at before update on public.accounts
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
 -- profiles
 --   1:1 with auth.users. Carries the role and the tenant binding.
 -- ---------------------------------------------------------------------------
@@ -215,11 +238,14 @@ create table if not exists public.insight_batches (
   id                uuid primary key default gen_random_uuid(),
   report_version_id uuid not null references public.report_versions (id) on delete cascade,
   platform          public.platform_type not null,
+  account_id        uuid references public.accounts (id) on delete restrict,
   status            public.batch_status not null default 'draft',
   notes             text,
   created_at        timestamptz not null default now(),
-  updated_at        timestamptz not null default now(),
-  unique (report_version_id, platform)
+  updated_at        timestamptz not null default now()
+  -- uniqueness is enforced via partial indexes below to allow both the
+  -- legacy single-per-platform batch (account_id IS NULL) and multiple
+  -- per-account batches (account_id IS NOT NULL).
 );
 
 create index if not exists insight_batches_version_platform_idx
@@ -228,6 +254,34 @@ create index if not exists insight_batches_version_platform_idx
 drop trigger if exists insight_batches_set_updated_at on public.insight_batches;
 create trigger insight_batches_set_updated_at before update on public.insight_batches
   for each row execute function public.set_updated_at();
+
+create unique index if not exists insight_batches_version_platform_single_idx
+  on public.insight_batches (report_version_id, platform) where account_id is null;
+create unique index if not exists insight_batches_version_platform_account_idx
+  on public.insight_batches (report_version_id, platform, account_id) where account_id is not null;
+
+create or replace function public.validate_insight_batch_account()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare account_row public.accounts%rowtype;
+declare report_client uuid;
+begin
+  if new.account_id is null then return new; end if;
+  select * into account_row from public.accounts where id = new.account_id;
+  if not found or account_row.platform <> new.platform then
+    raise exception 'Account does not match batch platform';
+  end if;
+  select r.client_id into report_client
+  from public.report_versions rv join public.reports r on r.id = rv.report_id
+  where rv.id = new.report_version_id;
+  if report_client is null or report_client <> account_row.client_id then
+    raise exception 'Account does not belong to report client';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists insight_batches_validate_account on public.insight_batches;
+create trigger insight_batches_validate_account before insert or update of account_id, platform, report_version_id
+  on public.insight_batches for each row execute function public.validate_insight_batch_account();
 
 -- ---------------------------------------------------------------------------
 -- insight_images
@@ -335,6 +389,7 @@ create index if not exists audit_logs_entity_idx on public.audit_logs (entity_ty
 -- ============================================================================
 
 alter table public.clients         enable row level security;
+alter table public.accounts        enable row level security;
 alter table public.profiles        enable row level security;
 alter table public.reports         enable row level security;
 alter table public.report_versions enable row level security;
@@ -366,6 +421,17 @@ drop policy if exists profiles_select_self on public.profiles;
 create policy profiles_select_self on public.profiles
   for select to authenticated
   using (id = auth.uid());
+
+-- accounts -----------------------------------------------------------------
+drop policy if exists accounts_admin_all on public.accounts;
+create policy accounts_admin_all on public.accounts
+  for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists accounts_select_own on public.accounts;
+create policy accounts_select_own on public.accounts
+  for select to authenticated
+  using (client_id = public.auth_client_id());
 
 -- reports ------------------------------------------------------------------
 drop policy if exists reports_admin_all on public.reports;

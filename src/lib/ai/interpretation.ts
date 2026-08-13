@@ -58,18 +58,24 @@ function notableMetrics(metrics: MetricRow[]) {
     "engagement_rate",
   ]);
 
-  return metrics
-    .filter(
-      (metric) =>
-        metric.metric_value !== null && !covered.has(metric.metric_name) && !metric.needs_review
-    )
-    .slice(0, 24)
-    .map((metric) => ({
-      platform: metric.platform,
-      metric: metric.metric_name,
-      value: metric.metric_value as number,
-      unit: metric.metric_unit,
-    }));
+  const groups = new Map<string, MetricRow[]>();
+  for (const metric of metrics) {
+    if (metric.metric_value === null || covered.has(metric.metric_name) || metric.needs_review) continue;
+    const key = `${metric.platform}:${metric.metric_name}:${metric.metric_unit}`;
+    groups.set(key, [...(groups.get(key) ?? []), metric]);
+  }
+
+  return [...groups.values()].slice(0, 24).map((group) => {
+    const first = group[0];
+    const values = group.map((metric) => Number(metric.metric_value));
+    const averaged = new Set(["percent", "seconds", "minutes", "hours"]).has(first.metric_unit);
+    return {
+      platform: first.platform,
+      metric: first.metric_name,
+      value: values.reduce((sum, value) => sum + value, 0) / (averaged ? values.length : 1),
+      unit: first.metric_unit,
+    };
+  });
 }
 
 export function buildInterpretationPayload(

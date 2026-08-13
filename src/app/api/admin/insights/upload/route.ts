@@ -68,6 +68,7 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
 
   const reportVersionId = String(form.get("reportVersionId") ?? "");
   const platformRaw = String(form.get("platform") ?? "");
+  const accountIdRaw = String(form.get("accountId") ?? "").trim();
   const notes = String(form.get("notes") ?? "").trim();
 
   if (!reportVersionId || !isPlatform(platformRaw)) {
@@ -107,13 +108,26 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
 
   const clientId = version.reports.client_id;
 
+  // If an accountId was provided, validate it belongs to this client.
+  let accountId: string | null = null;
+  if (accountIdRaw) {
+    const { data: acct, error: acctErr } = await supabase
+      .from("accounts")
+      .select("id, client_id, platform")
+      .eq("id", accountIdRaw)
+      .maybeSingle();
+    if (acctErr) throw acctErr;
+    if (!acct || acct.client_id !== clientId) return apiError(403, "forbidden");
+    if (acct.platform !== platform) return apiError(422, "accountPlatformMismatch");
+    accountId = acct.id;
+  }
+
   // Reuse the platform batch if it exists (one per platform per version).
-  const { data: existingBatch, error: batchLookupError } = await supabase
-    .from("insight_batches")
-    .select("*")
-    .eq("report_version_id", reportVersionId)
-    .eq("platform", platform)
-    .maybeSingle();
+  const batchQuery = supabase.from("insight_batches").select("*").eq("report_version_id", reportVersionId).eq("platform", platform);
+  if (accountId) batchQuery.eq("account_id", accountId);
+  else batchQuery.is("account_id", null);
+
+  const { data: existingBatch, error: batchLookupError } = await batchQuery.maybeSingle();
 
   if (batchLookupError) throw batchLookupError;
 
@@ -125,14 +139,23 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
       .insert({
         report_version_id: reportVersionId,
         platform,
+        account_id: accountId,
         status: "uploading",
         notes: notes || null,
       })
       .select("*")
       .single();
 
-    if (createError || !created) throw createError ?? new Error("batch insert returned no row");
-    batch = created;
+    if (createError?.code === "23505") {
+      const retryQuery = supabase.from("insight_batches").select("*").eq("report_version_id", reportVersionId).eq("platform", platform);
+      if (accountId) retryQuery.eq("account_id", accountId); else retryQuery.is("account_id", null);
+      const { data: concurrent, error: retryError } = await retryQuery.maybeSingle();
+      if (retryError || !concurrent) throw retryError ?? createError;
+      batch = concurrent;
+    } else {
+      if (createError || !created) throw createError ?? new Error("batch insert returned no row");
+      batch = created;
+    }
   } else if (batch.status === "processing") {
     return apiError(409, "batchProcessing");
   }
@@ -174,7 +197,8 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
 
     const imageId = randomUUID();
     const extension = EXTENSION_BY_MIME[sniffed];
-    const path = `clients/${clientId}/reports/${version.report_id}/versions/${reportVersionId}/${platform}/${imageId}.${extension}`;
+    const accountSegment = accountId ? `accounts/${accountId}/` : "";
+    const path = `clients/${clientId}/reports/${version.report_id}/versions/${reportVersionId}/${accountSegment}${platform}/${imageId}.${extension}`;
 
     const { error: uploadError } = await storage.upload(path, buffer, {
       contentType: sniffed,
@@ -201,6 +225,7 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
   }
 
   if (rows.length === 0) {
+    await supabase.from("insight_batches").update({ status: "draft" }).eq("id", batch.id).eq("status", "uploading");
     return apiError(422, "allFilesRejected", rejected.map((r) => `${r.filename}:${r.reason}`));
   }
 
@@ -226,7 +251,7 @@ export const POST = withAdmin("uploadInsights", async (session, request) => {
     action: "IMAGE_UPLOADED",
     entity_type: "insight_batch",
     entity_id: batch.id,
-    metadata: { platform, uploaded: images?.length ?? 0, rejected: rejected.length },
+    metadata: { platform, accountId, uploaded: images?.length ?? 0, rejected: rejected.length },
   });
 
   return apiOk(

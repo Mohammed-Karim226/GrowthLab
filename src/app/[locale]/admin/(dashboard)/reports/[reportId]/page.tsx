@@ -43,6 +43,7 @@ type ReportRecord = {
 type BatchRecord = {
   id: string;
   platform: Platform;
+  account_id?: string | null;
   status: BatchStatus;
   notes: string | null;
   insight_images: Array<{
@@ -52,6 +53,8 @@ type BatchRecord = {
     sort_order: number;
   }>;
 };
+
+type AccountRecord = { id: string; platform: Platform; page_name: string | null; page_id: string | null; stage: string | null };
 
 export default async function ReportWorkspacePage({
   params,
@@ -87,25 +90,37 @@ export default async function ReportWorkspacePage({
 
   if (!version) notFound();
 
-  const { data: batches } = await supabase
+  const { data: batches, error: batchesError } = await supabase
     .from("insight_batches")
-    .select("id, platform, status, notes, insight_images(id, original_filename, file_size, sort_order)")
+    .select("id, platform, account_id, status, notes, insight_images(id, original_filename, file_size, sort_order)")
     .eq("report_version_id", version.id)
     .returns<BatchRecord[]>();
+  if (batchesError) throw batchesError;
 
-  const byPlatform = new Map((batches ?? []).map((batch) => [batch.platform, batch]));
+  const { data: accounts, error: accountsError } = await supabase
+    .from("accounts")
+    .select("id, platform, page_name, page_id, stage")
+    .eq("client_id", report.client_id)
+    .returns<AccountRecord[]>();
+  if (accountsError) throw accountsError;
 
-  const { data: metricRows } = await supabase
+  const { data: metricRows, error: metricsError } = await supabase
     .from("metrics")
     .select("*")
     .eq("report_version_id", version.id)
     .order("platform", { ascending: true })
     .order("metric_name", { ascending: true })
     .returns<MetricRow[]>();
+  if (metricsError) throw metricsError;
 
   const metrics: ReviewMetric[] = (metricRows ?? []).map((metric) => ({
     id: metric.id,
     platform: metric.platform,
+    accountName: (() => {
+      const batch = (batches ?? []).find((candidate) => candidate.id === metric.insight_batch_id);
+      const account = (accounts ?? []).find((candidate) => candidate.id === batch?.account_id);
+      return account?.page_name ?? account?.page_id ?? null;
+    })(),
     metricName: metric.metric_name,
     metricValue: metric.metric_value,
     metricUnit: metric.metric_unit,
@@ -147,21 +162,24 @@ export default async function ReportWorkspacePage({
         locale={locale}
         reportVersionId={version.id}
         locked={locked}
-        platforms={PLATFORMS.map((platform) => {
-          const batch = byPlatform.get(platform);
-          return {
+        panels={PLATFORMS.flatMap((platform) => {
+          const platformAccounts = (accounts ?? []).filter((account) => account.platform === platform);
+          const legacy = (batches ?? []).find((batch) => batch.platform === platform && batch.account_id === null);
+          const targets = [
+            ...(legacy || platformAccounts.length === 0 ? [{ account: null, batch: legacy }] : []),
+            ...platformAccounts.map((account) => ({ account, batch: (batches ?? []).find((batch) => batch.account_id === account.id) })),
+          ];
+          return targets.map(({ account, batch }) => ({
+            key: `${platform}:${account?.id ?? "default"}`,
             platform,
+            accountId: account?.id ?? null,
+            accountName: account?.page_name ?? account?.page_id ?? null,
+            accountStage: account?.stage ?? null,
             batchId: batch?.id ?? null,
             status: batch?.status ?? null,
             notes: batch?.notes ?? null,
-            images: [...(batch?.insight_images ?? [])]
-              .sort((a, b) => a.sort_order - b.sort_order)
-              .map((image) => ({
-                id: image.id,
-                filename: image.original_filename,
-                fileSize: image.file_size,
-              })),
-          };
+            images: [...(batch?.insight_images ?? [])].sort((a, b) => a.sort_order - b.sort_order).map((image) => ({ id: image.id, filename: image.original_filename, fileSize: image.file_size })),
+          }));
         })}
       />
 

@@ -59,9 +59,28 @@ export function comparePeriods(
   const hasPrevious = Boolean(previousMetrics && previousMetrics.length > 0);
   const previous = hasPrevious ? headlineKpis(previousMetrics!) : null;
 
-  const previousIndex = indexMetrics(previousMetrics ?? []);
+  const aggregate = (rows: MetricRow[]) => {
+    const groups = new Map<string, MetricRow[]>();
+    for (const row of rows) {
+      const key = `${row.platform}:${row.metric_name}:${row.metric_unit}:${row.metric_date ?? ""}`;
+      groups.set(key, [...(groups.get(key) ?? []), row]);
+    }
+    return [...groups.values()].map((group) => {
+      const first = group[0];
+      const values = group.flatMap((row) => row.metric_value === null ? [] : [Number(row.metric_value)]);
+      const averageUnits = new Set(["percent", "seconds", "minutes", "hours"]);
+      const metricValue = values.length === 0 ? null : averageUnits.has(first.metric_unit)
+        ? values.reduce((sum, value) => sum + value, 0) / values.length
+        : values.reduce((sum, value) => sum + value, 0);
+      return { ...first, id: first.id, insight_batch_id: null, metric_value: metricValue };
+    });
+  };
 
-  const metricComparisons: MetricComparison[] = currentMetrics.map((metric) => {
+  const aggregatedCurrent = aggregate(currentMetrics);
+  const aggregatedPrevious = aggregate(previousMetrics ?? []);
+  const previousIndex = indexMetrics(aggregatedPrevious);
+
+  const metricComparisons: MetricComparison[] = aggregatedCurrent.map((metric) => {
     const counterpart = previousIndex.get(`${metric.platform}:${metric.metric_name}`);
     return {
       platform: metric.platform,

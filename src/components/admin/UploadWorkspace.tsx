@@ -20,8 +20,12 @@ import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n";
 import type { BatchStatus, Platform } from "@/types/database";
 
-export type PlatformPanel = {
+export type UploadPanel = {
+  key: string;
   platform: Platform;
+  accountId: string | null;
+  accountName: string | null;
+  accountStage: string | null;
   batchId: string | null;
   status: BatchStatus | null;
   notes: string | null;
@@ -35,12 +39,12 @@ export default function UploadWorkspace({
   locale,
   reportVersionId,
   locked,
-  platforms,
+  panels,
 }: {
   locale: Locale;
   reportVersionId: string;
   locked: boolean;
-  platforms: PlatformPanel[];
+  panels: UploadPanel[];
 }) {
   const t = useTranslations("admin.workspace");
 
@@ -59,9 +63,9 @@ export default function UploadWorkspace({
       )}
 
       <div className="grid gap-4 xl:grid-cols-2">
-        {platforms.map((panel) => (
+        {panels.map((panel) => (
           <PlatformUploader
-            key={panel.platform}
+            key={panel.key}
             panel={panel}
             locale={locale}
             reportVersionId={reportVersionId}
@@ -82,7 +86,7 @@ function PlatformUploader({
   reportVersionId,
   versionLocked,
 }: {
-  panel: PlatformPanel;
+  panel: UploadPanel;
   locale: Locale;
   reportVersionId: string;
   versionLocked: boolean;
@@ -107,6 +111,7 @@ function PlatformUploader({
       const form = new FormData();
       form.set("reportVersionId", reportVersionId);
       form.set("platform", panel.platform);
+      if (panel.accountId) form.set("accountId", panel.accountId);
       for (const file of files) form.append("files", file);
 
       return apiPost<{ rejected: Array<{ filename: string; reason: string }> }>(
@@ -205,7 +210,10 @@ function PlatformUploader({
   return (
     <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
       <CardHeader className="flex flex-row items-center justify-between gap-3">
-        <CardTitle className="text-sm text-white">{tPlatforms(panel.platform)}</CardTitle>
+        <div>
+          <CardTitle className="text-sm text-white">{panel.accountName ?? tPlatforms(panel.platform)}</CardTitle>
+          {panel.accountName && <p className="mt-1 text-[11px] text-slate-500">{tPlatforms(panel.platform)}{panel.accountStage ? ` · ${panel.accountStage}` : ""}</p>}
+        </div>
         <div className="flex items-center gap-2">
           {panel.images.length > 0 && (
             <span className="text-xs text-slate-500">

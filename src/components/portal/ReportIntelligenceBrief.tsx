@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BadgeCheck, BrainCircuit, Crown, ScanSearch, Sparkles, Trophy } from "lucide-react";
+import { Activity, BadgeCheck, BrainCircuit, Crown, Focus, Rocket, ScanSearch, Sparkles, Trophy, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +32,14 @@ export default function ReportIntelligenceBrief({ locale, comparison }: { locale
     { key: "engagementRate", growth: comparison.kpiGrowth.engagementRate },
   ].filter((signal) => signal.growth.percent !== null).sort((a, b) => Math.abs(b.growth.percent ?? 0) - Math.abs(a.growth.percent ?? 0));
   const strongest = growthSignals[0];
+  const positiveSignal = growthSignals
+    .filter((signal) => (signal.growth.percent ?? 0) > 0)
+    .sort((a, b) => (b.growth.percent ?? 0) - (a.growth.percent ?? 0))[0];
+  const negativeSignal = growthSignals
+    .filter((signal) => (signal.growth.percent ?? 0) < 0)
+    .sort((a, b) => (a.growth.percent ?? 0) - (b.growth.percent ?? 0))[0];
+
+  const metricLabel = (key: string) => tKpi(key as never);
 
   const headline = comparison.current.engagementRate !== null
     ? { label: tKpi("engagementRate"), value: formatPercent(comparison.current.engagementRate, locale) }
@@ -94,6 +102,47 @@ export default function ReportIntelligenceBrief({ locale, comparison }: { locale
           <p className="mt-8 text-[9px] font-semibold tracking-[0.16em] text-[#777f92] uppercase">{t("headlineSignal")}</p>
           {headline ? <><p className="mt-2 break-words font-satoshi text-3xl tracking-[-0.06em] tabular-nums text-[#fffaf0] sm:text-4xl">{headline.value}</p><p className="mt-2 text-xs text-[#9aa1b1]">{headline.label}</p></> : <p className="mt-4 text-sm text-[#7e8698]">{t("unavailable")}</p>}
           <div className="mt-8 flex items-center gap-2 text-[9px] text-[#6f778b]"><BadgeCheck className="size-3.5 text-[#65dbbd]" aria-hidden />{t("sourceNote")}</div>
+        </article>
+      </div>
+
+      <div className="relative mt-3 grid gap-3 lg:grid-cols-3">
+        <article className="rounded-[22px] border border-[#55e0c1]/15 bg-[#55e0c1]/[0.055] p-4 sm:p-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#55e0c1]/20 bg-[#55e0c1]/10 text-[#72e4c9]"><TrendingUp className="size-[18px]" aria-hidden /></span>
+            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#72e4c9] uppercase">{t("progressTitle")}</p><p className="mt-1 text-xs text-[#9ba8a5]">{t("progressHint")}</p></div>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-[#d8dfdc]">
+            {positiveSignal
+              ? t("progressDetail", { metric: metricLabel(positiveSignal.key), change: formatSignedPercent(positiveSignal.growth.percent, locale) })
+              : t("progressSteady")}
+          </p>
+        </article>
+
+        <article className="rounded-[22px] border border-[#ef9978]/15 bg-[#ef9978]/[0.045] p-4 sm:p-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#ef9978]/20 bg-[#ef9978]/10 text-[#ef9978]"><Focus className="size-[18px]" aria-hidden /></span>
+            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#ef9978] uppercase">{t("challengeTitle")}</p><p className="mt-1 text-xs text-[#a99b96]">{t("challengeHint")}</p></div>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-[#ded7d3]">
+            {negativeSignal
+              ? t("challengeDetail", { metric: metricLabel(negativeSignal.key), change: formatSignedPercent(negativeSignal.growth.percent, locale) })
+              : t("challengeClear")}
+          </p>
+        </article>
+
+        <article className="relative overflow-hidden rounded-[22px] border border-[#d8be78]/20 bg-[#d8be78]/[0.065] p-4 sm:p-5">
+          <div aria-hidden className="absolute -end-12 -top-12 size-32 rounded-full bg-[#d8be78]/10 blur-3xl" />
+          <div className="relative flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#d8be78]/25 bg-[#d8be78]/10 text-[#ead48d]"><Rocket className="size-[18px]" aria-hidden /></span>
+            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#ead48d] uppercase">{t("outlookTitle")}</p><p className="mt-1 text-xs text-[#a49b82]">{t("outlookHint")}</p></div>
+          </div>
+          <p className="relative mt-4 text-sm leading-relaxed text-[#e4ded0]">
+            {negativeSignal
+              ? t("outlookRecovery", { metric: metricLabel(negativeSignal.key) })
+              : positiveSignal
+                ? t("outlookMomentum", { metric: metricLabel(positiveSignal.key) })
+                : t("outlookFoundation")}
+          </p>
         </article>
       </div>
     </section>

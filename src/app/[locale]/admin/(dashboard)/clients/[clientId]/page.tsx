@@ -6,10 +6,11 @@ import { ArrowLeft, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientReports from "@/components/admin/ClientReports";
+import AccountManager from "@/components/admin/AccountManager";
 import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate } from "@/lib/format";
-import type { ClientRow, ReportStatus } from "@/types/database";
+import type { AccountRow, ClientRow, ReportStatus } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,15 @@ export default async function ClientDetailPage({
     .order("period_end", { ascending: false })
     .returns<ReportWithVersions[]>();
 
+  const { data: accounts, error: accountsError } = await supabase
+    .from("accounts")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("platform")
+    .order("page_name")
+    .returns<AccountRow[]>();
+  if (accountsError) throw accountsError;
+
   return (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -104,6 +114,7 @@ export default async function ClientDetailPage({
         />
 
         <aside className="space-y-6">
+          <AccountManager clientId={client.id} accounts={accounts ?? []} />
           <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
             <CardHeader>
               <CardTitle className="text-sm text-white">{t("editTitle")}</CardTitle>

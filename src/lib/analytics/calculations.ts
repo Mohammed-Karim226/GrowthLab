@@ -119,18 +119,19 @@ export function weightedAverage(
   let weightTotal = 0;
   const plainValues: number[] = [];
 
-  const byPlatform = new Map<Platform, { value?: number; weight?: number }>();
+  const bySource = new Map<string, { value?: number; weight?: number }>();
 
   for (const metric of metrics) {
     if (metric.metric_value === null || !Number.isFinite(metric.metric_value)) continue;
 
-    const entry = byPlatform.get(metric.platform) ?? {};
+    const key = `${metric.platform}:${metric.insight_batch_id ?? "manual"}`;
+    const entry = bySource.get(key) ?? {};
     if (metric.metric_name === metricName) entry.value = metric.metric_value;
     if (metric.metric_name === weightMetricName) entry.weight = metric.metric_value;
-    byPlatform.set(metric.platform, entry);
+    bySource.set(key, entry);
   }
 
-  for (const { value, weight } of byPlatform.values()) {
+  for (const { value, weight } of bySource.values()) {
     if (value === undefined) continue;
     plainValues.push(value);
     if (weight !== undefined && weight > 0) {
@@ -155,22 +156,26 @@ export type PlatformTotals = {
   engagementRate: number | null;
 };
 
-function valueOf(metrics: MetricRow[], name: string): number | null {
-  const match = metrics.find(
-    (metric) => metric.metric_name === name && metric.metric_value !== null
-  );
-  return match?.metric_value ?? null;
+function totalOf(metrics: MetricRow[], name: string): number | null {
+  const values = metrics
+    .filter((metric) => metric.metric_name === name && metric.metric_value !== null)
+    .map((metric) => Number(metric.metric_value));
+  return values.length > 0 ? roundTo(values.reduce((sum, value) => sum + value, 0), 2) : null;
 }
 
 export function platformTotals(metrics: MetricRow[], platform: Platform): PlatformTotals {
   const scoped = metricsForPlatform(metrics, platform);
   return {
     platform,
-    views: valueOf(scoped, "views"),
-    reach: valueOf(scoped, "reach"),
-    followers: valueOf(scoped, "followers") ?? valueOf(scoped, "subscribers"),
-    engagement: valueOf(scoped, "engagement"),
-    engagementRate: valueOf(scoped, "engagement_rate"),
+    views: totalOf(scoped, "views"),
+    reach: totalOf(scoped, "reach"),
+    followers: (() => {
+      const followers = totalOf(scoped, "followers");
+      const subscribers = totalOf(scoped, "subscribers");
+      return followers === null && subscribers === null ? null : roundTo((followers ?? 0) + (subscribers ?? 0), 2);
+    })(),
+    engagement: totalOf(scoped, "engagement"),
+    engagementRate: weightedAverage(scoped, "engagement_rate", "views"),
   };
 }
 

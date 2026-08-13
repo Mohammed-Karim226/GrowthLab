@@ -98,8 +98,20 @@ export type InsightBatchRow = {
   id: string;
   report_version_id: string;
   platform: Platform;
+  account_id: string | null;
   status: BatchStatus;
   notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AccountRow = {
+  id: string;
+  client_id: string;
+  platform: Platform;
+  page_name: string | null;
+  page_id: string | null;
+  stage: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -202,7 +214,11 @@ export type Database = {
       >;
       insight_batches: Table<
         InsightBatchRow,
-        InsertOf<InsightBatchRow, "status" | "notes">
+        InsertOf<InsightBatchRow, "account_id" | "status" | "notes">
+      >;
+      accounts: Table<
+        AccountRow,
+        InsertOf<AccountRow, "page_name" | "page_id" | "stage">
       >;
       insight_images: Table<
         InsightImageRow,
