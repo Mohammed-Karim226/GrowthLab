@@ -26,6 +26,8 @@
     }
   },
   "common": {
+    "previous": "Previous",
+    "next": "Next",
     "loading": "Loading…",
     "save": "Save",
     "saving": "Saving…",
@@ -136,7 +138,8 @@
         "email": "Login email",
         "reports": "Reports",
         "status": "Status",
-        "created": "Created"
+        "created": "Created",
+        "actions": "Actions"
       },
       "create": {
         "title": "Create client",
@@ -161,6 +164,19 @@
         "copyAll": "Copy both",
         "done": "I have saved them"
       },
+      "actions": {
+        "active": "Set active",
+        "paused": "Pause client",
+        "delete": "Delete client"
+      },
+      "confirm": {
+        "active": { "title": "Activate client?", "description": "{name} will be able to sign in to the client portal again." },
+        "paused": { "title": "Pause client?", "description": "{name} will keep all data but will no longer be able to sign in." },
+        "delete": { "title": "Delete client permanently?", "description": "This permanently deletes {name}, their reports, accounts and portal login. This cannot be undone." }
+      },
+      "confirmButton": "Confirm",
+      "actionSuccess": "Client updated successfully.",
+      "actionError": "Could not complete this action ({error}).",
       "detail": {
         "backToClients": "All clients",
         "reports": "Reporting periods",

@@ -8,6 +8,7 @@ import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { formatCompact } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { Platform } from "@/types/database";
@@ -31,7 +32,7 @@ export default function PlatformComparisonChart({ locale, platforms }: { locale:
 
   const picker = (
     <div className="flex min-w-max gap-1 rounded-full border border-white/[0.07] bg-black/20 p-1">
-      {available.map(({ key, icon: Icon }) => <button key={key} type="button" onClick={() => setSelected(key)} aria-label={t(`series.${key}` as never)} aria-pressed={key === measure} className={cn("flex size-8 items-center justify-center rounded-full transition-all", key === measure ? "bg-[#e4ce91] text-[#17150f] shadow-[0_8px_22px_rgba(216,190,120,0.2)]" : "text-[#6f6e68] hover:bg-white/[0.05] hover:text-[#d6d1c6]")}><Icon className="size-3.5" strokeWidth={1.9} aria-hidden /></button>)}
+      {available.map(({ key, icon: Icon }) => <Button key={key} type="button" variant="ghost" size="icon-sm" onClick={() => setSelected(key)} aria-label={t(`series.${key}` as never)} aria-pressed={key === measure} className={cn("rounded-full", key === measure ? "bg-[#e4ce91] text-[#17150f] shadow-[0_8px_22px_rgba(216,190,120,0.2)] hover:bg-[#e4ce91]/90" : "text-[#6f6e68] hover:bg-white/[0.05] hover:text-[#d6d1c6]")}><Icon className="size-3.5" strokeWidth={1.9} aria-hidden /></Button>)}
     </div>
   );
 

@@ -37,6 +37,7 @@ export type BatchStatus =
 export type MetricSource = "ai" | "manual" | "calculated" | "imported";
 
 export type AnalysisStatus = "pending" | "processing" | "completed" | "failed";
+export type AiJobStatus = "queued" | "processing" | "completed" | "failed" | "dead_letter";
 
 export type ClientRow = {
   id: string;
@@ -144,6 +145,25 @@ export type AiAnalysisRow = {
   completed_at: string | null;
 };
 
+export type AiJobRow = {
+  id: string;
+  insight_batch_id: string;
+  status: AiJobStatus;
+  force_run: boolean;
+  attempts: number;
+  max_attempts: number;
+  available_at: string;
+  locked_by: string | null;
+  lease_expires_at: string | null;
+  requested_by: string | null;
+  result: Record<string, unknown> | null;
+  error_key: string | null;
+  error_detail: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+};
+
 export type MetricRow = {
   id: string;
   report_version_id: string;
@@ -241,6 +261,25 @@ export type Database = {
           | "completed_at"
         >
       >;
+      ai_jobs: Table<
+        AiJobRow,
+        InsertOf<
+          AiJobRow,
+          | "status"
+          | "force_run"
+          | "attempts"
+          | "max_attempts"
+          | "available_at"
+          | "locked_by"
+          | "lease_expires_at"
+          | "requested_by"
+          | "result"
+          | "error_key"
+          | "error_detail"
+          | "started_at"
+          | "completed_at"
+        >
+      >;
       metrics: Table<
         MetricRow,
         InsertOf<
@@ -265,6 +304,27 @@ export type Database = {
       auth_role: { Args: Record<never, never>; Returns: UserRole };
       auth_client_id: { Args: Record<never, never>; Returns: string | null };
       is_admin: { Args: Record<never, never>; Returns: boolean };
+      enqueue_ai_job: {
+        Args: { batch_id: string; force_requested?: boolean };
+        Returns: AiJobRow;
+      };
+      claim_ai_job: {
+        Args: { worker_name: string; lease_seconds?: number };
+        Returns: AiJobRow | null;
+      };
+      finish_ai_job: {
+        Args: { job_id: string; job_result: Record<string, unknown> };
+        Returns: undefined;
+      };
+      fail_ai_job: {
+        Args: {
+          job_id: string;
+          failure_key: string;
+          failure_detail: string;
+          retry_delay_seconds?: number;
+        };
+        Returns: AiJobStatus;
+      };
     };
     Enums: {
       platform_type: Platform;
@@ -273,6 +333,7 @@ export type Database = {
       batch_status: BatchStatus;
       metric_source: MetricSource;
       analysis_status: AnalysisStatus;
+      ai_job_status: AiJobStatus;
     };
     CompositeTypes: Record<never, never>;
   };

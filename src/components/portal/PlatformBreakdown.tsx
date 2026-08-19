@@ -8,6 +8,7 @@ import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import GrowthBadge from "@/components/portal/GrowthBadge";
 import { formatMetricValue, formatNumber, humanizeMetricName } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
@@ -144,18 +145,19 @@ function PlatformCard({
 
       {metrics.length > 0 && (
         <>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
-            className="flex w-full items-center justify-between gap-2 border-t border-white/[0.055] px-5 py-3 text-[10px] font-medium tracking-wide text-[#77766f] transition-colors hover:bg-white/[0.02] hover:text-[#c9c5ba]"
+            className="h-auto w-full justify-between rounded-none border-t border-white/[0.055] px-5 py-3 text-[10px] font-medium tracking-wide text-[#77766f] hover:bg-white/[0.02] hover:text-[#c9c5ba]"
           >
             {open ? t("hideMetrics") : t("showMetrics")}
             <ChevronDown
               className={cn("size-3.5 transition-transform", open && "rotate-180")}
               aria-hidden
             />
-          </button>
+          </Button>
 
           <AnimatePresence initial={false}>
           {open && (

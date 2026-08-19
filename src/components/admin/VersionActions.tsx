@@ -8,6 +8,7 @@ import { BadgeCheck, GitBranch, Globe, Loader2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiRequestError, apiDelete, apiPost } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
@@ -174,8 +175,7 @@ export default function VersionActions({
 
         {(isPublished || isArchived) && (
           <label className="flex items-center gap-2 text-sm text-slate-400">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={carryOver}
               onChange={(event) => setCarryOver(event.target.checked)}
               disabled={busy}

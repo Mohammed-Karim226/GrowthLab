@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Crown, Search, Users } from "lucide-react";
+import { Check, Crown, Loader2, Pause, Search, Trash2, Users } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,9 @@ import CreateClientDialog from "@/components/admin/CreateClientDialog";
 import { formatDate } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { ClientRow } from "@/types/database";
+import PaginationNav from "@/components/ui/PaginationNav";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ApiRequestError, apiDelete, apiPatch } from "@/lib/api-client";
 
 export type ClientListItem = ClientRow & { reportCount: number };
 
@@ -34,46 +39,50 @@ export type ClientListItem = ClientRow & { reportCount: number };
 export default function ClientsView({
   clients,
   locale,
+  query,
+  previousHref,
+  nextHref,
 }: {
   clients: ClientListItem[];
   locale: Locale;
+  query: string;
+  previousHref: string | null;
+  nextHref: string | null;
 }) {
   const t = useTranslations("admin.clients");
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("status");
   const router = useRouter();
 
-  const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return clients;
-
-    return clients.filter((client) =>
-      [client.name, client.company_name, client.contact_email]
-        .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(needle))
-    );
-  }, [clients, query]);
+  const [pending, setPending] = useState<{ client: ClientListItem; action: "active" | "paused" | "delete" } | null>(null);
+  const action = useMutation({
+    mutationFn: ({ client, kind }: { client: ClientListItem; kind: "active" | "paused" | "delete" }) =>
+      kind === "delete"
+        ? apiDelete<{ deleted: string }>(`/api/admin/clients/${client.id}`)
+        : apiPatch(`/api/admin/clients/${client.id}`, { isActive: kind === "active" }),
+    onSuccess: () => { setPending(null); toast.success(t("actionSuccess")); router.refresh(); },
+    onError: (error) => toast.error(t("actionError", { error: error instanceof ApiRequestError ? error.errorKey : "serverError" })),
+  });
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="admin-search relative w-full max-w-sm">
+        <form method="get" action={`/${locale}/admin/clients`} className="admin-search relative flex w-full max-w-sm gap-2">
           <Search
             aria-hidden
             className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
           />
           <Input
             type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            name="q"
+            defaultValue={query}
             placeholder={t("searchPlaceholder")}
             aria-label={tCommon("search")}
             className="border-white/10 bg-white/[0.02] ps-9 text-slate-200"
           />
-        </div>
+          <Button type="submit" variant="outline" size="sm">{tCommon("search")}</Button>
+        </form>
 
         <Button
           type="button"
@@ -88,9 +97,7 @@ export default function ClientsView({
       <Card className="admin-table-card">
         <CardContent className="p-0 sm:p-2">
           {clients.length === 0 ? (
-            <EmptyState title={t("empty")} hint={t("emptyHint")} />
-          ) : filtered.length === 0 ? (
-            <EmptyState title={t("noMatches")} />
+            <EmptyState title={query ? t("noMatches") : t("empty")} hint={query ? undefined : t("emptyHint")} />
           ) : (
             <Table>
               <TableHeader>
@@ -101,10 +108,11 @@ export default function ClientsView({
                   <TableHead>{t("columns.reports")}</TableHead>
                   <TableHead>{t("columns.status")}</TableHead>
                   <TableHead className="hidden sm:table-cell">{t("columns.created")}</TableHead>
+                  <TableHead className="text-end">{t("columns.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((client) => (
+                {clients.map((client) => (
                   <TableRow key={client.id} className="border-white/[0.06] hover:bg-white/[0.03]">
                     <TableCell>
                       <Link
@@ -125,11 +133,18 @@ export default function ClientsView({
                     <TableCell className="text-sm text-slate-300">{client.reportCount}</TableCell>
                     <TableCell>
                       <Badge variant={client.is_active ? "success" : "muted"}>
-                        {tStatus(client.is_active ? "active" : "inactive")}
+                        {client.is_active ? tStatus("active") : t("actions.paused")}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden text-sm text-slate-500 sm:table-cell">
                       {formatDate(client.created_at, locale)}
+                    </TableCell>
+                    <TableCell className="text-end">
+                      <div className="flex justify-end gap-1">
+                        <Button size="icon-sm" variant="ghost" title={t("actions.active")} aria-label={t("actions.active")} disabled={action.isPending || client.is_active} onClick={() => setPending({ client, action: "active" })}><Check /></Button>
+                        <Button size="icon-sm" variant="ghost" title={t("actions.paused")} aria-label={t("actions.paused")} disabled={action.isPending || !client.is_active} onClick={() => setPending({ client, action: "paused" })}><Pause /></Button>
+                        <Button size="icon-sm" variant="destructive" title={t("actions.delete")} aria-label={t("actions.delete")} disabled={action.isPending} onClick={() => setPending({ client, action: "delete" })}><Trash2 /></Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -139,11 +154,28 @@ export default function ClientsView({
         </CardContent>
       </Card>
 
+      <PaginationNav previousHref={previousHref} nextHref={nextHref} previousLabel={tCommon("previous")} nextLabel={tCommon("next")} />
+
       <CreateClientDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onCreated={() => router.refresh()}
       />
+
+      <Dialog open={pending !== null} onOpenChange={(open) => !open && !action.isPending && setPending(null)}>
+        <DialogContent className="vip-dialog max-w-md">
+          <DialogHeader>
+            <DialogTitle>{pending ? t(`confirm.${pending.action}.title`) : ""}</DialogTitle>
+            <DialogDescription>{pending ? t(`confirm.${pending.action}.description`, { name: pending.client.name }) : ""}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" disabled={action.isPending} onClick={() => setPending(null)}>{tCommon("cancel")}</Button>
+            <Button variant={pending?.action === "delete" ? "destructive" : "default"} disabled={action.isPending} onClick={() => pending && action.mutate({ client: pending.client, kind: pending.action })}>
+              {action.isPending && <Loader2 className="animate-spin" />}{t("confirmButton")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

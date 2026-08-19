@@ -6,6 +6,7 @@ import { ArrowDownRight, ArrowUpRight, ChartNoAxesColumnIncreasing, Minus } from
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { formatCompact, humanizeMetricName } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import { ChartFrame, ChartTooltip, Tooltip, categoryAxis, chartGrid, valueAxis } from "./chart-parts";
@@ -28,7 +29,7 @@ export default function MetricTrendChart({ locale, series }: { locale: Locale; s
   const maximum = Math.max(...values, 0);
 
   const picker = available.length > 1 ? <div className="scrollbar-slim flex max-w-full gap-1.5 overflow-x-auto pb-1">
-    {available.map((entry) => <button key={entry.metricName} type="button" onClick={() => setSelected(entry.metricName)} aria-pressed={entry.metricName === active?.metricName} className={cn("inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-medium transition-all", entry.metricName === active?.metricName ? "border-[#d8be78]/25 bg-[#d8be78]/10 text-[#e4ce91]" : "border-white/[0.06] text-[#696861] hover:bg-white/[0.04] hover:text-[#c8c4b9]")}><ChartNoAxesColumnIncreasing className="size-3" aria-hidden />{labelFor(entry.metricName)}</button>)}
+    {available.map((entry) => <Button key={entry.metricName} type="button" variant="outline" size="xs" onClick={() => setSelected(entry.metricName)} aria-pressed={entry.metricName === active?.metricName} className={cn("shrink-0 rounded-full", entry.metricName === active?.metricName ? "border-[#d8be78]/25 bg-[#d8be78]/10 text-[#e4ce91] hover:bg-[#d8be78]/15" : "border-white/[0.06] bg-transparent text-[#696861] hover:bg-white/[0.04] hover:text-[#c8c4b9]")}><ChartNoAxesColumnIncreasing className="size-3" aria-hidden />{labelFor(entry.metricName)}</Button>)}
   </div> : undefined;
 
   return <ChartFrame title={t("metricTitle")} hint={t("metricHint")} action={picker} isEmpty={!active} emptyLabel={t("trendEmpty")} responsive={false}>

@@ -20,6 +20,7 @@ import type { AccountRow, Platform } from "@/types/database";
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
+import { Button } from "@/components/ui/button";
 
 type PortalShellProps = {
   clientName: string;
@@ -213,14 +214,16 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
                 <ShieldCheck className="size-3.5 text-[#d8be78]" strokeWidth={1.8} />
                 {t("ui.verifiedBy")}
               </div>
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 type="button"
                 onClick={() => setMenuOpen(true)}
                 aria-label={t("nav.open")}
-                className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2.5 text-[#c8c4b9] transition-colors hover:bg-white/[0.07] lg:hidden"
+                className="border-white/[0.08] bg-white/[0.03] text-[#c8c4b9] hover:bg-white/[0.07] lg:hidden"
               >
                 <Menu className="size-4" aria-hidden />
-              </button>
+              </Button>
             </div>
           </header>
 
@@ -253,14 +256,16 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
             >
               <div className="mb-7 flex shrink-0 items-center justify-between">
                 {brand}
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-sm"
                   type="button"
                   onClick={() => setMenuOpen(false)}
                   aria-label={t("nav.close")}
-                  className="rounded-xl border border-white/[0.08] p-2 text-[#9d9a91]"
+                  className="border-white/[0.08] text-[#9d9a91]"
                 >
                   <X className="size-4" aria-hidden />
-                </button>
+                </Button>
               </div>
               <div className="scrollbar-slim min-h-0 flex-1 overflow-y-auto pe-1">
                 {nav}
