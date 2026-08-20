@@ -382,6 +382,7 @@
       "reports": "Reports",
       "open": "Open menu",
       "close": "Close menu",
+      "backToTop": "Back to top",
       "accounts": "Active accounts",
       "activeAccount": "Active account",
       "noAccounts": "No active accounts connected yet."

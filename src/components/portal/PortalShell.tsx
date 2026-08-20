@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowUp,
   BarChart3,
   ChevronRight,
   FileBarChart,
@@ -56,8 +57,21 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
   const locale = useLocale();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const base = `/${locale}/portal`;
   const initial = clientName.trim().charAt(0).toUpperCase() || "G";
+
+  useEffect(() => {
+    const updateScrollState = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 12);
+      setShowScrollTop(scrollY > 320);
+    };
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrollState);
+  }, []);
 
   function isActive(href: string) {
     const full = `${base}${href}`;
@@ -200,7 +214,10 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col lg:ps-[302px]">
-          <header className="portal-glass-topbar sticky top-3 z-20 mx-3 mt-3 flex h-[64px] items-center justify-between rounded-[22px] border border-white/[0.12] px-4 sm:mx-5 sm:px-6 lg:mx-8 lg:px-6">
+          <header
+            data-scrolled={isScrolled ? "true" : "false"}
+            className="portal-glass-topbar fixed inset-x-3 top-3 z-20 flex h-[64px] items-center justify-between rounded-[22px] border border-white/[0.14] px-4 sm:inset-x-5 sm:px-6 lg:sticky lg:inset-x-auto lg:mx-8 lg:mt-3 lg:px-6"
+          >
             <div className="lg:hidden">{brand}</div>
             <div className="hidden items-center gap-2 lg:flex">
               <span className="size-1.5 animate-pulse rounded-full bg-[#55deb0] shadow-[0_0_14px_rgba(85,222,176,0.75)]" />
@@ -227,11 +244,35 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
             </div>
           </header>
 
-          <main className="scrollbar-slim min-w-0 flex-1 px-4 py-7 sm:px-6 sm:py-9 lg:px-8 lg:py-10 xl:px-10">
+          <main className="scrollbar-slim min-w-0 flex-1 px-4 pb-7 pt-[92px] sm:px-6 sm:pb-9 sm:pt-[100px] lg:px-8 lg:py-10 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">{children}</div>
           </main>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.div
+            className="fixed bottom-5 end-4 z-30 sm:bottom-6 sm:end-6"
+            initial={{ opacity: 0, y: 12, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label={t("nav.backToTop")}
+              title={t("nav.backToTop")}
+              className="border-[#d8be78]/30 bg-[#111a2d]/95 text-[#ead69e] shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-md hover:border-[#d8be78]/55 hover:bg-[#1a2942]"
+            >
+              <ArrowUp className="size-4" strokeWidth={2} aria-hidden />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {menuOpen && (
