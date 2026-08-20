@@ -394,7 +394,9 @@
       "viewReport": "عرض التقرير الكامل",
       "comparedTo": "مقارنةً بـ {period}",
       "noComparison": "لا توجد فترة سابقة للمقارنة",
-      "newMetric": "جديد هذه الفترة"
+      "newMetric": "جديد هذه الفترة",
+      "deepDiveEyebrow": "استكشف التفاصيل",
+      "deepDiveHint": "الرسوم البيانية وأداء المنصات والتحليل المكتوب الكامل"
     },
     "kpi": {
       "title": "النتائج الرئيسية",
@@ -479,8 +481,11 @@
       "reportNavigation": "أقسام التقرير",
       "overviewSection": "نظرة عامة",
       "insightsSection": "الرؤى",
+      "insightsSectionHint": "التفسير المختصر والخطوات التالية المقترحة",
       "channelsSection": "المنصات",
+      "channelsSectionHint": "قارن بين المنصات وافهم مساهمة كل منها",
       "detailsSection": "كل التفاصيل",
+      "detailsSectionHint": "افتح سجل المؤشرات الكامل والموثّق",
       "premiumReport": "تحليل أداء متميز",
       "premiumReportHint": "تمت مراجعته والتحقق منه ونشره بشكل خاص لحسابك."
     },

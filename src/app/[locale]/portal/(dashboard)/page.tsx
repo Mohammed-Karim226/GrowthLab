@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { FileBarChart, Sparkles } from "lucide-react";
+import { ChevronDown, FileBarChart, Sparkles } from "lucide-react";
 
 import KpiGrid from "@/components/portal/KpiGrid";
 import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
@@ -14,6 +14,7 @@ import { buildTrendSeries, comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import PortalHero from "@/components/portal/PortalHero";
+import ReportIntelligenceBrief from "@/components/portal/ReportIntelligenceBrief";
 
 export const dynamic = "force-dynamic";
 
@@ -108,31 +109,40 @@ export default async function PortalOverviewPage({
         }}
       />
 
-      <KpiGrid locale={locale} comparison={comparison} />
+      <ReportIntelligenceBrief locale={locale} comparison={comparison} />
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <PerformanceLineChart locale={locale} points={trend} />
-        <PlatformComparisonChart
-          locale={locale}
-          platforms={comparison.platforms.map((platform) => ({
-            platform: platform.platform,
-            views: platform.current.views,
-            reach: platform.current.reach,
-            engagement: platform.current.engagement,
-            followers: platform.current.followers,
-          }))}
-        />
-      </div>
+      <KpiGrid locale={locale} comparison={comparison} compact />
 
-      {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
+      <details className="portal-deep-dive group rounded-[28px] border border-white/[0.1] bg-white/[0.02] p-3 sm:p-4">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[20px] px-3 py-3 text-sm font-medium text-[#d9d5ca] transition-colors hover:bg-white/[0.045] [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-[10px] font-semibold tracking-[0.18em] text-[#d8be78] uppercase">{t("deepDiveEyebrow")}</span>
+            <span className="mt-1 block text-xs text-[#85837b]">{t("deepDiveHint")}</span>
+          </span>
+          <ChevronDown className="size-4 shrink-0 text-[#bca66e] transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
 
-      <PlatformBreakdown
-        locale={locale}
-        platforms={comparison.platforms}
-        metrics={comparison.metrics}
-      />
+        <div className="mt-4 space-y-6 border-t border-white/[0.07] px-1 pt-5 sm:px-2">
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <PerformanceLineChart locale={locale} points={trend} />
+            <PlatformComparisonChart
+              locale={locale}
+              platforms={comparison.platforms.map((platform) => ({
+                platform: platform.platform,
+                views: platform.current.views,
+                reach: platform.current.reach,
+                engagement: platform.current.engagement,
+                followers: platform.current.followers,
+              }))}
+            />
+          </div>
 
-      <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+          {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
+
+          <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
+          <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+        </div>
+      </details>
     </div>
   );
 }

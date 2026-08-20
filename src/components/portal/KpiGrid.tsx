@@ -30,9 +30,11 @@ const ACCENTS = [
 export default function KpiGrid({
   locale,
   comparison,
+  compact = false,
 }: {
   locale: Locale;
   comparison: PeriodComparison;
+  compact?: boolean;
 }) {
   const t = useTranslations("portal.kpi");
   const tUi = useTranslations("portal.ui");
@@ -82,6 +84,7 @@ export default function KpiGrid({
       growth: comparison.kpiGrowth.engagementRate,
     },
   ] as const;
+  const visibleCards = compact ? cards.filter((card) => card.key !== "followerGrowth") : cards;
 
   return (
     <section className="space-y-4">
@@ -98,10 +101,10 @@ export default function KpiGrid({
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
-        {cards.map((card, index) => {
+        {visibleCards.map((card, index) => {
           const Icon = card.icon;
           const accent = ACCENTS[index];
-          const featured = index < 2;
+          const featured = !compact && index < 2;
 
           return (
             <motion.article
@@ -111,7 +114,8 @@ export default function KpiGrid({
               viewport={{ once: true, amount: 0.35 }}
               transition={{ duration: 0.5, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "portal-metric-card group relative min-h-[150px] min-w-0 overflow-hidden rounded-[22px] border border-white/[0.13] p-4 sm:min-h-[168px] sm:rounded-[28px] sm:p-6",
+                "portal-metric-card group relative min-w-0 overflow-hidden rounded-[22px] border border-white/[0.13] p-4 sm:rounded-[28px] sm:p-6",
+                compact ? "min-h-[132px] sm:min-h-[150px]" : "min-h-[150px] sm:min-h-[168px]",
                 featured && "xl:col-span-2 xl:min-h-[184px]"
               )}
             >
@@ -149,7 +153,7 @@ export default function KpiGrid({
                     <p
                       className={cn(
                         "font-satoshi leading-none tracking-[-0.055em] tabular-nums text-[#f7f4ed]",
-                        featured ? "text-[28px] sm:text-[46px]" : "text-[25px] sm:text-[34px]"
+                        featured ? "text-[28px] sm:text-[46px]" : compact ? "text-[24px] sm:text-[31px]" : "text-[25px] sm:text-[34px]"
                       )}
                     >
                       {card.value}

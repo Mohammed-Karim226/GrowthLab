@@ -398,7 +398,9 @@
       "viewReport": "View full report",
       "comparedTo": "vs {period}",
       "noComparison": "No earlier period to compare with",
-      "newMetric": "New this period"
+      "newMetric": "New this period",
+      "deepDiveEyebrow": "Explore the detail",
+      "deepDiveHint": "Charts, channel performance, and the full written analysis"
     },
     "kpi": {
       "title": "Headline results",
@@ -483,8 +485,11 @@
       "reportNavigation": "Report sections",
       "overviewSection": "Overview",
       "insightsSection": "Insights",
+      "insightsSectionHint": "The short interpretation and recommended next actions",
       "channelsSection": "Channels",
+      "channelsSectionHint": "Compare platforms and understand their contribution",
       "detailsSection": "All details",
+      "detailsSectionHint": "Open the complete verified metrics ledger",
       "premiumReport": "Premium performance intelligence",
       "premiumReportHint": "Reviewed, verified and privately published for your account."
     },
