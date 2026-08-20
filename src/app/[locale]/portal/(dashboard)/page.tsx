@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { ChevronDown, FileBarChart, Sparkles } from "lucide-react";
+import { FileBarChart, Sparkles } from "lucide-react";
 
 import KpiGrid from "@/components/portal/KpiGrid";
 import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
@@ -113,36 +113,34 @@ export default async function PortalOverviewPage({
 
       <KpiGrid locale={locale} comparison={comparison} compact />
 
-      <details className="portal-deep-dive group rounded-[28px] border border-white/[0.1] bg-white/[0.02] p-3 sm:p-4">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[20px] px-3 py-3 text-sm font-medium text-[#d9d5ca] transition-colors hover:bg-white/[0.045] [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block text-[10px] font-semibold tracking-[0.18em] text-[#d8be78] uppercase">{t("deepDiveEyebrow")}</span>
-            <span className="mt-1 block text-xs text-[#85837b]">{t("deepDiveHint")}</span>
-          </span>
-          <ChevronDown className="size-4 shrink-0 text-[#bca66e] transition-transform group-open:rotate-180" aria-hidden />
-        </summary>
-
-        <div className="mt-4 space-y-6 border-t border-white/[0.07] px-1 pt-5 sm:px-2">
-          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-            <PerformanceLineChart locale={locale} points={trend} />
-            <PlatformComparisonChart
-              locale={locale}
-              platforms={comparison.platforms.map((platform) => ({
-                platform: platform.platform,
-                views: platform.current.views,
-                reach: platform.current.reach,
-                engagement: platform.current.engagement,
-                followers: platform.current.followers,
-              }))}
-            />
+      <section className="portal-feature-gateway relative space-y-6 rounded-[30px] border border-[#8f78e8]/20 bg-[#110f26]/45 p-3 sm:space-y-8 sm:p-5 lg:p-6">
+        <div className="portal-feature-gateway-heading flex flex-col gap-3 border-b border-[#d8be78]/15 pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[9px] font-semibold tracking-[0.22em] text-[#d8be78] uppercase">{t("featureEyebrow")}</p>
+            <h2 className="mt-1 font-satoshi text-2xl tracking-[-0.04em] text-[#f4f0e7] sm:text-3xl">{t("deepDiveTitle")}</h2>
           </div>
-
-          {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
-
-          <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
-          <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+          <p className="max-w-md text-xs leading-relaxed text-[#9992b2]">{t("deepDiveHint")}</p>
         </div>
-      </details>
+
+        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <PerformanceLineChart locale={locale} points={trend} />
+          <PlatformComparisonChart
+            locale={locale}
+            platforms={comparison.platforms.map((platform) => ({
+              platform: platform.platform,
+              views: platform.current.views,
+              reach: platform.current.reach,
+              engagement: platform.current.engagement,
+              followers: platform.current.followers,
+            }))}
+          />
+        </div>
+
+        {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
+
+        <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
+        <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+      </section>
     </div>
   );
 }

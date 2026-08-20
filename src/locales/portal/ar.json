@@ -370,7 +370,9 @@
       "dataLedger": "سجل البيانات",
       "reportArchive": "أرشيف التقارير",
       "verifiedReports": "{count} تقارير موثّقة",
-      "latest": "الأحدث"
+      "latest": "الأحدث",
+      "vipAccess": "وصول VIP خاص",
+      "vipWelcome": "مركز قيادة أدائك جاهز. كل إشارة أدناه تمت مراجعتها وحمايتها وتجهيزها لخطوتك القادمة."
     },
     "nav": {
       "label": "أقسام البوابة",
@@ -395,7 +397,8 @@
       "comparedTo": "مقارنةً بـ {period}",
       "noComparison": "لا توجد فترة سابقة للمقارنة",
       "newMetric": "جديد هذه الفترة",
-      "deepDiveEyebrow": "استكشف التفاصيل",
+      "featureEyebrow": "بوابة مزايا VIP",
+      "deepDiveTitle": "مركز قيادة نموك",
       "deepDiveHint": "الرسوم البيانية وأداء المنصات والتحليل المكتوب الكامل"
     },
     "kpi": {

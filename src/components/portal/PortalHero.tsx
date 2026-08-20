@@ -37,16 +37,27 @@ export default function PortalHero({
   return (
     <header
       className={cn(
-        "portal-hero portal-glass-panel portal-reveal relative overflow-hidden rounded-[34px] border border-white/[0.14]",
+        "portal-hero portal-hero-premium portal-glass-panel portal-reveal relative overflow-hidden rounded-[34px] border border-white/[0.14]",
         compact ? "px-4 py-5 sm:px-7 sm:py-6" : "px-4 py-6 sm:px-8 sm:py-9 lg:px-10"
       )}
     >
       <div aria-hidden className="portal-hero-grid absolute inset-0 opacity-70" />
       <div aria-hidden className="absolute -top-24 -end-20 size-72 rounded-full bg-[#d8be78]/[0.08] blur-[90px]" />
       <div aria-hidden className="absolute -bottom-28 start-1/4 h-52 w-80 rounded-full bg-[#276650]/[0.08] blur-[90px]" />
+      {!compact && (
+        <div className="portal-hero-orbit pointer-events-none absolute -end-20 top-1/2 hidden size-72 -translate-y-1/2 rounded-full border border-[#d8be78]/15 lg:block" aria-hidden>
+          <span className="absolute start-1/2 top-0 size-2 -translate-x-1/2 rounded-full bg-[#f3da91] shadow-[0_0_20px_#f3da91]" />
+        </div>
+      )}
 
       <div className="relative flex flex-col justify-between gap-8 xl:flex-row xl:items-end">
         <div className="max-w-3xl">
+          {!compact && (
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#d8be78]/25 bg-[#d8be78]/[0.09] px-3 py-1.5 text-[9px] font-bold tracking-[0.2em] text-[#f0d991] uppercase shadow-[0_8px_24px_rgba(216,190,120,.12)]">
+              <span className="portal-live-dot size-1.5 rounded-full bg-[#62e0b6]" />
+              {t("vipAccess")}
+            </div>
+          )}
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#d8be78]/15 bg-[#d8be78]/[0.055] px-3 py-1.5 text-[10px] font-semibold tracking-[0.18em] text-[#d8c58e] uppercase">
             <span className="size-1.5 rounded-full bg-[#e0c878] shadow-[0_0_12px_rgba(224,200,120,0.7)]" />
             {eyebrow}
@@ -59,6 +70,7 @@ export default function PortalHero({
           >
             {title}
           </h1>
+          {!compact && <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#b4b2aa]">{t("vipWelcome")}</p>}
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2.5 text-xs text-[#8f8d85]">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-3.5 text-[#c4aa6d]" strokeWidth={1.8} />

@@ -374,7 +374,9 @@
       "dataLedger": "Data ledger",
       "reportArchive": "Report archive",
       "verifiedReports": "{count} verified reports",
-      "latest": "Latest"
+      "latest": "Latest",
+      "vipAccess": "VIP private access",
+      "vipWelcome": "Your performance command center is ready. Every signal below is reviewed, protected, and prepared for your next level."
     },
     "nav": {
       "label": "Portal sections",
@@ -399,7 +401,8 @@
       "comparedTo": "vs {period}",
       "noComparison": "No earlier period to compare with",
       "newMetric": "New this period",
-      "deepDiveEyebrow": "Explore the detail",
+      "featureEyebrow": "VIP feature gateway",
+      "deepDiveTitle": "Your growth command center",
       "deepDiveHint": "Charts, channel performance, and the full written analysis"
     },
     "kpi": {

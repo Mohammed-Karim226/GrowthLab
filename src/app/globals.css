@@ -646,6 +646,96 @@
     }
   }
 
+  .portal-hero-premium {
+    isolation: isolate;
+  }
+
+  .portal-feature-gateway {
+    isolation: isolate;
+    box-shadow: 0 28px 90px rgba(20, 13, 54, 0.28), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  .portal-feature-gateway::before {
+    content: "";
+    position: absolute;
+    inset-block: 1.25rem;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, transparent, #d8be78 18%, #9b83ef 50%, #d8be78 82%, transparent);
+    box-shadow: 0 0 22px rgba(155,131,239,.52);
+  }
+
+  .portal-feature-gateway-heading {
+    position: relative;
+  }
+
+  .portal-feature-gateway-heading::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 0;
+    bottom: -1px;
+    width: 7rem;
+    height: 1px;
+    background: linear-gradient(to left, #d8be78, transparent);
+  }
+
+  [dir="rtl"] .portal-feature-gateway-heading::after {
+    background: linear-gradient(to right, #d8be78, transparent);
+  }
+
+  .portal-feature-gateway .portal-chart-card,
+  .portal-feature-gateway .portal-platform-card,
+  .portal-feature-gateway .portal-insights {
+    border-color: rgba(155, 131, 239, 0.18);
+    background:
+      radial-gradient(circle at 100% 0, rgba(155, 131, 239, 0.12), transparent 32%),
+      radial-gradient(circle at 0 100%, rgba(216, 190, 120, 0.07), transparent 34%),
+      linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.018) 58%),
+      rgba(10, 9, 25, 0.76);
+    box-shadow: 0 24px 70px rgba(8, 5, 24, 0.3), inset 0 1px 0 rgba(255,255,255,.13);
+  }
+
+  .portal-feature-gateway .portal-chart-card:hover,
+  .portal-feature-gateway .portal-platform-card:hover {
+    border-color: rgba(216, 190, 120, 0.28);
+    box-shadow: 0 30px 85px rgba(20, 12, 52, 0.42), 0 0 34px rgba(155,131,239,.08), inset 0 1px 0 rgba(255,255,255,.17);
+  }
+
+  .portal-hero-premium::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.09) 48%, transparent 72%);
+    transform: translateX(-120%);
+    animation: portal-hero-sweep 9s ease-in-out infinite;
+  }
+
+  .portal-hero-orbit {
+    animation: portal-hero-orbit 18s linear infinite;
+    box-shadow: 0 0 80px rgba(216,190,120,.08), inset 0 0 50px rgba(129,166,255,.05);
+  }
+
+  .portal-live-dot {
+    animation: portal-live-pulse 2.2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(98,224,182,.55);
+  }
+
+  @keyframes portal-hero-sweep {
+    0%, 65%, 100% { transform: translateX(-120%); }
+    78% { transform: translateX(120%); }
+  }
+
+  @keyframes portal-hero-orbit {
+    to { transform: translateY(-50%) rotate(360deg); }
+  }
+
+  @keyframes portal-live-pulse {
+    0%, 100% { opacity: .7; box-shadow: 0 0 0 0 rgba(98,224,182,.45); }
+    50% { opacity: 1; box-shadow: 0 0 0 5px rgba(98,224,182,0); }
+  }
+
   @media (max-width: 639px) {
     .portal-liquid .portal-aurora {
       width: 22rem;
