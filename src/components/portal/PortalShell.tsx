@@ -9,6 +9,7 @@ import {
   ArrowUp,
   BarChart3,
   ChevronRight,
+  CreditCard,
   FileBarChart,
   Menu,
   ShieldCheck,
@@ -52,6 +53,7 @@ function accountHref(account: AccountRow) {
 const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
   { key: "reports", href: "/reports", icon: FileBarChart },
+  { key: "payments", href: "/payments", icon: CreditCard },
 ] as const;
 
 export default function PortalShell({ clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
@@ -248,7 +250,9 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
 
           <main className="scrollbar-slim min-w-0 flex-1 px-4 pb-7 pt-[92px] sm:px-6 sm:pb-9 sm:pt-[100px] lg:px-8 lg:py-10 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px] space-y-6">
-              <PaymentPlanCard payments={payments} locale={locale as "en" | "ar"} />
+              {!pathname.startsWith(`${base}/payments`) && (
+                <PaymentPlanCard payments={payments} locale={locale as "en" | "ar"} />
+              )}
               {children}
             </div>
           </main>
