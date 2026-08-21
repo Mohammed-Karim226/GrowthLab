@@ -187,7 +187,41 @@
         "deactivate": "Deactivate",
         "activate": "Activate",
         "deactivateHint": "A deactivated client keeps their data but can no longer sign in.",
-        "portalEmail": "Portal login"
+        "portalEmail": "Portal login",
+        "payments": {
+          "title": "Monthly payment plan",
+          "hint": "Track the client's monthly amount and payment state.",
+          "month": "Billing month",
+          "amount": "Amount",
+          "totalPlanPrice": "Total plan price",
+          "currency": "Currency",
+          "currencyNames": { "USD": "US dollar", "GBP": "British pound", "EUR": "Euro", "AED": "UAE dirham", "SAR": "Saudi riyal", "EGP": "Egyptian pound", "CAD": "Canadian dollar", "AUD": "Australian dollar", "JPY": "Japanese yen", "CHF": "Swiss franc" },
+          "dueDate": "Due date",
+          "chooseMonth": "Choose month",
+          "chooseDate": "Choose date",
+          "notes": "Payment notes",
+          "notesPlaceholder": "Example: 50% at the beginning of the month and 50% at the end.",
+          "noNotes": "No payment notes",
+          "statusLabel": "Status",
+          "add": "Add",
+          "pending": "Pending",
+          "paid": "Paid",
+          "overdue": "Overdue",
+          "waived": "Waived",
+          "empty": "No monthly billings have been added yet.",
+          "edit": "Edit billing",
+          "remove": "Remove billing",
+          "editTitle": "Edit monthly billing",
+          "editHint": "Update the amount, date, currency, month, or payment status.",
+          "save": "Save changes",
+          "cancel": "Cancel",
+          "created": "Monthly billing added.",
+          "updated": "Monthly billing updated.",
+          "deleted": "Monthly billing removed.",
+          "monthExists": "A billing record already exists for this month. Edit the existing record instead.",
+          "saveError": "The billing record could not be saved. Check the fields and try again.",
+          "deleteError": "The billing record could not be removed."
+        }
       }
     },
     "reports": {
@@ -359,6 +393,18 @@
   },
   "portal": {
     "brand": "GrowthLab",
+    "payments": {
+      "eyebrow": "Client care",
+      "title": "Your monthly plan",
+      "currentMonth": "Current month",
+      "billingDate": "Billing date",
+      "amount": "Installment amount",
+      "totalPlanPrice": "Total plan price",
+      "dueDate": "Due date",
+      "note": "Payment arrangement",
+      "history": "{count} months tracked",
+      "status": { "pending": "Pending", "paid": "Paid", "overdue": "Overdue", "waived": "Waived" }
+    },
     "ui": {
       "clientIntelligence": "Client intelligence",
       "secureWorkspace": "Secure workspace",

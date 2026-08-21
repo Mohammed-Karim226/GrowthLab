@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientReports from "@/components/admin/ClientReports";
 import AccountManager from "@/components/admin/AccountManager";
+import PaymentPlanManager from "@/components/admin/PaymentPlanManager";
 import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate } from "@/lib/format";
-import type { AccountRow, ClientRow, ReportStatus } from "@/types/database";
+import type { AccountRow, ClientPaymentPlanRow, ClientRow, ReportStatus } from "@/types/database";
 import { decodeCursor, encodeCursor } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
@@ -87,6 +88,13 @@ export default async function ClientDetailPage({
     .order("page_name")
     .returns<AccountRow[]>();
   if (accountsError) throw accountsError;
+  const { data: payments, error: paymentsError } = await supabase
+    .from("client_payment_plans")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("billing_month", { ascending: false })
+    .returns<ClientPaymentPlanRow[]>();
+  if (paymentsError) throw paymentsError;
 
   return (
     <div className="space-y-8">
@@ -137,6 +145,7 @@ export default async function ClientDetailPage({
 
         <aside className="space-y-6">
           <AccountManager clientId={client.id} accounts={accounts ?? []} />
+          <PaymentPlanManager clientId={client.id} initial={payments ?? []} />
           <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
             <CardHeader>
               <CardTitle className="text-sm text-white">{t("editTitle")}</CardTitle>

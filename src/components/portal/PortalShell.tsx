@@ -17,16 +17,18 @@ import {
 } from "lucide-react";
 import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { AccountRow, Platform } from "@/types/database";
+import type { AccountRow, ClientPaymentPlanRow, Platform } from "@/types/database";
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
 import { Button } from "@/components/ui/button";
+import PaymentPlanCard from "@/components/portal/PaymentPlanCard";
 
 type PortalShellProps = {
   clientName: string;
   clientEmail: string | null;
   accounts: AccountRow[];
+  payments: ClientPaymentPlanRow[];
   children: React.ReactNode;
 };
 
@@ -52,7 +54,7 @@ const NAV = [
   { key: "reports", href: "/reports", icon: FileBarChart },
 ] as const;
 
-export default function PortalShell({ clientName, clientEmail, accounts, children }: PortalShellProps) {
+export default function PortalShell({ clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const pathname = usePathname();
@@ -245,7 +247,10 @@ export default function PortalShell({ clientName, clientEmail, accounts, childre
           </header>
 
           <main className="scrollbar-slim min-w-0 flex-1 px-4 pb-7 pt-[92px] sm:px-6 sm:pb-9 sm:pt-[100px] lg:px-8 lg:py-10 xl:px-10">
-            <div className="mx-auto w-full max-w-[1500px]">{children}</div>
+            <div className="mx-auto w-full max-w-[1500px] space-y-6">
+              <PaymentPlanCard payments={payments} locale={locale as "en" | "ar"} />
+              {children}
+            </div>
           </main>
         </div>
       </div>

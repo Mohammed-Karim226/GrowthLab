@@ -51,6 +51,23 @@ export type ClientRow = {
   updated_at: string;
 };
 
+export type PaymentStatus = "pending" | "paid" | "overdue" | "waived";
+
+export type ClientPaymentPlanRow = {
+  id: string;
+  client_id: string;
+  billing_month: string;
+  amount: number;
+  total_plan_price: number | null;
+  currency: string;
+  status: PaymentStatus;
+  due_date: string | null;
+  paid_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProfileRow = {
   id: string;
   role: UserRole;
@@ -216,6 +233,10 @@ export type Database = {
           ClientRow,
           "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active"
         >
+      >;
+      client_payment_plans: Table<
+        ClientPaymentPlanRow,
+        InsertOf<ClientPaymentPlanRow, "total_plan_price" | "due_date" | "paid_at" | "notes" | "status" | "currency">
       >;
       profiles: Table<
         ProfileRow,
