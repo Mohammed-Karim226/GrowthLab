@@ -7,8 +7,10 @@ import {
   Check,
   Clock3,
   Copy,
+  Globe2,
   ListX,
   Mail,
+  MessageCircle,
   Pencil,
   Plus,
   RefreshCw,
@@ -57,6 +59,7 @@ type Sender = {
   is_default: boolean;
 };
 type Status = "draft" | "ready" | "sent" | "replied" | "no_reply" | "closed";
+type CopyLanguage = "en" | "ar";
 type Message = {
   id: string;
   contact_id: string;
@@ -94,9 +97,25 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] || character);
 }
 
-function buildGmailEmailHtml(subject: string, body: string) {
-  const paragraphs = body.split(/\n{2,}/).map((paragraph) => `<p style="margin:0 0 16px;">${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`).join("");
-  return `<div style="margin:0;padding:0;color:#172033;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;"><div style="max-width:640px;margin:0 auto;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#ffffff;"><div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#f8fafc;"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:6px;">GrowthLab Outreach</div><div style="font-size:20px;line-height:1.35;font-weight:700;color:#0f172a;">${escapeHtml(subject)}</div></div><div style="padding:26px 24px 10px;">${paragraphs}</div><div style="margin:0 24px;padding:16px 0 22px;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.5;">Prepared with GrowthLab · Professional outreach</div></div></div>`;
+function buildGmailEmailHtml(subject: string, body: string, contact?: Contact, sender?: Sender, language: CopyLanguage = "en", website = "", whatsapp = "") {
+  const copyLabels = language === "ar"
+    ? { eyebrow: "GrowthLab - رسالة خاصة للعميل", prepared: "أُعدت خصيصًا لـ", badge: "موجز VIP", note: "رسالة شخصية لك", connect: "تواصل معنا مباشرة", website: "زيارة موقعنا", whatsapp: "تواصل عبر واتساب", footer: "هذه رسالة خاصة أُعدت لك. يمكنك الرد مباشرة عندما تكون مستعدًا للمتابعة." }
+    : { eyebrow: "GrowthLab - Private Client Note", prepared: "Prepared especially for", badge: "VIP BRIEF", note: "A personal note for you", connect: "Connect with us directly", website: "Visit our website", whatsapp: "Chat on WhatsApp", footer: "A private communication prepared for you. Reply directly whenever you are ready to continue." };
+  const recipient = escapeHtml(contact?.name || "Valued Partner");
+  const company = contact?.company ? ` - ${escapeHtml(contact.company)}` : "";
+  const senderName = escapeHtml(sender?.name || "GrowthLab Team");
+  const senderTitle = sender?.title ? `<div style="margin-top:4px;color:#64748b;font-size:12px;line-height:1.5;">${escapeHtml(sender.title)}</div>` : "";
+  const senderEmail = sender?.email ? `<div style="margin-top:3px;color:#4d7c8a;font-size:12px;line-height:1.5;">${escapeHtml(sender.email)}</div>` : "";
+  const vipParagraphs = body.split(/\n{2,}/).map((paragraph) => `<p style="margin:0 0 19px;color:#26364a;font-size:16px;font-weight:500;line-height:${language === "ar" ? "1.9" : "1.78"};">${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`).join("");
+  const direction = language === "ar" ? "rtl" : "ltr";
+  const font = language === "ar" ? "Tahoma,Arial,sans-serif" : "Arial,Helvetica,sans-serif";
+  const glassLabel = (text: string) => `<span style="display:inline-block;padding:7px 12px;border:1px solid rgba(202,155,43,.48);border-radius:999px;background:linear-gradient(135deg,rgba(255,251,229,.96),rgba(247,224,145,.48));color:#8f6916;font-size:10px;font-weight:800;letter-spacing:1.25px;line-height:1.2;text-transform:uppercase;box-shadow:inset 0 1px 2px rgba(255,255,255,.98),0 3px 10px rgba(184,135,24,.14);">${text}</span>`;
+  const vipBadge = glassLabel(copyLabels.badge);
+  const websiteUrl = website.trim() ? (/^https?:\/\//i.test(website.trim()) ? website.trim() : `https://${website.trim()}`) : "";
+  const whatsappNumber = whatsapp.replace(/\D/g, "");
+  const contactButtons = `${websiteUrl ? `<tr><td style="padding:0 0 10px;"><a href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px 18px;border:1px solid #b8cdeb;border-radius:14px;background:#e9f3ff;background:linear-gradient(135deg,#eef7ff,#e9e5ff);color:#365f91;font-size:14px;font-weight:800;line-height:1.2;text-align:center;text-decoration:none;box-shadow:inset 0 1px 2px rgba(255,255,255,.95),0 5px 14px rgba(76,111,159,.14);">${copyLabels.website}</a></td></tr>` : ""}${whatsappNumber ? `<tr><td style="padding:0;"><a href="https://wa.me/${whatsappNumber}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px 18px;border:1px solid #9bd8bc;border-radius:14px;background:#e7f9ef;background:linear-gradient(135deg,#effcf5,#dff7ea);color:#217a50;font-size:14px;font-weight:800;line-height:1.2;text-align:center;text-decoration:none;box-shadow:inset 0 1px 2px rgba(255,255,255,.95),0 5px 14px rgba(50,145,93,.13);">${copyLabels.whatsapp}</a></td></tr>` : ""}`;
+  const contactSection = contactButtons ? `<tr><td style="padding:10px 22px 26px;"><div style="margin-bottom:12px;">${glassLabel(copyLabels.connect)}</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${contactButtons}</table></td></tr>` : "";
+  return `<table dir="${direction}" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin:0;background:#edf4ff;font-family:${font};color:#26364a;"><tr><td align="center" style="padding:18px 10px;background:#edf4ff;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="width:100%;max-width:640px;background:#ffffff;border:1px solid #d8e5f2;border-radius:22px;overflow:hidden;box-shadow:0 12px 32px rgba(74,107,143,.14);"><tr><td style="padding:12px 22px;background:#e8f7f5;">${glassLabel(copyLabels.eyebrow)}</td></tr><tr><td style="padding:22px;background:#dcecff;background:linear-gradient(135deg,#dcecff 0%,#f2e8ff 52%,#e2f8f2 100%);">${vipBadge}<div style="margin-top:18px;">${glassLabel(copyLabels.prepared)}</div><div style="margin-top:10px;color:#213b59;font-size:26px;font-weight:800;line-height:1.25;word-break:break-word;">${recipient}${company}</div></td></tr><tr><td style="padding:24px 22px 4px;">${glassLabel(copyLabels.note)}<h1 style="margin:12px 0 0;color:#213b59;font-size:24px;line-height:1.35;font-weight:800;word-break:break-word;">${escapeHtml(subject)}</h1><div style="margin-top:16px;width:46px;height:4px;border-radius:4px;background:#f2a7b8;"></div></td></tr><tr><td style="padding:22px 22px 4px;">${vipParagraphs}</td></tr>${contactSection}<tr><td style="padding:8px 22px 24px;border-top:1px solid #e3ebf3;"><div style="padding-top:18px;color:#213b59;font-size:15px;font-weight:800;">${senderName}</div>${senderTitle}${senderEmail}<div style="margin-top:12px;color:#5d6eae;font-size:10px;font-weight:800;letter-spacing:1px;">GROWTHLAB</div></td></tr><tr><td style="padding:14px 22px;background:#f5f9fc;border-top:1px solid #e3ebf3;color:#718096;font-size:10px;line-height:1.6;">${copyLabels.footer}</td></tr></table></td></tr></table>`;
 }
 
 export default function Home() {
@@ -136,6 +155,9 @@ export default function Home() {
   const [contactDraft, setContactDraft] = useState({ name: "", email: "", company: "", channel: "", notes: "" });
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [messageDraft, setMessageDraft] = useState({ subject: "", body: "" });
+  const [copyTarget, setCopyTarget] = useState<Message | null>(null);
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -158,6 +180,16 @@ export default function Home() {
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    setWebsiteUrl(window.localStorage.getItem("growthlab-outreach-website") || "");
+    setWhatsappNumber(window.localStorage.getItem("growthlab-outreach-whatsapp") || "");
+  }, []);
+  useEffect(() => {
+    window.localStorage.setItem("growthlab-outreach-website", websiteUrl);
+  }, [websiteUrl]);
+  useEffect(() => {
+    window.localStorage.setItem("growthlab-outreach-whatsapp", whatsappNumber);
+  }, [whatsappNumber]);
   const selectedContact =
     contacts.find((item) => item.id === contactId) || null;
   const selectedSender = senders.find((item) => item.id === senderId) || null;
@@ -212,26 +244,31 @@ export default function Home() {
   async function save(status: "draft" | "ready") {
     if (!selectedContact || !subject.trim() || !body.trim())
       return toast.error(t("selectComplete"));
+    const messagePayload = {
+      kind: "message" as const,
+      contactId: selectedContact.id,
+      senderId: selectedSender?.id || null,
+      subject: subject.trim(),
+      body: body.trim(),
+      goal: goal.trim() || undefined,
+      status,
+    };
     setBusy(true);
     try {
       const response = await fetch("/api/admin/outreach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: "message",
-          contactId,
-          senderId: senderId || null,
-          subject,
-          body,
-          goal,
-          status,
-        }),
+        body: JSON.stringify(messagePayload),
       });
-      if (!response.ok) throw new Error();
+      if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        const details = Array.isArray(error?.details) ? error.details.join(" ") : "";
+        throw new Error(details || error?.errorKey || "Request failed");
+      }
       toast.success(status === "ready" ? t("messageReady") : t("draftSaved"));
       await load();
-    } catch {
-      toast.error(t("saveError"));
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : t("saveError"));
     } finally {
       setBusy(false);
     }
@@ -284,41 +321,53 @@ export default function Home() {
     }
   }
   async function createRecord() {
-    if (!createKind || !recordName.trim() || !recordEmail.trim()) return;
+    const name = recordName.trim();
+    const email = recordEmail.trim().toLowerCase();
+    const detail = recordDetail.trim();
+    if (!createKind || !name || !email) return;
+    if (name.length < 2) return toast.error(t("recordNameTooShort"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error(t("recordEmailInvalid"));
     setBusy(true);
     try {
       const payload =
         createKind === "contact"
           ? {
               kind: "contact",
-              name: recordName,
-              email: recordEmail,
-              company: recordDetail,
+              name,
+              email,
+              company: detail || undefined,
             }
           : {
               kind: "sender",
-              name: recordName,
-              email: recordEmail,
-              title: recordDetail,
+              name,
+              email,
+              title: detail || undefined,
             };
       const response = await fetch("/api/admin/outreach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const created = await response.json();
-      if (!response.ok) throw new Error();
-      createKind === "contact"
-        ? setContactId(created.id)
-        : setSenderId(created.id);
+      const created = await response.json().catch(() => null);
+      if (!response.ok || !created?.id) {
+        const details = Array.isArray(created?.details) ? created.details.join(" ") : "";
+        throw new Error(details || created?.errorKey || t("recordError"));
+      }
+      if (createKind === "contact") {
+        setContacts((current) => [created as Contact, ...current.filter((item) => item.id !== created.id)]);
+        setContactId(created.id);
+      } else {
+        setSenders((current) => [created as Sender, ...current.filter((item) => item.id !== created.id)]);
+        setSenderId(created.id);
+      }
       setCreateKind(null);
       setRecordName("");
       setRecordEmail("");
       setRecordDetail("");
       toast.success(t("recordSaved"));
       await load();
-    } catch {
-      toast.error(t("recordError"));
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : t("recordError"));
     } finally {
       setBusy(false);
     }
@@ -326,9 +375,11 @@ export default function Home() {
   function startContactEdit(contact: Contact) { setEditingContact(contact); setContactDraft({ name: contact.name, email: contact.email, company: contact.company || "", channel: contact.channel || "", notes: contact.notes || "" }); }
   async function saveContact() { if (!editingContact || !contactDraft.name.trim() || !contactDraft.email.trim()) return; setBusy(true); try { const response = await fetch("/api/admin/outreach", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "contact", id: editingContact.id, ...contactDraft }) }); if (!response.ok) throw new Error(); toast.success(t("contactUpdated")); setEditingContact(null); await load(); } catch { toast.error(t("contactUpdateError")); } finally { setBusy(false); } }
   async function deleteContact(contact: Contact) { if (!window.confirm(t("contactDeleteConfirm"))) return; setBusy(true); try { const response = await fetch("/api/admin/outreach", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "contact", id: contact.id }) }); if (!response.ok) throw new Error(); toast.success(t("contactDeleted")); if (contactId === contact.id) setContactId(""); await load(); } catch { toast.error(t("contactDeleteError")); } finally { setBusy(false); } }
-  async function copyMessage(message: Message) {
+  async function copyMessage(message: Message, language: CopyLanguage) {
     const plainText = `${message.subject}\n\n${message.body}`;
-    const html = buildGmailEmailHtml(message.subject, message.body);
+    const contact = contacts.find((item) => item.id === message.contact_id);
+    const sender = senders.find((item) => item.id === message.sender_id);
+    const html = buildGmailEmailHtml(message.subject, message.body, contact, sender, language, websiteUrl, whatsappNumber);
     try {
       if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
         await navigator.clipboard.write([
@@ -344,6 +395,7 @@ export default function Home() {
     } catch {
       toast.error(t("copyError"));
     }
+    setCopyTarget(null);
   }
   function startMessageEdit(message: Message) { setEditingMessage(message); setMessageDraft({ subject: message.subject, body: message.body }); }
   async function saveMessageEdit() { if (!editingMessage || !messageDraft.subject.trim() || !messageDraft.body.trim()) return; setBusy(true); try { const response = await fetch("/api/admin/outreach", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "message", id: editingMessage.id, ...messageDraft }) }); if (!response.ok) throw new Error(); toast.success(t("messageUpdated")); setEditingMessage(null); await load(); } catch { toast.error(t("messageUpdateError")); } finally { setBusy(false); } }
@@ -473,6 +525,14 @@ export default function Home() {
                     ))}
                   </SelectContent>
                 </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="outreach-website"><span className="flex items-center gap-2"><Globe2 className="size-4 text-cyan-300" />{t("websiteLink")}</span></FieldLabel>
+                <Input id="outreach-website" type="url" dir="ltr" value={websiteUrl} onChange={(event) => setWebsiteUrl(event.target.value)} placeholder="https://yourcompany.com" className="border-cyan-300/20 bg-cyan-300/[0.04]" />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="outreach-whatsapp"><span className="flex items-center gap-2"><MessageCircle className="size-4 text-emerald-300" />{t("whatsappNumber")}</span></FieldLabel>
+                <Input id="outreach-whatsapp" type="tel" dir="ltr" value={whatsappNumber} onChange={(event) => setWhatsappNumber(event.target.value)} placeholder="+1 555 123 4567" className="border-emerald-300/20 bg-emerald-300/[0.04]" />
               </Field>
               <Field className="md:col-span-2">
                 <FieldLabel htmlFor="outreach-goal">Goal</FieldLabel>
@@ -623,7 +683,7 @@ export default function Home() {
                       <div className="flex items-center gap-2"><Badge variant="outline" className={statusStyles[message.status].badge}>
                         <span className={`size-1.5 rounded-full ${statusStyles[message.status].dot}`} />
                         {labels[message.status]}
-                      </Badge><Button variant="ghost" size="icon-sm" className="text-slate-500 opacity-60 hover:bg-cyan-400/10 hover:text-cyan-200 group-hover:opacity-100" title={t("copyMessage")} aria-label={t("copyMessage")} onClick={() => void copyMessage(message)}><Copy /></Button><Button variant="ghost" size="icon-sm" className="text-slate-500 opacity-60 hover:bg-blue-400/10 hover:text-blue-200 group-hover:opacity-100" title={t("editMessage")} aria-label={t("editMessage")} onClick={() => startMessageEdit(message)}><Pencil /></Button><Button variant="ghost" size="icon-sm" className="border border-transparent text-slate-500 opacity-60 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100" title={t("delete")} aria-label={t("delete")} disabled={busy} onClick={() => void deleteMessage(message.id)}><Trash2 /></Button></div>
+                      </Badge><Button variant="ghost" size="icon-sm" className="text-slate-500 opacity-60 hover:bg-cyan-400/10 hover:text-cyan-200 group-hover:opacity-100" title={t("copyMessage")} aria-label={t("copyMessage")} onClick={() => setCopyTarget(message)}><Copy /></Button><Button variant="ghost" size="icon-sm" className="text-slate-500 opacity-60 hover:bg-blue-400/10 hover:text-blue-200 group-hover:opacity-100" title={t("editMessage")} aria-label={t("editMessage")} onClick={() => startMessageEdit(message)}><Pencil /></Button><Button variant="ghost" size="icon-sm" className="border border-transparent text-slate-500 opacity-60 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100" title={t("delete")} aria-label={t("delete")} disabled={busy} onClick={() => void deleteMessage(message.id)}><Trash2 /></Button></div>
                     </div>
                     <p className="line-clamp-2 text-xs leading-5 text-slate-400">
                       {message.body}
@@ -728,6 +788,7 @@ export default function Home() {
       </Sheet>
       <Dialog open={Boolean(editingContact)} onOpenChange={(open) => !open && setEditingContact(null)}><DialogContent><DialogHeader><DialogTitle>{t("editContact")}</DialogTitle><DialogDescription>{t("editContactDescription")}</DialogDescription></DialogHeader><FieldGroup><Field><FieldLabel>Name</FieldLabel><Input value={contactDraft.name} onChange={(e) => setContactDraft((d) => ({ ...d, name: e.target.value }))} /></Field><Field><FieldLabel>Email</FieldLabel><Input type="email" value={contactDraft.email} onChange={(e) => setContactDraft((d) => ({ ...d, email: e.target.value }))} /></Field><Field><FieldLabel>Company</FieldLabel><Input value={contactDraft.company} onChange={(e) => setContactDraft((d) => ({ ...d, company: e.target.value }))} /></Field><Field><FieldLabel>Channel</FieldLabel><Input value={contactDraft.channel} onChange={(e) => setContactDraft((d) => ({ ...d, channel: e.target.value }))} /></Field><Field><FieldLabel>Notes</FieldLabel><Textarea rows={3} value={contactDraft.notes} onChange={(e) => setContactDraft((d) => ({ ...d, notes: e.target.value }))} /></Field></FieldGroup><DialogFooter><Button variant="outline" onClick={() => setEditingContact(null)}>Cancel</Button><Button onClick={() => void saveContact()} disabled={busy || !contactDraft.name.trim() || !contactDraft.email.trim()}>Save changes</Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={Boolean(editingMessage)} onOpenChange={(open) => !open && setEditingMessage(null)}><DialogContent className="max-w-2xl"><DialogHeader><DialogTitle>{t("editMessage")}</DialogTitle><DialogDescription>{t("editMessageDescription")}</DialogDescription></DialogHeader><FieldGroup className="gap-4"><Field><FieldLabel>{t("subject")}</FieldLabel><Input value={messageDraft.subject} onChange={(e) => setMessageDraft((draft) => ({ ...draft, subject: e.target.value }))} /></Field><Field><FieldLabel>{t("message")}</FieldLabel><Textarea rows={12} className="resize-y" value={messageDraft.body} onChange={(e) => setMessageDraft((draft) => ({ ...draft, body: e.target.value }))} /></Field></FieldGroup><DialogFooter><Button variant="outline" onClick={() => setEditingMessage(null)}>{t("cancel")}</Button><Button onClick={() => void saveMessageEdit()} disabled={busy || !messageDraft.subject.trim() || messageDraft.body.trim().length < 10}>{t("saveChanges")}</Button></DialogFooter></DialogContent></Dialog>
+      <Dialog open={Boolean(copyTarget)} onOpenChange={(open) => !open && setCopyTarget(null)}><DialogContent className="max-w-sm"><DialogHeader><DialogTitle>{t("copyLanguageTitle")}</DialogTitle><DialogDescription>{t("copyLanguageDescription")}</DialogDescription></DialogHeader><div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><Button className="h-12 justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-400" onClick={() => copyTarget && void copyMessage(copyTarget, "en")}><Copy className="size-4" />{t("copyEnglish")}</Button><Button className="h-12 justify-center gap-2 rounded-xl border border-violet-300/30 bg-violet-400/15 text-violet-100 shadow-lg shadow-violet-500/10 hover:bg-violet-400/25" onClick={() => copyTarget && void copyMessage(copyTarget, "ar")}><Copy className="size-4" />{t("copyArabic")}</Button></div></DialogContent></Dialog>
     </div>
   );
 }
