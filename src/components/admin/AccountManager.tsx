@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiRequestError, apiDelete, apiPost } from "@/lib/api-client";
 import { PLATFORMS, type AccountRow, type Platform } from "@/types/database";
 
@@ -39,8 +39,9 @@ export default function AccountManager({ clientId, accounts }: { clientId: strin
     <CardHeader><CardTitle className="text-sm text-white">{t("title")}</CardTitle></CardHeader>
     <CardContent className="space-y-4">
       <div className="grid gap-2">
-        <Select value={platform} onChange={(e) => setPlatform(e.target.value as Platform)} aria-label={t("platform")}>
-          {PLATFORMS.map((value) => <option key={value} value={value}>{tPlatforms(value)}</option>)}
+        <Select value={platform} onValueChange={(value) => value && setPlatform(value as Platform)} items={PLATFORMS.map((value) => ({ value, label: tPlatforms(value) }))}>
+          <SelectTrigger aria-label={t("platform")}><SelectValue /></SelectTrigger>
+          <SelectContent>{PLATFORMS.map((value) => <SelectItem key={value} value={value}>{tPlatforms(value)}</SelectItem>)}</SelectContent>
         </Select>
         <Input value={pageName} onChange={(e) => setPageName(e.target.value)} placeholder={t("namePlaceholder")} />
         <Input value={pageId} onChange={(e) => setPageId(e.target.value)} placeholder={t("idPlaceholder")} />

@@ -14,6 +14,7 @@ import { statusBadgeVariant } from "@/components/admin/status";
 import { formatDate, formatDateRange } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { ReportStatus } from "@/types/database";
+import PaginationNav from "@/components/ui/PaginationNav";
 
 export type ReportListItem = {
   id: string;
@@ -30,14 +31,19 @@ export default function ClientReports({
   clientId,
   locale,
   reports,
+  previousHref,
+  nextHref,
 }: {
   clientId: string;
   locale: Locale;
   reports: ReportListItem[];
+  previousHref: string | null;
+  nextHref: string | null;
 }) {
   const t = useTranslations("admin.clients.detail");
   const tReports = useTranslations("admin.reports");
   const tStatus = useTranslations("status");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -101,6 +107,7 @@ export default function ClientReports({
           )}
         </CardContent>
       </Card>
+      <div className="mt-4"><PaginationNav previousHref={previousHref} nextHref={nextHref} previousLabel={tCommon("previous")} nextLabel={tCommon("next")} /></div>
 
       <CreateReportDialog
         clientId={clientId}

@@ -9,7 +9,7 @@ import MetricsTable from "@/components/portal/MetricsTable";
 import InsightsPanel from "@/components/portal/InsightsPanel";
 import PlatformComparisonChart from "@/components/portal/charts/PlatformComparisonChart";
 import { requireClient } from "@/lib/auth";
-import { listPublishedPeriods, loadMetrics, loadPublishedPeriod } from "@/lib/portal/data";
+import { loadMetrics, loadPreviousPublishedPeriod, loadPublishedPeriod } from "@/lib/portal/data";
 import { comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
@@ -45,9 +45,7 @@ export default async function PortalReportPage({
 
   // The preceding published period supplies the comparison column. It is read
   // from the same tenant-scoped list, so it can never be another client's.
-  const history = await listPublishedPeriods(session.clientId);
-  const index = history.findIndex((entry) => entry.reportId === period.reportId);
-  const previous = index >= 0 ? (history[index + 1] ?? null) : null;
+  const previous = await loadPreviousPublishedPeriod(period, session.clientId);
 
   const versionIds = previous ? [period.versionId, previous.versionId] : [period.versionId];
   const metricsByVersion = await loadMetrics(versionIds);

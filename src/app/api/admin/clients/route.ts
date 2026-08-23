@@ -2,17 +2,39 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { apiError, apiOk, parseBody, withAdmin, writeAuditLog } from "@/lib/api";
 import { createClientSchema } from "@/lib/validation/schemas";
+import { decodeCursor, encodeCursor, pageSize } from "@/lib/pagination";
+import type { ClientRow } from "@/types/database";
 
-export const GET = withAdmin("listClients", async () => {
+type ClientWithCount = ClientRow & { reports: Array<{ count: number }> };
+
+export const GET = withAdmin("listClients", async (_session, request) => {
+  const url = new URL(request.url);
+  const limit = pageSize(url.searchParams.get("limit") ?? undefined, 25);
+  const cursor = decodeCursor(url.searchParams.get("cursor") ?? undefined);
+  const previousDirection = url.searchParams.get("direction") === "prev";
+  const term = (url.searchParams.get("q") ?? "").trim().slice(0, 100).replace(/[,()%]/g, " ").trim();
   const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("clients")
-    .select("*")
-    .order("created_at", { ascending: false });
-
+  let query = supabase.from("clients").select("*, reports(count)")
+    .order("created_at", { ascending: previousDirection }).order("id", { ascending: previousDirection }).limit(limit + 1);
+  if (term) query = query.or(`name.ilike.%${term}%,company_name.ilike.%${term}%,contact_email.ilike.%${term}%`);
+  if (cursor) {
+    const operator = previousDirection ? "gt" : "lt";
+    query = query.or(`created_at.${operator}.${cursor.value},and(created_at.eq.${cursor.value},id.${operator}.${cursor.id})`);
+  }
+  const { data, error } = await query.returns<ClientWithCount[]>();
   if (error) throw error;
-  return apiOk({ clients: data });
+  const raw = data ?? [];
+  const hasMore = raw.length > limit;
+  const rows = raw.slice(0, limit);
+  if (previousDirection) rows.reverse();
+  const clients = rows.map(({ reports, ...client }) => ({ ...client, reportCount: reports?.[0]?.count ?? 0 }));
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  return apiOk({
+    clients,
+    previousCursor: (previousDirection ? hasMore : Boolean(cursor)) && first ? encodeCursor({ value: first.created_at, id: first.id }) : null,
+    nextCursor: (previousDirection ? Boolean(cursor) : hasMore) && last ? encodeCursor({ value: last.created_at, id: last.id }) : null,
+  });
 });
 
 /**

@@ -140,22 +140,33 @@ function PlatformUploader({
     },
   });
 
-  type AnalyzeResponse = {
-    total: number;
-    needsReview: number;
-    unreadable: string[];
+  type AnalyzeResponse = { jobId: string; status: string };
+  type JobResponse = {
+    status: string;
+    result: { total?: number; needsReview?: number; unreadable?: string[] } | null;
+    error_key: string | null;
   };
 
   const analyzeMutation = useMutation({
-    mutationFn: (force: boolean) =>
-      apiPost<AnalyzeResponse>("/api/admin/insights/analyze", {
+    mutationFn: async (force: boolean) => {
+      const queued = await apiPost<AnalyzeResponse>("/api/admin/insights/analyze", {
         insightBatchId: panel.batchId,
         force,
-      }),
+      });
+      for (let poll = 0; poll < 400; poll += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const job = await apiFetch<JobResponse>(`/api/admin/insights/jobs/${queued.jobId}`);
+        if (job.status === "completed") return job.result ?? {};
+        if (job.status === "failed" || job.status === "dead_letter") {
+          throw new ApiRequestError(502, job.error_key ?? "aiFailed");
+        }
+      }
+      throw new ApiRequestError(504, "aiUnavailable");
+    },
     onSuccess: (data) => {
-      setUnreadable(data.unreadable);
-      if (data.total === 0) toast.warning(t("analyzeEmpty"));
-      else toast.success(t("analyzeDone", { total: data.total, needsReview: data.needsReview }));
+      setUnreadable(data.unreadable ?? []);
+      if ((data.total ?? 0) === 0) toast.warning(t("analyzeEmpty"));
+      else toast.success(t("analyzeDone", { total: data.total ?? 0, needsReview: data.needsReview ?? 0 }));
       router.refresh();
     },
     onError: (error) => {
@@ -300,10 +311,11 @@ function PlatformUploader({
                   <ImageIcon className="size-3.5" aria-hidden />
                 </span>
 
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => openPreview(image.id)}
-                  className="min-w-0 flex-1 text-start"
+                  className="h-auto min-w-0 flex-1 justify-start p-0 text-start whitespace-normal hover:bg-transparent"
                 >
                   <span className="block truncate text-xs text-slate-300 hover:text-white">
                     {image.filename ?? t("preview")}
@@ -311,7 +323,7 @@ function PlatformUploader({
                   <span className="block text-[11px] text-slate-500">
                     {formatFileSize(image.fileSize, locale)}
                   </span>
-                </button>
+                </Button>
 
                 {!locked && (
                   <Button

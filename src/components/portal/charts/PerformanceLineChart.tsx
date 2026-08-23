@@ -6,6 +6,7 @@ import { Eye, Heart, RadioTower, Users, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { formatCompact } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { TrendPoint } from "@/lib/analytics/comparisons";
@@ -48,8 +49,8 @@ export default function PerformanceLineChart({ locale, points }: { locale: Local
             const value = points.at(-1)?.[key] ?? null;
             const selectedMetric = key === active;
             return (
-              <button key={key} type="button" onClick={() => setSelected(key)} aria-pressed={selectedMetric} className={cn(
-                "group flex min-w-0 items-center gap-2.5 rounded-[16px] border p-2.5 text-start transition-all duration-300 sm:gap-3 sm:rounded-[18px] sm:p-3",
+              <Button key={key} type="button" variant="outline" onClick={() => setSelected(key)} aria-pressed={selectedMetric} className={cn(
+                "group h-auto min-w-0 justify-start gap-2.5 p-2.5 text-start whitespace-normal sm:gap-3 sm:p-3",
                 selectedMetric ? "border-white/[0.12] bg-white/[0.07] shadow-[0_16px_35px_rgba(0,0,0,0.2)]" : "border-white/[0.05] bg-white/[0.018] hover:bg-white/[0.04]"
               )}>
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[13px]" style={{ color, backgroundColor: `${color}16`, boxShadow: selectedMetric ? `0 0 28px ${color}20` : undefined }}>
@@ -59,7 +60,7 @@ export default function PerformanceLineChart({ locale, points }: { locale: Local
                   <span className="block truncate text-[9px] font-semibold tracking-[0.1em] text-[#77766f] uppercase">{t(`series.${key}` as never)}</span>
                   <span className="mt-1 block font-satoshi text-base tabular-nums text-[#f0ede5]">{formatCompact(value, locale)}</span>
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>

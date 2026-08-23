@@ -3,26 +3,37 @@ import { getTranslations } from "next-intl/server";
 import { ArrowRight, CalendarRange, CheckCircle2, FileBarChart, ShieldCheck } from "lucide-react";
 
 import { requireClient } from "@/lib/auth";
-import { listPublishedPeriods } from "@/lib/portal/data";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
+import PaginationNav from "@/components/ui/PaginationNav";
+import { listPublishedPeriodsPage } from "@/lib/portal/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function PortalReportsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ cursor?: string; direction?: string }>;
 }) {
   const { locale: raw } = await params;
   const locale = isLocale(raw) ? raw : defaultLocale;
 
   const session = await requireClient(locale);
-  const [t, tUi] = await Promise.all([
+  const [t, tUi, tCommon] = await Promise.all([
     getTranslations({ locale, namespace: "portal.reports" }),
     getTranslations({ locale, namespace: "portal.ui" }),
+    getTranslations({ locale, namespace: "common" }),
   ]);
-  const periods = await listPublishedPeriods(session.clientId);
+  const query = await searchParams;
+  const page = await listPublishedPeriodsPage(session.clientId, {
+    cursor: query.cursor,
+    direction: query.direction === "prev" ? "prev" : "next",
+  });
+  const periods = page.periods;
+  const pageHref = (cursor: string | null, direction: "next" | "prev") =>
+    cursor ? `/${locale}/portal/reports?cursor=${encodeURIComponent(cursor)}&direction=${direction}` : null;
 
   return (
     <div className="space-y-8">
@@ -39,7 +50,7 @@ export default async function PortalReportsPage({
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-[#54d8ac]/10 bg-[#54d8ac]/[0.045] px-3 py-2 text-[10px] font-medium text-[#72d7b6]">
           <ShieldCheck className="size-3.5" strokeWidth={1.8} />
-          {tUi("verifiedReports", { count: periods.length })}
+          {tUi("verifiedReports", { count: page.total })}
         </div>
       </header>
 
@@ -93,6 +104,7 @@ export default async function PortalReportsPage({
               </div>
             </Link>
           ))}
+          <PaginationNav previousHref={pageHref(page.previousCursor, "prev")} nextHref={pageHref(page.nextCursor, "next")} previousLabel={tCommon("previous")} nextLabel={tCommon("next")} />
         </div>
       )}
     </div>

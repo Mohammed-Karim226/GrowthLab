@@ -39,7 +39,8 @@ arithmetic, and the second AI pass only writes prose about numbers it was given.
 | `src/lib/supabase/` | Browser, cookie-bound server, and service-role clients |
 | `src/lib/auth.ts` | `requireAdmin`, `requireClient`, `requireAdminApi` |
 | `src/lib/analytics/` | Normalisation, calculations, period comparisons |
-| `src/lib/ai/` | Gemini provider, prompts, Zod response schemas |
+| `src/lib/ai/` | Gemini provider, prompts, queue processor, Zod schemas |
+| `scripts/ai-worker.ts` | Independently deployed durable-queue worker |
 | `src/lib/portal/` | The portal's entire read surface (tenant-scoped queries) |
 | `src/app/api/admin/**` | Admin mutations, all wrapped in `withAdmin` |
 | `src/app/[locale]/admin/**` | Admin UI |
@@ -59,7 +60,10 @@ arithmetic, and the second AI pass only writes prose about numbers it was given.
    and the private `insights` bucket with its storage policies.
 3. **First admin** — `npm run bootstrap:admin -- admin@growthlab.com 'a-strong-password' 'Full Name'`.
    The password is passed on the command line and never written to a table.
-4. **Run** — `npm run dev`, then sign in at `/en/admin/login`.
+4. **Run web** — `npm run dev`, then sign in at `/en/admin/login`.
+5. **Run AI worker** — run `npm run worker:ai` in a separate process or
+   deployment. Apply `0003_ai_jobs.sql` first. The web tier only enqueues work;
+   Gemini requests and image buffers stay in the worker tier.
 
 Client accounts are created from the admin UI. The generated password is shown
 once, on screen, immediately after creation; it is never persisted in `clients`

@@ -722,9 +722,10 @@
   }
 
   .admin-vip-sidebar {
-    position: sticky;
+    position: fixed;
     top: 0;
-    height: 100vh;
+    inset-inline-start: 0;
+    height: 100dvh;
     border-inline-end: 1px solid rgba(238, 213, 127, 0.1);
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 24%),
@@ -732,6 +733,7 @@
     box-shadow: 28px 0 80px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(28px) saturate(135%);
     -webkit-backdrop-filter: blur(28px) saturate(135%);
+    overflow: hidden;
   }
 
   .admin-vip-sidebar::after {

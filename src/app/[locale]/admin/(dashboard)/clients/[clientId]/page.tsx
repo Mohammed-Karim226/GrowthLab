@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate } from "@/lib/format";
 import type { AccountRow, ClientRow, ReportStatus } from "@/types/database";
+import { decodeCursor, encodeCursor } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -26,10 +27,12 @@ type ReportWithVersions = {
 
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; clientId: string }>;
+  searchParams: Promise<{ cursor?: string; direction?: string }>;
 }) {
-  const { locale: raw, clientId } = await params;
+  const [{ locale: raw, clientId }, search] = await Promise.all([params, searchParams]);
   const locale = isLocale(raw) ? raw : defaultLocale;
   const [t, tStatus] = await Promise.all([
     getTranslations({ locale, namespace: "admin.clients.detail" }),
@@ -48,7 +51,9 @@ export default async function ClientDetailPage({
   if (error) throw error;
   if (!client) notFound();
 
-  const { data: reports } = await supabase
+  const cursor = decodeCursor(search.cursor);
+  const previousDirection = search.direction === "prev";
+  let reportsQuery = supabase
     .from("reports")
     .select(
       // FK named explicitly: `current_published_version_id` points the other
@@ -56,8 +61,23 @@ export default async function ClientDetailPage({
       "id, title, period_start, period_end, updated_at, current_published_version_id, report_versions!report_versions_report_id_fkey(id, version_number, status)"
     )
     .eq("client_id", clientId)
-    .order("period_end", { ascending: false })
-    .returns<ReportWithVersions[]>();
+    .order("period_end", { ascending: previousDirection })
+    .order("id", { ascending: previousDirection })
+    .limit(21);
+  if (cursor) {
+    const operator = previousDirection ? "gt" : "lt";
+    reportsQuery = reportsQuery.or(`period_end.${operator}.${cursor.value},and(period_end.eq.${cursor.value},id.${operator}.${cursor.id})`);
+  }
+  const { data: reportRows, error: reportsError } = await reportsQuery.returns<ReportWithVersions[]>();
+  if (reportsError) throw reportsError;
+  const hasMoreReports = (reportRows?.length ?? 0) > 20;
+  const reports = (reportRows ?? []).slice(0, 20);
+  if (previousDirection) reports.reverse();
+  const reportHref = (report: ReportWithVersions | undefined, direction: "next" | "prev") => report
+    ? `/${locale}/admin/clients/${clientId}?cursor=${encodeURIComponent(encodeCursor({ value: report.period_end, id: report.id }))}&direction=${direction}`
+    : null;
+  const previousReportsHref = (previousDirection ? hasMoreReports : Boolean(cursor)) ? reportHref(reports[0], "prev") : null;
+  const nextReportsHref = (previousDirection ? Boolean(cursor) : hasMoreReports) ? reportHref(reports[reports.length - 1], "next") : null;
 
   const { data: accounts, error: accountsError } = await supabase
     .from("accounts")
@@ -111,6 +131,8 @@ export default async function ClientDetailPage({
               isPublished: Boolean(report.current_published_version_id),
             };
           })}
+          previousHref={previousReportsHref}
+          nextHref={nextReportsHref}
         />
 
         <aside className="space-y-6">

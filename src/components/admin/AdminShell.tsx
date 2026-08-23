@@ -17,6 +17,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/auth/SignOutButton";
+import { Button } from "@/components/ui/button";
 
 type AdminShellProps = {
   adminName: string;
@@ -100,15 +101,15 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
   );
 
   return (
-    <div className="admin-vip relative min-h-screen overflow-hidden bg-[#050711] text-slate-200">
+    <div className="admin-vip relative h-dvh overflow-hidden bg-[#050711] text-slate-200">
       <div aria-hidden className="admin-vip-ambient pointer-events-none fixed inset-0" />
       <div aria-hidden className="admin-vip-orb admin-vip-orb-one pointer-events-none fixed" />
       <div aria-hidden className="admin-vip-orb admin-vip-orb-two pointer-events-none fixed" />
       <div aria-hidden className="pointer-events-none fixed inset-0 hero-grid opacity-25" />
       <div aria-hidden className="admin-vip-noise pointer-events-none fixed inset-0" />
 
-      <div className="relative flex min-h-screen">
-        <aside className="admin-vip-sidebar hidden w-72 shrink-0 flex-col justify-between p-5 lg:flex">
+      <div className="relative flex h-full">
+        <aside className="admin-vip-sidebar scrollbar-slim z-30 hidden w-72 flex-col justify-between overflow-y-auto p-5 lg:flex">
           <div className="space-y-9">
             <Link href={`/${locale}`} className="group flex items-center gap-3 px-1">
               <span className="admin-vip-logo relative flex size-11 items-center justify-center rounded-2xl">
@@ -127,7 +128,7 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
           {identity}
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex h-full min-w-0 flex-1 flex-col lg:ps-72">
           <header className="admin-vip-mobile-header flex items-center justify-between gap-3 px-4 py-3 lg:hidden">
             <Link href={`/${locale}/admin`} className="flex items-center gap-2">
               <span className="admin-vip-logo flex size-9 items-center justify-center rounded-xl">
@@ -135,17 +136,19 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
               </span>
               <span className="font-satoshi text-sm text-white">{t("brand")}</span>
             </Link>
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label={t("nav.open")}
-              className="rounded-xl border border-[#e9cd72]/15 bg-[#e9cd72]/[0.06] p-2.5 text-[#ead581] transition-colors hover:bg-[#e9cd72]/10"
+              className="border-[#e9cd72]/15 bg-[#e9cd72]/[0.06] text-[#ead581] hover:bg-[#e9cd72]/10"
             >
               <Menu className="size-4" aria-hidden />
-            </button>
+            </Button>
           </header>
 
-          <main className="admin-vip-main scrollbar-slim min-w-0 flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-10 lg:py-9 xl:px-12">
+          <main className="admin-vip-main scrollbar-slim min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 lg:px-10 lg:py-9 xl:px-12">
             <div className="mx-auto w-full max-w-[96rem]">{children}</div>
           </main>
         </div>
@@ -166,14 +169,16 @@ export default function AdminShell({ adminName, adminEmail, children }: AdminShe
                   <Crown className="size-4 text-[#f4d77d]" aria-hidden />
                   {t("brand")}
                 </span>
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-sm"
                   type="button"
                   onClick={() => setMenuOpen(false)}
                   aria-label={t("nav.close")}
-                  className="rounded-lg border border-white/10 p-1.5 text-slate-300"
+                  className="border-white/10 text-slate-300"
                 >
                   <X className="size-4" aria-hidden />
-                </button>
+                </Button>
               </div>
               {nav}
             </div>

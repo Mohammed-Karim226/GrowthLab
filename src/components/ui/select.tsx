@@ -1,35 +1,11 @@
+"use client"
 import * as React from "react"
-import { ChevronDown } from "lucide-react"
-
+import { Select as SelectPrimitive } from "@base-ui/react/select"
+import { Check, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-/**
- * Styled native <select>.
- *
- * Native rather than a JS popover on purpose: it inherits correct RTL
- * behaviour, keyboard handling and mobile pickers for free, which matters for
- * the Arabic locale.
- */
-function Select({ className, children, ...props }: React.ComponentProps<"select">) {
-  return (
-    <div data-slot="select-container" className="relative w-full">
-      <select
-        data-slot="select"
-        className={cn(
-          "h-9 w-full min-w-0 appearance-none rounded-md border border-input bg-transparent ps-2.5 pe-8 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30",
-          "[&>option]:bg-popover [&>option]:text-popover-foreground",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute end-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-      />
-    </div>
-  )
-}
-
-export { Select }
+const Select = SelectPrimitive.Root
+function SelectValue(props: SelectPrimitive.Value.Props) { return <SelectPrimitive.Value data-slot="select-value" {...props} /> }
+function SelectTrigger({ className, children, ...props }: SelectPrimitive.Trigger.Props) { return <SelectPrimitive.Trigger data-slot="select-trigger" className={cn("flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50", className)} {...props}>{children}<SelectPrimitive.Icon render={<ChevronDown className="size-4 text-muted-foreground" aria-hidden />} /></SelectPrimitive.Trigger> }
+function SelectContent({ className, children, ...props }: SelectPrimitive.Popup.Props) { return <SelectPrimitive.Portal><SelectPrimitive.Positioner className="z-50 outline-none" sideOffset={4}><SelectPrimitive.Popup data-slot="select-content" className={cn("min-w-[var(--anchor-width)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none", className)} {...props}><SelectPrimitive.List className="max-h-72 overflow-y-auto">{children}</SelectPrimitive.List></SelectPrimitive.Popup></SelectPrimitive.Positioner></SelectPrimitive.Portal> }
+function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Props) { return <SelectPrimitive.Item data-slot="select-item" className={cn("relative flex min-h-8 cursor-default select-none items-center rounded-sm py-1.5 ps-2 pe-8 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)} {...props}><SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText><SelectPrimitive.ItemIndicator className="absolute end-2"><Check className="size-4" /></SelectPrimitive.ItemIndicator></SelectPrimitive.Item> }
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue }
