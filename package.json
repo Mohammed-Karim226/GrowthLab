@@ -10,6 +10,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
+    "reset:admin-password": "node scripts/reset-admin-password.mjs",
     "db:apply": "node scripts/apply-migration.mjs",
     "db:check": "node scripts/check-supabase.mjs",
     "db:probe": "node scripts/probe-schema.mjs",
