@@ -70,7 +70,9 @@ export default function ClientReports({
                 <CalendarRange className="size-5" aria-hidden />
               </span>
               <p className="text-sm text-slate-300">{t("noReports")}</p>
-              <p className="max-w-sm text-xs text-slate-500">{t("noReportsHint")}</p>
+              <p className="max-w-sm text-xs text-slate-500">
+                {t("noReportsHint")}
+              </p>
             </div>
           ) : (
             <ul className="divide-y divide-white/[0.06]">
@@ -85,9 +87,14 @@ export default function ClientReports({
                         {report.title}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {formatDateRange(report.periodStart, report.periodEnd, locale)} ·{" "}
-                        {tReports("version", { number: report.versionNumber })} ·{" "}
-                        {formatDate(report.updatedAt, locale)}
+                        {formatDateRange(
+                          report.periodStart,
+                          report.periodEnd,
+                          locale,
+                        )}{" "}
+                        ·{" "}
+                        {tReports("version", { number: report.versionNumber })}{" "}
+                        · {formatDate(report.updatedAt, locale)}
                       </p>
                     </div>
 
@@ -107,7 +114,14 @@ export default function ClientReports({
           )}
         </CardContent>
       </Card>
-      <div className="mt-4"><PaginationNav previousHref={previousHref} nextHref={nextHref} previousLabel={tCommon("previous")} nextLabel={tCommon("next")} /></div>
+      <div className="mt-4">
+        <PaginationNav
+          previousHref={previousHref}
+          nextHref={nextHref}
+          previousLabel={tCommon("previous")}
+          nextLabel={tCommon("next")}
+        />
+      </div>
 
       <CreateReportDialog
         clientId={clientId}

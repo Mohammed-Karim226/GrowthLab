@@ -54,7 +54,7 @@ export default async function AdminOverviewPage({
       .select(
         // FK named explicitly: `reports.current_published_version_id` also
         // points at report_versions, so a bare embed is ambiguous (PGRST201).
-        "id, title, period_start, period_end, updated_at, client_id, clients(name), report_versions!report_versions_report_id_fkey(status, version_number)"
+        "id, title, period_start, period_end, updated_at, client_id, clients(name), report_versions!report_versions_report_id_fkey(status, version_number)",
       )
       .order("updated_at", { ascending: false })
       .limit(8)
@@ -69,14 +69,29 @@ export default async function AdminOverviewPage({
     .select("id", { count: "exact", head: true });
 
   const awaitingReview = reports.filter((report) =>
-    report.report_versions.some((version) => version.status === "needs_review")
+    report.report_versions.some((version) => version.status === "needs_review"),
   ).length;
 
   const stats = [
     { key: "totalClients", value: clients.length, icon: Users, tone: "violet" },
-    { key: "activeClients", value: clients.filter((client) => client.is_active).length, icon: UserCheck, tone: "emerald" },
-    { key: "totalReports", value: totalReports ?? 0, icon: Files, tone: "gold" },
-    { key: "awaitingReview", value: awaitingReview, icon: ShieldCheck, tone: "cyan" },
+    {
+      key: "activeClients",
+      value: clients.filter((client) => client.is_active).length,
+      icon: UserCheck,
+      tone: "emerald",
+    },
+    {
+      key: "totalReports",
+      value: totalReports ?? 0,
+      icon: Files,
+      tone: "gold",
+    },
+    {
+      key: "awaitingReview",
+      value: awaitingReview,
+      icon: ShieldCheck,
+      tone: "cyan",
+    },
   ] as const;
 
   return (
@@ -84,10 +99,15 @@ export default async function AdminOverviewPage({
       <header className="admin-page-hero relative flex flex-wrap items-end justify-between gap-5 overflow-hidden rounded-3xl p-5 sm:p-7">
         <div className="relative z-10 space-y-2">
           <span className="admin-vip-eyebrow inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase">
-            <Crown className="size-3" aria-hidden /> {t("overview.vipIntelligence")}
+            <Crown className="size-3" aria-hidden />{" "}
+            {t("overview.vipIntelligence")}
           </span>
-          <h1 className="font-satoshi text-2xl text-white sm:text-3xl">{t("overview.title")}</h1>
-          <p className="max-w-xl text-sm text-slate-400">{t("overview.subtitle")}</p>
+          <h1 className="font-satoshi text-2xl text-white sm:text-3xl">
+            {t("overview.title")}
+          </h1>
+          <p className="max-w-xl text-sm text-slate-400">
+            {t("overview.subtitle")}
+          </p>
         </div>
         <Link
           href={`/${locale}/admin/clients`}
@@ -97,7 +117,10 @@ export default async function AdminOverviewPage({
           {t("overview.quickCreate")}
           <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
         </Link>
-        <div aria-hidden className="admin-hero-crown absolute -end-7 -top-10 opacity-[0.07]">
+        <div
+          aria-hidden
+          className="admin-hero-crown absolute -end-7 -top-10 opacity-[0.07]"
+        >
           <Crown className="size-48 rotate-12" strokeWidth={1} />
         </div>
       </header>
@@ -106,13 +129,18 @@ export default async function AdminOverviewPage({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.key} className={`admin-stat-card admin-stat-${stat.tone}`}>
+            <Card
+              key={stat.key}
+              className={`admin-stat-card admin-stat-${stat.tone}`}
+            >
               <CardContent className="flex items-center justify-between gap-4 p-5">
                 <div className="space-y-1">
                   <p className="text-xs tracking-wide text-slate-500 uppercase">
                     {t(`overview.${stat.key}` as never)}
                   </p>
-                  <p className="font-satoshi text-2xl text-white">{stat.value}</p>
+                  <p className="font-satoshi text-2xl text-white">
+                    {stat.value}
+                  </p>
                 </div>
                 <span className="admin-stat-icon flex size-11 items-center justify-center rounded-2xl">
                   <Icon className="size-5" aria-hidden />
@@ -134,12 +162,14 @@ export default async function AdminOverviewPage({
         </CardHeader>
         <CardContent>
           {reports.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-500">{t("overview.noReports")}</p>
+            <p className="py-6 text-center text-sm text-slate-500">
+              {t("overview.noReports")}
+            </p>
           ) : (
             <ul className="divide-y divide-white/[0.06]">
               {reports.map((report) => {
                 const latest = [...report.report_versions].sort(
-                  (a, b) => b.version_number - a.version_number
+                  (a, b) => b.version_number - a.version_number,
                 )[0];
 
                 return (
@@ -149,10 +179,16 @@ export default async function AdminOverviewPage({
                       className="admin-report-row group flex flex-wrap items-center justify-between gap-3 rounded-xl px-3 py-3.5 transition-all hover:text-white"
                     >
                       <div className="min-w-0 space-y-0.5">
-                        <p className="truncate text-sm text-slate-200">{report.title}</p>
+                        <p className="truncate text-sm text-slate-200">
+                          {report.title}
+                        </p>
                         <p className="text-xs text-slate-500">
                           {report.clients?.name ?? "—"} ·{" "}
-                          {formatDateRange(report.period_start, report.period_end, locale)}
+                          {formatDateRange(
+                            report.period_start,
+                            report.period_end,
+                            locale,
+                          )}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -164,7 +200,10 @@ export default async function AdminOverviewPage({
                         <span className="text-xs text-slate-500">
                           {formatDate(report.updated_at, locale)}
                         </span>
-                        <ArrowUpRight className="size-3.5 text-slate-600 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#efd77f] rtl:-scale-x-100" aria-hidden />
+                        <ArrowUpRight
+                          className="size-3.5 text-slate-600 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#efd77f] rtl:-scale-x-100"
+                          aria-hidden
+                        />
                       </div>
                     </Link>
                   </li>

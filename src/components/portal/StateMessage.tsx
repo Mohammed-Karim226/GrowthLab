@@ -40,7 +40,9 @@ export default function StateMessage({
         </span>
 
         <div className="space-y-2">
-          <h1 className="font-satoshi text-xl tracking-[-0.03em] text-[#f1eee6]">{title}</h1>
+          <h1 className="font-satoshi text-xl tracking-[-0.03em] text-[#f1eee6]">
+            {title}
+          </h1>
           <p className="text-sm leading-relaxed text-[#85837b]">{body}</p>
         </div>
 
@@ -53,13 +55,20 @@ export default function StateMessage({
           )}
 
           {backHref && backLabel && (
-            <Link href={backHref} className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+            <Link
+              href={backHref}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
               {backLabel}
             </Link>
           )}
         </div>
 
-        {digest && <p className="text-[10px] text-[#5f5e58]">{t("errorReference", { id: digest })}</p>}
+        {digest && (
+          <p className="text-[10px] text-[#5f5e58]">
+            {t("errorReference", { id: digest })}
+          </p>
+        )}
       </div>
     </div>
   );

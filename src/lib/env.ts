@@ -85,7 +85,9 @@ export function geminiApiKey(): string {
 }
 
 export function geminiModel(): string {
-  return process.env.GEMINI_MODEL?.trim() || "gemini-3.5-flash";
+  // gemini-3.5-flash is not a published Gemini model. Keep this valid by
+  // default while still allowing deployments to pin another model.
+  return process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 }
 
 // Upload limits are NOT here: the browser needs them, and nothing that runs in
