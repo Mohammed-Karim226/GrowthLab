@@ -642,6 +642,8 @@
       "counts": "{contacts} contacts Â· {senders} sender identities",
       "newContact": "New contact",
       "newSender": "New sender",
+      "contact": "contact",
+      "sender": "sender",
       "draft": "Draft",
       "ready": "Ready",
       "sent": "Sent",

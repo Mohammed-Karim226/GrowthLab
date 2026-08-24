@@ -652,6 +652,8 @@
       "counts": "{contacts} جهة اتصال · {senders} هوية مرسل",
       "newContact": "جهة اتصال جديدة",
       "newSender": "مرسل جديد",
+      "contact": "جهة اتصال",
+      "sender": "مرسل",
       "draft": "مسودة",
       "ready": "جاهز",
       "sent": "تم الإرسال",

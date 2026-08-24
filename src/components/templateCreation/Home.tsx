@@ -60,6 +60,8 @@ type Sender = {
 };
 type Status = "draft" | "ready" | "sent" | "replied" | "no_reply" | "closed";
 type CopyLanguage = "en" | "ar";
+const DEFAULT_OUTREACH_WEBSITE = "https://growthlab.agency";
+const DEFAULT_OUTREACH_WHATSAPP = "201126421602";
 type Message = {
   id: string;
   contact_id: string;
@@ -118,6 +120,44 @@ function buildGmailEmailHtml(subject: string, body: string, contact?: Contact, s
   return `<table dir="${direction}" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin:0;background:#edf4ff;font-family:${font};color:#26364a;"><tr><td align="center" style="padding:18px 10px;background:#edf4ff;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="width:100%;max-width:640px;background:#ffffff;border:1px solid #d8e5f2;border-radius:22px;overflow:hidden;box-shadow:0 12px 32px rgba(74,107,143,.14);"><tr><td style="padding:12px 22px;background:#e8f7f5;">${glassLabel(copyLabels.eyebrow)}</td></tr><tr><td style="padding:22px;background:#dcecff;background:linear-gradient(135deg,#dcecff 0%,#f2e8ff 52%,#e2f8f2 100%);">${vipBadge}<div style="margin-top:18px;">${glassLabel(copyLabels.prepared)}</div><div style="margin-top:10px;color:#213b59;font-size:26px;font-weight:800;line-height:1.25;word-break:break-word;">${recipient}${company}</div></td></tr><tr><td style="padding:24px 22px 4px;">${glassLabel(copyLabels.note)}<h1 style="margin:12px 0 0;color:#213b59;font-size:24px;line-height:1.35;font-weight:800;word-break:break-word;">${escapeHtml(subject)}</h1><div style="margin-top:16px;width:46px;height:4px;border-radius:4px;background:#f2a7b8;"></div></td></tr><tr><td style="padding:22px 22px 4px;">${vipParagraphs}</td></tr>${contactSection}<tr><td style="padding:8px 22px 24px;border-top:1px solid #e3ebf3;"><div style="padding-top:18px;color:#213b59;font-size:15px;font-weight:800;">${senderName}</div>${senderTitle}${senderEmail}<div style="margin-top:12px;color:#5d6eae;font-size:10px;font-weight:800;letter-spacing:1px;">GROWTHLAB</div></td></tr><tr><td style="padding:14px 22px;background:#f5f9fc;border-top:1px solid #e3ebf3;color:#718096;font-size:10px;line-height:1.6;">${copyLabels.footer}</td></tr></table></td></tr></table>`;
 }
 
+function buildSimpleGmailEmailHtml(subject: string, body: string, contact?: Contact, sender?: Sender, language: CopyLanguage = "en", website = "", whatsapp = "") {
+  const labels = language === "ar"
+    ? { greeting: "مرحبًا", website: "زيارة الموقع", whatsapp: "تواصل عبر واتساب", footer: "يمكنك الرد مباشرة على هذه الرسالة في أي وقت." }
+    : { greeting: "Hello", website: "Visit our website", whatsapp: "Chat on WhatsApp", footer: "You can reply directly to this message at any time." };
+  const direction = language === "ar" ? "rtl" : "ltr";
+  const alignment = language === "ar" ? "right" : "left";
+  const font = language === "ar" ? "Tahoma,Arial,sans-serif" : "Arial,Helvetica,sans-serif";
+  const recipient = escapeHtml(contact?.name || (language === "ar" ? "عميلنا العزيز" : "Valued client"));
+  const company = contact?.company ? `<div style="margin-top:4px;color:#00838F;font-size:13px;line-height:1.5;opacity:.75;">${escapeHtml(contact.company)}</div>` : "";
+  const senderName = escapeHtml(sender?.name || "GrowthLab Team");
+  const senderTitle = sender?.title ? `<div style="margin-top:3px;font-size:13px;line-height:1.5;opacity:.75;">${escapeHtml(sender.title)}</div>` : "";
+  const senderEmail = sender?.email ? `<div style="margin-top:3px;font-size:13px;line-height:1.5;opacity:.75;">${escapeHtml(sender.email)}</div>` : "";
+  const paragraphs = body.split(/\n{2,}/).map((paragraph) => `<p style="margin:0 0 18px;color:#00838F;font-size:16px;line-height:${language === "ar" ? "1.9" : "1.7"};">${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`).join("");
+  const websiteUrl = website.trim() ? (/^https?:\/\//i.test(website.trim()) ? website.trim() : `https://${website.trim()}`) : "";
+  const whatsappNumber = whatsapp.replace(/\D/g, "");
+  const button = (href: string, label: string) => `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px 18px;border:1px solid #00838F;border-radius:10px;background:#F5F5F5;color:#00838F;font-size:15px;font-weight:700;line-height:1.2;text-align:center;text-decoration:none;">${label}&nbsp;&nbsp;&#8594;</a>`;
+  const actions = [
+    websiteUrl ? `<td style="padding:0 6px 10px;">${button(websiteUrl, labels.website)}</td>` : "",
+    whatsappNumber ? `<td style="padding:0 6px 10px;">${button(`https://wa.me/${whatsappNumber}`, labels.whatsapp)}</td>` : "",
+  ].filter(Boolean).join("");
+  const actionSection = actions ? `<tr><td style="padding:6px 18px 20px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>${actions}</tr></table></td></tr>` : "";
+
+  return `<table dir="${direction}" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin:0;background:#F5F5F5;font-family:${font};color:#00838F;"><tr><td align="center" style="padding:16px 8px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="620" style="width:100%;max-width:620px;background:#F5F5F5;border:1px solid #00838F;border-radius:12px;overflow:hidden;"><tr><td align="${alignment}" style="padding:24px 24px 18px;border-bottom:1px solid rgba(0,131,143,.22);"><div style="font-size:14px;font-weight:700;line-height:1.5;">${labels.greeting} ${recipient},</div>${company}<h1 style="margin:18px 0 0;color:#00838F;font-size:25px;font-weight:700;line-height:1.35;word-break:break-word;">${escapeHtml(subject)}</h1></td></tr><tr><td align="${alignment}" style="padding:24px 24px 8px;">${paragraphs}</td></tr>${actionSection}<tr><td align="${alignment}" style="padding:20px 24px;border-top:1px solid rgba(0,131,143,.22);color:#00838F;"><div style="font-size:15px;font-weight:700;line-height:1.5;">${senderName}</div>${senderTitle}${senderEmail}</td></tr><tr><td align="${alignment}" style="padding:13px 24px;background:#F5F5F5;border-top:1px solid rgba(0,131,143,.14);color:#00838F;font-size:11px;line-height:1.6;opacity:.75;">${labels.footer}</td></tr></table></td></tr></table>`;
+}
+
+function buildClassicGmailEmailHtml(subject: string, body: string, website = "", whatsapp = "") {
+  const paragraphs = body
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p style="margin:0 0 16px;">${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+  const websiteUrl = website.trim() ? (/^https?:\/\//i.test(website.trim()) ? website.trim() : `https://${website.trim()}`) : "";
+  const whatsappNumber = whatsapp.replace(/\D/g, "");
+  const cta = (href: string, label: string) => `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:0 6px 8px 0;padding:11px 16px;border:1px solid #00838F;border-radius:8px;background:#F5F5F5;color:#00838F;font-size:13px;font-weight:700;line-height:1.2;text-decoration:none;">${label} &#8594;</a>`;
+  const ctas = `${websiteUrl ? cta(websiteUrl, "Visit our website") : ""}${whatsappNumber ? cta(`https://wa.me/${whatsappNumber}`, "Chat on WhatsApp") : ""}`;
+  const ctaSection = ctas ? `<div style="margin:8px 24px 0;padding:18px 0 10px;border-top:1px solid #e5e7eb;"><div style="margin-bottom:10px;color:#64748b;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Continue the conversation</div>${ctas}</div>` : "";
+  return `<div style="margin:0;padding:0;color:#172033;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;"><div style="max-width:640px;margin:0 auto;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#ffffff;"><div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#f8fafc;"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:6px;">GrowthLab Outreach</div><div style="font-size:20px;line-height:1.35;font-weight:700;color:#0f172a;">${escapeHtml(subject)}</div></div><div style="padding:26px 24px 10px;">${paragraphs}</div>${ctaSection}<div style="margin:0 24px;padding:16px 0 22px;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.5;">Prepared with GrowthLab · Professional outreach</div></div></div>`;
+}
+
 export default function Home() {
   const t = useTranslations("adminOutreach.outreach");
   const labels: Record<Status, string> = {
@@ -156,8 +196,8 @@ export default function Home() {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [messageDraft, setMessageDraft] = useState({ subject: "", body: "" });
   const [copyTarget, setCopyTarget] = useState<Message | null>(null);
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState(DEFAULT_OUTREACH_WEBSITE);
+  const [whatsappNumber, setWhatsappNumber] = useState(DEFAULT_OUTREACH_WHATSAPP);
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -181,8 +221,8 @@ export default function Home() {
     void load();
   }, [load]);
   useEffect(() => {
-    setWebsiteUrl(window.localStorage.getItem("growthlab-outreach-website") || "");
-    setWhatsappNumber(window.localStorage.getItem("growthlab-outreach-whatsapp") || "");
+    setWebsiteUrl(window.localStorage.getItem("growthlab-outreach-website") || DEFAULT_OUTREACH_WEBSITE);
+    setWhatsappNumber(window.localStorage.getItem("growthlab-outreach-whatsapp") || DEFAULT_OUTREACH_WHATSAPP);
   }, []);
   useEffect(() => {
     window.localStorage.setItem("growthlab-outreach-website", websiteUrl);
@@ -379,7 +419,7 @@ export default function Home() {
     const plainText = `${message.subject}\n\n${message.body}`;
     const contact = contacts.find((item) => item.id === message.contact_id);
     const sender = senders.find((item) => item.id === message.sender_id);
-    const html = buildGmailEmailHtml(message.subject, message.body, contact, sender, language, websiteUrl, whatsappNumber);
+    const html = buildClassicGmailEmailHtml(message.subject, message.body, websiteUrl, whatsappNumber);
     try {
       if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
         await navigator.clipboard.write([
@@ -464,7 +504,7 @@ export default function Home() {
           <Plus />
           {t("newSender")}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => setContactsOpen(true)}><UserRound />Manage contacts</Button>
+        <Button variant="outline" size="sm" onClick={() => setContactsOpen(true)}><UserRound />{t("manageContacts")}</Button>
       </div>
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,.9fr)]">
         <Card>
@@ -477,7 +517,7 @@ export default function Home() {
           <CardContent>
             <FieldGroup className="grid gap-4 md:grid-cols-2">
               <Field>
-                <FieldLabel>Recipient</FieldLabel>
+                <FieldLabel>{t("recipient")}</FieldLabel>
                 <Select
                   value={contactId}
                   onValueChange={(value) => setContactId(value || "")}
@@ -487,7 +527,7 @@ export default function Home() {
                   }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a contact" />
+                    <SelectValue placeholder={t("selectContact")} />
                   </SelectTrigger>
                   <SelectContent>
                     {contacts.map((item) => (
@@ -499,14 +539,14 @@ export default function Home() {
                 </Select>
               </Field>
               <Field>
-                <FieldLabel>Sender identity</FieldLabel>
+                <FieldLabel>{t("senderIdentity")}</FieldLabel>
                 <Select
                   value={senderId || "growthlab"}
                   onValueChange={(value) =>
                     setSenderId(value === "growthlab" ? "" : value || "")
                   }
                   items={[
-                    { value: "growthlab", label: "Use GrowthLab" },
+                    { value: "growthlab", label: t("useGrowthLab") },
                     ...senders.map((item) => ({
                       value: item.id,
                       label: item.name,
@@ -517,7 +557,7 @@ export default function Home() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="growthlab">Use GrowthLab</SelectItem>
+                    <SelectItem value="growthlab">{t("useGrowthLab")}</SelectItem>
                     {senders.map((item) => (
                       <SelectItem key={item.id} value={item.id}>
                         {item.name} · {item.email}
@@ -535,7 +575,7 @@ export default function Home() {
                 <Input id="outreach-whatsapp" type="tel" dir="ltr" value={whatsappNumber} onChange={(event) => setWhatsappNumber(event.target.value)} placeholder="+1 555 123 4567" className="border-emerald-300/20 bg-emerald-300/[0.04]" />
               </Field>
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor="outreach-goal">Goal</FieldLabel>
+                <FieldLabel htmlFor="outreach-goal">{t("goal")}</FieldLabel>
                 <Input
                   id="outreach-goal"
                   value={goal}
@@ -543,25 +583,23 @@ export default function Home() {
                 />
               </Field>
               <Field>
-                <FieldLabel>Tone</FieldLabel>
+                <FieldLabel>{t("tone")}</FieldLabel>
                 <Select
                   value={tone}
                   onValueChange={(value) => setTone(value || "professional")}
                   items={[
-                    { value: "professional", label: "Professional" },
-                    { value: "warm", label: "Warm" },
-                    { value: "direct", label: "Direct" },
+                    { value: "professional", label: t("professional") },
+                    { value: "warm", label: t("warm") },
+                    { value: "direct", label: t("directTone") },
                   ]}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="warm">
-                      Warm and conversational
-                    </SelectItem>
-                    <SelectItem value="direct">Direct and concise</SelectItem>
+                    <SelectItem value="professional">{t("professional")}</SelectItem>
+                    <SelectItem value="warm">{t("warm")}</SelectItem>
+                    <SelectItem value="direct">{t("directTone")}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -572,20 +610,20 @@ export default function Home() {
                   disabled={busy || !selectedContact}
                 >
                   <Bot />
-                  {busy ? "Working..." : "Generate with AI"}
+                  {busy ? t("working") : t("generate")}
                 </Button>
               </div>
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor="outreach-subject">Subject</FieldLabel>
+                <FieldLabel htmlFor="outreach-subject">{t("subject")}</FieldLabel>
                 <Input
                   id="outreach-subject"
                   value={subject}
                   onChange={(event) => setSubject(event.target.value)}
-                  placeholder="A subject that earns attention without hype"
+                  placeholder={t("subjectPlaceholder")}
                 />
               </Field>
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor="outreach-body">Message</FieldLabel>
+                <FieldLabel htmlFor="outreach-body">{t("message")}</FieldLabel>
                 <Textarea
                   id="outreach-body"
                   value={body}
@@ -614,18 +652,18 @@ export default function Home() {
                   setDraft(null);
                 }}
               >
-                Clear
+                {t("clear")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => void save("draft")}
                 disabled={busy}
               >
-                Save draft
+                {t("saveDraft")}
               </Button>
               <Button onClick={() => void save("ready")} disabled={busy}>
                 <Check />
-                Mark ready
+                {t("markReady")}
               </Button>
             </div>
           </CardContent>
@@ -635,7 +673,7 @@ export default function Home() {
             <CardTitle className="flex items-center justify-between gap-3">
               <span className="flex min-w-0 items-center gap-2.5">
                 <Clock3 className="size-4 shrink-0 text-[#54d8ac]" />
-                <span className="truncate">Conversation queue</span>
+                <span className="truncate">{t("queue")}</span>
                 <Badge variant="muted" className="h-5 min-w-5 px-1.5 text-[10px] text-slate-400">
                   {messages.length}
                 </Badge>
@@ -656,11 +694,11 @@ export default function Home() {
           <CardContent className="divide-y divide-white/[0.06] px-0">
             {loading ? (
               <p className="px-6 py-8 text-sm text-muted-foreground">
-                Loading outreach records...
+                {t("loading")}
               </p>
             ) : visibleMessages.length === 0 ? (
               <p className="px-6 py-10 text-center text-sm text-muted-foreground">
-                No messages in this view.
+                {t("emptyQueue")}
               </p>
             ) : (
               visibleMessages.map((message) => {
@@ -676,7 +714,7 @@ export default function Home() {
                         </p>
                         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                           <UserRound className="size-3" />
-                          {contact?.name || "Unknown contact"} ·{" "}
+                          {contact?.name || t("unknownContact")} ·{" "}
                           {contact?.email}
                         </p>
                       </div>
@@ -690,7 +728,7 @@ export default function Home() {
                     </p>
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-[10px] text-slate-600">
-                        {message.last_event || "Created"}
+                        {message.last_event || t("created")}
                       </p>
                       <Select
                         value={message.status}
@@ -729,14 +767,14 @@ export default function Home() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New {createKind}</DialogTitle>
+            <DialogTitle>{t("newRecord", { kind: createKind === "contact" ? t("contact") : t("sender") })}</DialogTitle>
             <DialogDescription>
-              Save this record once and reuse it across future outreach.
+              {t("recordDescription")}
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="record-name">Name</FieldLabel>
+              <FieldLabel htmlFor="record-name">{t("name")}</FieldLabel>
               <Input
                 id="record-name"
                 value={recordName}
@@ -744,7 +782,7 @@ export default function Home() {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="record-email">Email</FieldLabel>
+              <FieldLabel htmlFor="record-email">{t("email")}</FieldLabel>
               <Input
                 id="record-email"
                 type="email"
