@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
-import { BadgeCheck, GitBranch, Globe, Loader2, Undo2 } from "lucide-react";
+import { BadgeCheck, GitBranch, Globe, Loader2, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -91,9 +91,17 @@ export default function VersionActions({
     },
     onError: reportError,
   });
+  const deleteReport = useMutation({
+    mutationFn: () => apiDelete(`/api/admin/reports/${reportId}`),
+    onSuccess: () => {
+      toast.success(t("deleted"));
+      router.replace(`/${locale}/admin`);
+    },
+    onError: reportError,
+  });
 
   const busy =
-    approve.isPending || publish.isPending || unpublish.isPending || newVersion.isPending;
+    approve.isPending || publish.isPending || unpublish.isPending || newVersion.isPending || deleteReport.isPending;
 
   const isPublished = status === "published";
   const isArchived = status === "archived";
@@ -183,6 +191,15 @@ export default function VersionActions({
             />
             {t("carryOverLabel")}
           </label>
+        )}
+
+        {!isPublished && !isArchived && (
+          <div className="border-t border-red-500/10 pt-4">
+            <Button type="button" variant="outline" className="border-red-500/25 text-red-300 hover:bg-red-500/10" disabled={busy} onClick={() => { if (window.confirm(t("deleteConfirm"))) deleteReport.mutate(); }}>
+              {deleteReport.isPending ? <Loader2 className="animate-spin" /> : <Trash2 />}
+              {deleteReport.isPending ? t("deleting") : t("deleteReport")}
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -292,6 +292,13 @@
       "rejectedStorage": "Upload failed",
       "analyze": "Run AI analysis",
       "reanalyze": "Re-run analysis",
+      "analyzeAll": "Analyze uploaded images",
+      "analyzingAll": "Analyzing all images...",
+      "analyzeAllTitle": "One-click AI analysis",
+      "analyzeAllHint": "Analyze {count} ready image groups together. Completed results are reused automatically.",
+      "analysisCached": "All uploaded images are already analyzed. Saved results will be reused.",
+      "analyzeAllDone": "{total} metrics extracted · {needsReview} to review",
+      "analyzeAllQueued": "Queued {count} image groups for AI analysis. Inngest will process them in the background.",
       "analyzing": "Reading screenshotsâ€¦",
       "analyzeHint": "The AI reads the screenshots and extracts the numbers. You review them before anything is published.",
       "analyzeConfirm": "Re-running replaces the values the AI extracted for this platform. Corrections you made by hand are kept. Continue?",
@@ -363,7 +370,11 @@
         "versionCreated": "Version {number} created",
         "carryOverLabel": "Copy the current numbers into the new version",
         "reviewFirst": "Resolve the flagged metrics first.",
-        "liveNow": "Live for the client since {date}"
+        "liveNow": "Live for the client since {date}",
+        "deleteReport": "Delete report",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Delete this report permanently? All versions, screenshots and metrics will be removed.",
+        "deleted": "Report deleted"
       }
     },
     "accounts": {
@@ -380,6 +391,7 @@
     },
     "errors": {
       "emailTaken": "That email already has an account.",
+      "publishedReportDelete": "Withdraw the published report before deleting it.",
       "versionLocked": "This version is published and can no longer be edited.",
       "batchProcessing": "This platform is being analysed. Wait for it to finish.",
       "batchLocked": "Screenshots cannot be removed after analysis has run.",
