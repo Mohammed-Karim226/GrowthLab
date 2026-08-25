@@ -40,7 +40,8 @@ arithmetic, and the second AI pass only writes prose about numbers it was given.
 | `src/lib/auth.ts` | `requireAdmin`, `requireClient`, `requireAdminApi` |
 | `src/lib/analytics/` | Normalisation, calculations, period comparisons |
 | `src/lib/ai/` | Gemini provider, prompts, queue processor, Zod schemas |
-| `scripts/ai-worker.ts` | Independently deployed durable-queue worker |
+| `src/lib/inngest/` | Inngest client and durable AI analysis function |
+| `src/app/api/inngest/route.ts` | Inngest function webhook endpoint |
 | `src/lib/portal/` | The portal's entire read surface (tenant-scoped queries) |
 | `src/app/api/admin/**` | Admin mutations, all wrapped in `withAdmin` |
 | `src/app/[locale]/admin/**` | Admin UI |
@@ -61,9 +62,11 @@ arithmetic, and the second AI pass only writes prose about numbers it was given.
 3. **First admin** — `npm run bootstrap:admin -- admin@growthlab.com 'a-strong-password' 'Full Name'`.
    The password is passed on the command line and never written to a table.
 4. **Run web** — `npm run dev`, then sign in at `/en/admin/login`.
-5. **Run AI worker** — run `npm run worker:ai` in a separate process or
-   deployment. Apply `0003_ai_jobs.sql` first. The web tier only enqueues work;
-   Gemini requests and image buffers stay in the worker tier.
+5. **Configure Inngest** — set `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY`,
+   point the Inngest app endpoint at `/api/inngest`, and apply `0003_ai_jobs.sql`
+   first. The web tier only enqueues events; Gemini requests and image buffers
+   run inside the Inngest function. For local development, run
+   `npm run inngest:dev` alongside the Next.js dev server.
 
 Client accounts are created from the admin UI. The generated password is shown
 once, on screen, immediately after creation; it is never persisted in `clients`

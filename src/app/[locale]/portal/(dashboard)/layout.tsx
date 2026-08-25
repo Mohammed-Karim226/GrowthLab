@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import PortalShell from "@/components/portal/PortalShell";
 import { requireClient } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import type { AccountRow } from "@/types/database";
+import type { AccountRow, ClientPaymentPlanRow } from "@/types/database";
 
 // Every portal page reads the live session; nothing here may be prerendered.
 export const dynamic = "force-dynamic";
@@ -32,12 +32,21 @@ export default async function PortalLayout({
     .order("platform")
     .order("page_name");
   if (error) throw error;
+  const { data: payments, error: paymentsError } = await supabase
+    .from("client_payment_plans")
+    .select("*")
+    .eq("client_id", session.clientId)
+    .order("billing_month", { ascending: false })
+    .limit(12)
+    .returns<ClientPaymentPlanRow[]>();
+  if (paymentsError) throw paymentsError;
 
   return (
     <PortalShell
       clientName={session.profile.full_name ?? "GrowthLab"}
       clientEmail={session.email}
       accounts={(accounts ?? []) as AccountRow[]}
+      payments={payments ?? []}
     >
       {children}
     </PortalShell>

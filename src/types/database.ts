@@ -51,6 +51,23 @@ export type ClientRow = {
   updated_at: string;
 };
 
+export type PaymentStatus = "pending" | "paid" | "overdue" | "waived";
+
+export type ClientPaymentPlanRow = {
+  id: string;
+  client_id: string;
+  billing_month: string;
+  amount: number;
+  total_plan_price: number | null;
+  currency: string;
+  status: PaymentStatus;
+  due_date: string | null;
+  paid_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProfileRow = {
   id: string;
   role: UserRole;
@@ -191,6 +208,11 @@ export type AuditLogRow = {
   created_at: string;
 };
 
+export type OutreachMessageStatus = "draft" | "ready" | "sent" | "replied" | "no_reply" | "closed";
+export type OutreachSenderRow = { id: string; name: string; title: string | null; email: string; signature: string | null; is_default: boolean; created_at: string; updated_at: string };
+export type OutreachContactRow = { id: string; name: string; email: string; company: string | null; channel: string | null; notes: string | null; created_at: string; updated_at: string };
+export type OutreachMessageRow = { id: string; contact_id: string; sender_id: string | null; subject: string; body: string; goal: string | null; status: OutreachMessageStatus; sent_at: string | null; replied_at: string | null; last_event: string | null; created_by: string | null; created_at: string; updated_at: string };
+
 /** Columns the database fills in for us on insert. */
 type Generated = "id" | "created_at" | "updated_at";
 
@@ -216,6 +238,10 @@ export type Database = {
           ClientRow,
           "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active"
         >
+      >;
+      client_payment_plans: Table<
+        ClientPaymentPlanRow,
+        InsertOf<ClientPaymentPlanRow, "total_plan_price" | "due_date" | "paid_at" | "notes" | "status" | "currency">
       >;
       profiles: Table<
         ProfileRow,
@@ -298,6 +324,9 @@ export type Database = {
         AuditLogRow,
         Omit<AuditLogRow, "id" | "created_at"> & { id?: string; created_at?: string }
       >;
+      outreach_senders: Table<OutreachSenderRow, InsertOf<OutreachSenderRow, "title" | "signature" | "is_default">>;
+      outreach_contacts: Table<OutreachContactRow, InsertOf<OutreachContactRow, "company" | "channel" | "notes">>;
+      outreach_messages: Table<OutreachMessageRow, InsertOf<OutreachMessageRow, "sender_id" | "goal" | "status" | "sent_at" | "replied_at" | "last_event" | "created_by">>;
     };
     Views: Record<never, never>;
     Functions: {

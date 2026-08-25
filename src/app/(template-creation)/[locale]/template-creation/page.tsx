@@ -1,6 +1,7 @@
-import Home from "@/components/templateCreation/Home";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <Home />;
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  redirect(`/${locale}/admin/template-creation`);
 }
 

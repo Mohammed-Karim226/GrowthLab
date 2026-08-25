@@ -53,6 +53,20 @@ export const updateClientSchema = z
   .strict()
   .refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
+export const paymentPlanSchema = z.object({
+  billingMonth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  amount: z.coerce.number().finite().nonnegative().max(1_000_000),
+  totalPlanPrice: z.coerce.number().finite().nonnegative().max(10_000_000).nullable().optional(),
+  currency: z.string().trim().min(3).max(8).default("USD"),
+  status: z.enum(["pending", "paid", "overdue", "waived"] as const).default("pending"),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD").nullable().optional(),
+  notes: z.string().trim().max(500).nullable().optional(),
+}).strict();
+
+export const updatePaymentPlanSchema = paymentPlanSchema.partial().extend({
+  paidAt: z.string().datetime().nullable().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
+
 export const createReportSchema = z
   .object({
     clientId: z.string().uuid(),

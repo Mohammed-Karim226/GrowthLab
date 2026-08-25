@@ -14,6 +14,7 @@ import { buildTrendSeries, comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import PortalHero from "@/components/portal/PortalHero";
+import ReportIntelligenceBrief from "@/components/portal/ReportIntelligenceBrief";
 
 export const dynamic = "force-dynamic";
 
@@ -108,31 +109,38 @@ export default async function PortalOverviewPage({
         }}
       />
 
-      <KpiGrid locale={locale} comparison={comparison} />
+      <ReportIntelligenceBrief locale={locale} comparison={comparison} />
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <PerformanceLineChart locale={locale} points={trend} />
-        <PlatformComparisonChart
-          locale={locale}
-          platforms={comparison.platforms.map((platform) => ({
-            platform: platform.platform,
-            views: platform.current.views,
-            reach: platform.current.reach,
-            engagement: platform.current.engagement,
-            followers: platform.current.followers,
-          }))}
-        />
-      </div>
+      <KpiGrid locale={locale} comparison={comparison} compact />
 
-      {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
+      <section className="portal-feature-gateway relative space-y-6 rounded-[30px] border border-[#8f78e8]/20 bg-[#110f26]/45 p-3 sm:space-y-8 sm:p-5 lg:p-6">
+        <div className="portal-feature-gateway-heading flex flex-col gap-3 border-b border-[#d8be78]/15 pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[9px] font-semibold tracking-[0.22em] text-[#d8be78] uppercase">{t("featureEyebrow")}</p>
+            <h2 className="mt-1 font-satoshi text-2xl tracking-[-0.04em] text-[#f4f0e7] sm:text-3xl">{t("deepDiveTitle")}</h2>
+          </div>
+          <p className="max-w-md text-xs leading-relaxed text-[#9992b2]">{t("deepDiveHint")}</p>
+        </div>
 
-      <PlatformBreakdown
-        locale={locale}
-        platforms={comparison.platforms}
-        metrics={comparison.metrics}
-      />
+        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <PerformanceLineChart locale={locale} points={trend} />
+          <PlatformComparisonChart
+            locale={locale}
+            platforms={comparison.platforms.map((platform) => ({
+              platform: platform.platform,
+              views: platform.current.views,
+              reach: platform.current.reach,
+              engagement: platform.current.engagement,
+              followers: platform.current.followers,
+            }))}
+          />
+        </div>
 
-      <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+        {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
+
+        <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
+        <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
+      </section>
     </div>
   );
 }

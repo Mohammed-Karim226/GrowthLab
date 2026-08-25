@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -35,6 +35,16 @@ export type UploadPanel = {
 /** Batch states where screenshots may still be added or removed. */
 const EDITABLE: readonly BatchStatus[] = ["draft", "uploading", "uploaded"];
 
+type AnalyzeResponse = { jobId: string; status: string };
+type JobStatus = {
+  id: string;
+  status: "queued" | "processing" | "completed" | "failed" | "dead_letter";
+  result: { total?: number; needsReview?: number; unreadable?: string[] } | null;
+  error_key: string | null;
+};
+
+const ACTIVE_JOB_STATUSES = new Set(["queued", "processing"]);
+
 export default function UploadWorkspace({
   locale,
   reportVersionId,
@@ -47,6 +57,86 @@ export default function UploadWorkspace({
   panels: UploadPanel[];
 }) {
   const t = useTranslations("admin.workspace");
+  const tErrors = useTranslations("admin.errors");
+  const router = useRouter();
+  const [activeJobIds, setActiveJobIds] = useState<string[]>([]);
+  // Completed batches are deliberately excluded: their stored AI result is the
+  // cache. Only newly uploaded or failed work is sent to the provider again.
+  const pendingPanels = panels.filter(
+    (panel) =>
+      panel.batchId &&
+      panel.images.length > 0 &&
+      (panel.status === "uploaded" || panel.status === "failed")
+  );
+
+  const analyzeAllMutation = useMutation({
+    mutationFn: async () => {
+      return Promise.all(
+        pendingPanels.map((panel) =>
+          apiPost<AnalyzeResponse>("/api/admin/insights/analyze", {
+            insightBatchId: panel.batchId,
+            force: panel.status === "failed",
+          })
+        )
+      );
+    },
+    onSuccess: (jobs) => {
+      toast.success(t("analyzeAllQueued", { count: jobs.length }));
+      setActiveJobIds(jobs.map((job) => job.jobId));
+    },
+    onError: (error) => {
+      const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
+      toast.error(tErrors(key as never));
+    },
+  });
+
+  useEffect(() => {
+    if (activeJobIds.length === 0) return;
+
+    let disposed = false;
+    let refreshing = false;
+
+    const checkJobs = async () => {
+      if (disposed || refreshing) return;
+
+      try {
+        const response = await apiPost<{ jobs: JobStatus[] }>(
+          "/api/admin/insights/jobs",
+          { jobIds: activeJobIds }
+        );
+        if (disposed) return;
+
+        const jobsById = new Map(response.jobs.map((job) => [job.id, job]));
+        const finished = activeJobIds
+          .map((id) => jobsById.get(id))
+          .filter((job): job is JobStatus => Boolean(job));
+        const hasActiveJobs = finished.some((job) => ACTIVE_JOB_STATUSES.has(job.status));
+
+        if (!hasActiveJobs && finished.length === activeJobIds.length) {
+          refreshing = true;
+          setActiveJobIds([]);
+          const failed = finished.filter((job) => job.status === "failed" || job.status === "dead_letter");
+          if (failed.length > 0) {
+            const errorKey = failed[0].error_key ?? "aiFailed";
+            toast.error(tErrors(errorKey as never));
+          }
+          router.refresh();
+        }
+      } catch (error) {
+        if (!disposed) {
+          const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
+          toast.error(tErrors(key as never));
+        }
+      }
+    };
+
+    void checkJobs();
+    const interval = window.setInterval(() => void checkJobs(), 5000);
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+    };
+  }, [activeJobIds, router, tErrors]);
 
   return (
     <section className="space-y-4">
@@ -60,6 +150,32 @@ export default function UploadWorkspace({
           <Lock className="size-4 shrink-0" aria-hidden />
           {t("versionLocked")}
         </p>
+      )}
+
+      {!locked && (
+        <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.04] p-4 sm:flex sm:items-center sm:justify-between sm:gap-5">
+          <div>
+            <p className="text-sm font-medium text-white">{t("analyzeAllTitle")}</p>
+            <p className="mt-1 text-xs text-slate-400">
+              {pendingPanels.length > 0
+                ? t("analyzeAllHint", { count: pendingPanels.length })
+                : t("analysisCached")}
+            </p>
+          </div>
+          <Button
+            type="button"
+            disabled={pendingPanels.length === 0 || analyzeAllMutation.isPending}
+            onClick={() => analyzeAllMutation.mutate()}
+            className="button-primary button-shine mt-3 w-full text-white sm:mt-0 sm:w-auto"
+          >
+            {analyzeAllMutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Sparkles className="size-4" aria-hidden />
+            )}
+            {analyzeAllMutation.isPending ? t("analyzingAll") : t("analyzeAll")}
+          </Button>
+        </div>
       )}
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -76,9 +192,6 @@ export default function UploadWorkspace({
     </section>
   );
 }
-
-/** Batch states where the AI may be run or re-run. */
-const ANALYZABLE: readonly BatchStatus[] = ["uploaded", "needs_review", "failed"];
 
 function PlatformUploader({
   panel,
@@ -100,7 +213,6 @@ function PlatformUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [unreadable, setUnreadable] = useState<string[]>([]);
 
   // Uploads close once the batch leaves the assembly stage; analysis stays
   // available so a failed or reviewed batch can be re-run.
@@ -134,41 +246,6 @@ function PlatformUploader({
   const deleteMutation = useMutation({
     mutationFn: (imageId: string) => apiDelete(`/api/admin/insights/images/${imageId}`),
     onSuccess: () => router.refresh(),
-    onError: (error) => {
-      const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
-      toast.error(tErrors(key as never));
-    },
-  });
-
-  type AnalyzeResponse = { jobId: string; status: string };
-  type JobResponse = {
-    status: string;
-    result: { total?: number; needsReview?: number; unreadable?: string[] } | null;
-    error_key: string | null;
-  };
-
-  const analyzeMutation = useMutation({
-    mutationFn: async (force: boolean) => {
-      const queued = await apiPost<AnalyzeResponse>("/api/admin/insights/analyze", {
-        insightBatchId: panel.batchId,
-        force,
-      });
-      for (let poll = 0; poll < 400; poll += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        const job = await apiFetch<JobResponse>(`/api/admin/insights/jobs/${queued.jobId}`);
-        if (job.status === "completed") return job.result ?? {};
-        if (job.status === "failed" || job.status === "dead_letter") {
-          throw new ApiRequestError(502, job.error_key ?? "aiFailed");
-        }
-      }
-      throw new ApiRequestError(504, "aiUnavailable");
-    },
-    onSuccess: (data) => {
-      setUnreadable(data.unreadable ?? []);
-      if ((data.total ?? 0) === 0) toast.warning(t("analyzeEmpty"));
-      else toast.success(t("analyzeDone", { total: data.total ?? 0, needsReview: data.needsReview ?? 0 }));
-      router.refresh();
-    },
     onError: (error) => {
       const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
       toast.error(tErrors(key as never));
@@ -209,14 +286,6 @@ function PlatformUploader({
   }
 
   const busy = uploadMutation.isPending;
-  const analyzing = analyzeMutation.isPending || panel.status === "processing";
-  const analyzed = panel.status !== null && ANALYZABLE.includes(panel.status) && panel.status !== "uploaded";
-  const canAnalyze =
-    !versionLocked &&
-    panel.batchId !== null &&
-    panel.images.length > 0 &&
-    !analyzing &&
-    (panel.status === null || ANALYZABLE.includes(panel.status));
 
   return (
     <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
@@ -345,45 +414,6 @@ function PlatformUploader({
           </ul>
         )}
 
-        {unreadable.length > 0 && (
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3">
-            <p className="text-xs font-medium text-amber-200">{t("unreadableTitle")}</p>
-            <ul className="mt-1.5 list-disc space-y-0.5 ps-4 text-[11px] text-amber-200/80">
-              {unreadable.map((entry) => (
-                <li key={entry}>{entry}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {!versionLocked && (
-          <div className="flex flex-col gap-2 border-t border-white/[0.06] pt-3">
-            <Button
-              type="button"
-              variant={analyzed ? "outline" : "default"}
-              size="sm"
-              disabled={!canAnalyze}
-              onClick={() => {
-                if (analyzed && !window.confirm(t("analyzeConfirm"))) return;
-                analyzeMutation.mutate(analyzed);
-              }}
-              className={cn(
-                "w-full",
-                analyzed ? "border-white/10" : "button-primary button-shine text-white"
-              )}
-            >
-              {analyzing ? (
-                <Loader2 className="size-3.5 animate-spin" aria-hidden />
-              ) : (
-                <Sparkles className="size-3.5" aria-hidden />
-              )}
-              {analyzing ? t("analyzing") : analyzed ? t("reanalyze") : t("analyze")}
-            </Button>
-            <p className="text-[11px] text-slate-500">
-              {panel.images.length === 0 ? t("needsUpload") : t("analyzeHint")}
-            </p>
-          </div>
-        )}
       </CardContent>
 
       {previewUrl && (

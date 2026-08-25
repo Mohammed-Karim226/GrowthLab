@@ -9,7 +9,13 @@ import type { AiJobRow, Platform } from "@/types/database";
 
 type Batch = { id: string; platform: Platform; notes: string | null; report_version_id: string; report_versions: { status: string } | null; insight_images: StoredImage[] };
 
-export async function processAiJob(job: AiJobRow): Promise<void> {
+export type AiJobResult = {
+  total: number;
+  needsReview: number;
+  unreadable: string[];
+};
+
+export async function processAiJob(job: AiJobRow): Promise<AiJobResult> {
   const db = createAdminClient();
   const { data: batch, error } = await db.from("insight_batches")
     .select("id, platform, notes, report_version_id, report_versions(status), insight_images(id, storage_path, mime_type, sort_order)")
@@ -43,8 +49,7 @@ export async function processAiJob(job: AiJobRow): Promise<void> {
     const summary = reviewSummary(extraction.metrics);
     const { error: completeError } = await db.from("ai_analyses").update({ status: "completed", raw_response: completion.raw, structured_response: validated.data, completed_at: new Date().toISOString() }).eq("id", analysis.id);
     if (completeError) throw completeError;
-    const { error: finishError } = await db.rpc("finish_ai_job", { job_id: job.id, job_result: { total: summary.total, needsReview: summary.needsReview, unreadable: extraction.unreadable } });
-    if (finishError) throw finishError;
+    return { total: summary.total, needsReview: summary.needsReview, unreadable: extraction.unreadable };
   } catch (cause) {
     const detail = cause instanceof Error ? cause.message : String(cause);
     await db.from("ai_analyses").update({ status: "failed", error_message: detail.slice(0, 2000), completed_at: new Date().toISOString() }).eq("id", analysis.id);

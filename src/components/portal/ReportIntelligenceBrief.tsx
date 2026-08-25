@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BadgeCheck, BrainCircuit, Crown, Focus, Rocket, ScanSearch, Sparkles, Trophy, TrendingUp } from "lucide-react";
+import { Activity, BadgeCheck, BrainCircuit, Crown, ScanSearch, Sparkles, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -105,46 +105,22 @@ export default function ReportIntelligenceBrief({ locale, comparison }: { locale
         </article>
       </div>
 
-      <div className="relative mt-3 grid gap-3 lg:grid-cols-3">
-        <article className="rounded-[22px] border border-[#55e0c1]/15 bg-[#55e0c1]/[0.055] p-4 sm:p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#55e0c1]/20 bg-[#55e0c1]/10 text-[#72e4c9]"><TrendingUp className="size-[18px]" aria-hidden /></span>
-            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#72e4c9] uppercase">{t("progressTitle")}</p><p className="mt-1 text-xs text-[#9ba8a5]">{t("progressHint")}</p></div>
+      <article className="relative mt-3 overflow-hidden rounded-[22px] border border-[#d8be78]/20 bg-[#d8be78]/[0.065] p-4 sm:p-5">
+        <div aria-hidden className="absolute -end-12 -top-12 size-32 rounded-full bg-[#d8be78]/10 blur-3xl" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#d8be78]/25 bg-[#d8be78]/10 text-[#ead48d]"><Sparkles className="size-[18px]" aria-hidden /></span>
+          <div className="min-w-0">
+            <p className="text-[9px] font-semibold tracking-[0.15em] text-[#ead48d] uppercase">{t("outlookTitle")}</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#e4ded0]">
+              {negativeSignal
+                ? t("outlookRecovery", { metric: metricLabel(negativeSignal.key) })
+                : positiveSignal
+                  ? t("outlookMomentum", { metric: metricLabel(positiveSignal.key) })
+                  : t("outlookFoundation")}
+            </p>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-[#d8dfdc]">
-            {positiveSignal
-              ? t("progressDetail", { metric: metricLabel(positiveSignal.key), change: formatSignedPercent(positiveSignal.growth.percent, locale) })
-              : t("progressSteady")}
-          </p>
-        </article>
-
-        <article className="rounded-[22px] border border-[#ef9978]/15 bg-[#ef9978]/[0.045] p-4 sm:p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#ef9978]/20 bg-[#ef9978]/10 text-[#ef9978]"><Focus className="size-[18px]" aria-hidden /></span>
-            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#ef9978] uppercase">{t("challengeTitle")}</p><p className="mt-1 text-xs text-[#a99b96]">{t("challengeHint")}</p></div>
-          </div>
-          <p className="mt-4 text-sm leading-relaxed text-[#ded7d3]">
-            {negativeSignal
-              ? t("challengeDetail", { metric: metricLabel(negativeSignal.key), change: formatSignedPercent(negativeSignal.growth.percent, locale) })
-              : t("challengeClear")}
-          </p>
-        </article>
-
-        <article className="relative overflow-hidden rounded-[22px] border border-[#d8be78]/20 bg-[#d8be78]/[0.065] p-4 sm:p-5">
-          <div aria-hidden className="absolute -end-12 -top-12 size-32 rounded-full bg-[#d8be78]/10 blur-3xl" />
-          <div className="relative flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-[#d8be78]/25 bg-[#d8be78]/10 text-[#ead48d]"><Rocket className="size-[18px]" aria-hidden /></span>
-            <div><p className="text-[9px] font-semibold tracking-[0.15em] text-[#ead48d] uppercase">{t("outlookTitle")}</p><p className="mt-1 text-xs text-[#a49b82]">{t("outlookHint")}</p></div>
-          </div>
-          <p className="relative mt-4 text-sm leading-relaxed text-[#e4ded0]">
-            {negativeSignal
-              ? t("outlookRecovery", { metric: metricLabel(negativeSignal.key) })
-              : positiveSignal
-                ? t("outlookMomentum", { metric: metricLabel(positiveSignal.key) })
-                : t("outlookFoundation")}
-          </p>
-        </article>
-      </div>
+        </div>
+      </article>
     </section>
   );
 }

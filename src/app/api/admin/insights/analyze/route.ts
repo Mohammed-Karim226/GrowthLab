@@ -1,8 +1,9 @@
 import { apiError, apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
 import { createClient } from "@/lib/supabase/server";
 import { analyzeBatchSchema } from "@/lib/ai";
+import { inngest } from "@/lib/inngest/client";
 
-/** Enqueue only. Gemini work is performed by `npm run worker:ai`. */
+/** Enqueue only. Gemini work is performed by the Inngest function. */
 export const POST = withAdmin("enqueueInsights", async (session, request) => {
   const parsed = await parseBody(request, analyzeBatchSchema);
   if (!parsed.ok) return parsed.response;
@@ -25,5 +26,10 @@ export const POST = withAdmin("enqueueInsights", async (session, request) => {
     batch_id: batch.id, force_requested: Boolean(parsed.data.force),
   });
   if (jobError || !job) throw jobError ?? new Error("job enqueue returned no row");
+  await inngest.send({
+    name: "ai/insights.requested",
+    id: job.id,
+    data: { jobId: job.id, insightBatchId: batch.id },
+  });
   return apiOk({ jobId: job.id, status: job.status, requestedBy: session.userId }, 202);
 });

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeft, BarChart3, BookOpenText, ChartNoAxesCombined, Crown, ListTree, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart3, BookOpenText, ChevronDown, Crown, ListTree, Sparkles } from "lucide-react";
 
 import KpiGrid from "@/components/portal/KpiGrid";
 import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
@@ -86,38 +86,58 @@ export default async function PortalReportPage({
         />
       </div>
 
-      <nav aria-label={tReports("reportNavigation")} className="portal-report-nav portal-glass-panel sticky top-[76px] z-20 flex max-w-full gap-1.5 overflow-x-auto rounded-[20px] border border-white/[0.14] p-1.5 sm:top-20 sm:gap-2 sm:rounded-[24px] sm:p-2">
-        {[
-          { href: "#overview", label: tReports("overviewSection"), icon: ChartNoAxesCombined },
-          { href: "#insights", label: tReports("insightsSection"), icon: BookOpenText },
-          { href: "#channels", label: tReports("channelsSection"), icon: BarChart3 },
-          { href: "#details", label: tReports("detailsSection"), icon: ListTree },
-        ].map(({ href, label, icon: Icon }) => (
-          <a key={href} href={href} className="group inline-flex shrink-0 items-center gap-2 rounded-[15px] border border-transparent px-2.5 py-2 text-[9px] font-medium text-[#8f96a9] transition-all hover:border-white/[0.1] hover:bg-white/[0.075] hover:text-white sm:gap-2.5 sm:rounded-[17px] sm:px-3 sm:py-2.5 sm:text-[10px]">
-            <span className="flex size-7 items-center justify-center rounded-[10px] border border-white/[0.09] bg-white/[0.055] text-[#d8c27d] shadow-[inset_0_1px_0_rgba(255,255,255,.15)] transition-transform group-hover:scale-105 sm:size-8 sm:rounded-xl"><Icon className="size-3" strokeWidth={1.8} aria-hidden /></span><span>{label}</span>
-          </a>
-        ))}
-        <span className="ms-auto hidden items-center gap-2 px-3 text-[9px] font-semibold tracking-[0.16em] text-[#d9c37e] uppercase xl:flex"><Crown className="size-3.5" aria-hidden />VIP</span>
-      </nav>
-
       <ReportIntelligenceBrief locale={locale} comparison={comparison} />
 
-      <div id="overview" className="portal-report-section scroll-mt-28"><KpiGrid locale={locale} comparison={comparison} /></div>
-      <div id="insights" className="portal-report-section scroll-mt-28"><InsightsPanel summary={period.summary} aiSummary={period.aiSummary} /></div>
-      <div id="channels" className="portal-report-section scroll-mt-28 space-y-10">
-        <PlatformComparisonChart
-          locale={locale}
-          platforms={comparison.platforms.map((platform) => ({
-            platform: platform.platform,
-            views: platform.current.views,
-            reach: platform.current.reach,
-            engagement: platform.current.engagement,
-            followers: platform.current.followers,
-          }))}
-        />
-        <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
-      </div>
-      <div id="details" className="portal-report-section scroll-mt-28"><MetricsTable locale={locale} metrics={comparison.metrics} /></div>
+      <div className="portal-report-section"><KpiGrid locale={locale} comparison={comparison} compact /></div>
+
+      <section className="space-y-3" aria-label={tReports("reportNavigation")}>
+        {[
+          {
+            id: "insights",
+            label: tReports("insightsSection"),
+            hint: tReports("insightsSectionHint"),
+            icon: BookOpenText,
+            content: <InsightsPanel summary={period.summary} aiSummary={period.aiSummary} />,
+          },
+          {
+            id: "channels",
+            label: tReports("channelsSection"),
+            hint: tReports("channelsSectionHint"),
+            icon: BarChart3,
+            content: (
+              <div className="space-y-10">
+                <PlatformComparisonChart
+                  locale={locale}
+                  platforms={comparison.platforms.map((platform) => ({
+                    platform: platform.platform,
+                    views: platform.current.views,
+                    reach: platform.current.reach,
+                    engagement: platform.current.engagement,
+                    followers: platform.current.followers,
+                  }))}
+                />
+                <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
+              </div>
+            ),
+          },
+          {
+            id: "details",
+            label: tReports("detailsSection"),
+            hint: tReports("detailsSectionHint"),
+            icon: ListTree,
+            content: <MetricsTable locale={locale} metrics={comparison.metrics} />,
+          },
+        ].map(({ id, label, hint, icon: Icon, content }) => (
+          <details key={id} id={id} className="portal-deep-dive group scroll-mt-28 rounded-[24px] border border-white/[0.1] bg-white/[0.025] p-3 sm:rounded-[28px] sm:p-4">
+            <summary className="flex cursor-pointer list-none items-center gap-3 rounded-[18px] px-2 py-2.5 transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] border border-white/[0.1] bg-white/[0.05] text-[#d8c27d]"><Icon className="size-4" strokeWidth={1.8} aria-hidden /></span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-medium text-[#ece8df]">{label}</span><span className="mt-0.5 block text-[10px] text-[#7f8799]">{hint}</span></span>
+              <ChevronDown className="size-4 shrink-0 text-[#a99460] transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <div className="mt-4 border-t border-white/[0.07] px-1 pt-5 sm:px-2">{content}</div>
+          </details>
+        ))}
+      </section>
 
       <footer className="portal-glass-panel flex flex-col items-center justify-between gap-4 rounded-[28px] border border-white/[0.12] px-5 py-5 text-center sm:flex-row sm:text-start">
         <span className="flex size-11 items-center justify-center rounded-2xl border border-[#d8be78]/20 bg-[#d8be78]/10 text-[#ead48d] shadow-[0_0_30px_rgba(216,190,120,.12)]"><Sparkles className="size-5" strokeWidth={1.7} aria-hidden /></span>
