@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import {
   Bot,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Copy,
   Globe2,
@@ -181,6 +183,13 @@ export default function Home() {
   );
   const [tone, setTone] = useState("professional");
   const [filter, setFilter] = useState<Status | "all">("all");
+  const [queueSearch, setQueueSearch] = useState("");
+  const [debouncedQueueSearch, setDebouncedQueueSearch] = useState("");
+  const [queuePage, setQueuePage] = useState(1);
+  const [queuePageSize, setQueuePageSize] = useState(25);
+  const [queueTotal, setQueueTotal] = useState(0);
+  const [queueHasMore, setQueueHasMore] = useState(false);
+  const [counts, setCounts] = useState<Record<Status, number>>({ draft: 0, ready: 0, sent: 0, replied: 0, no_reply: 0, closed: 0 });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -202,7 +211,10 @@ export default function Home() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/outreach", {
+      const params = new URLSearchParams({ page: String(queuePage), pageSize: String(queuePageSize) });
+      if (filter !== "all") params.set("status", filter);
+      if (debouncedQueueSearch) params.set("search", debouncedQueueSearch);
+      const response = await fetch(`/api/admin/outreach?${params.toString()}`, {
         cache: "no-store",
       });
       if (!response.ok) throw new Error();
@@ -210,17 +222,29 @@ export default function Home() {
       setContacts(data.contacts || []);
       setSenders(data.senders || []);
       setMessages(data.messages || []);
+      setQueueTotal(data.pagination?.total || 0);
+      setQueueHasMore(Boolean(data.pagination?.hasMore));
+      setCounts(data.counts || { draft: 0, ready: 0, sent: 0, replied: 0, no_reply: 0, closed: 0 });
       setContactId((current) => current || data.contacts?.[0]?.id || "");
       setSenderId((current) => current || data.senders?.[0]?.id || "");
+      const lastPage = Math.max(1, Math.ceil((data.pagination?.total || 0) / queuePageSize));
+      if (queuePage > lastPage) setQueuePage(lastPage);
     } catch {
       toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [debouncedQueueSearch, filter, queuePage, queuePageSize, t]);
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setQueuePage(1);
+      setDebouncedQueueSearch(queueSearch.trim());
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [queueSearch]);
   useEffect(() => {
     const storedWebsite = window.localStorage.getItem("growthlab-outreach-website");
     setWebsiteUrl(
@@ -240,23 +264,7 @@ export default function Home() {
     contacts.find((item) => item.id === contactId) || null;
   const selectedSender = senders.find((item) => item.id === senderId) || null;
   const filteredContacts = useMemo(() => contacts.filter((contact) => `${contact.name} ${contact.email} ${contact.company || ""}`.toLowerCase().includes(contactSearch.toLowerCase())), [contacts, contactSearch]);
-  const visibleMessages = useMemo(
-    () =>
-      filter === "all"
-        ? messages
-        : messages.filter((item) => item.status === filter),
-    [filter, messages],
-  );
-  const counts = useMemo(
-    () =>
-      Object.fromEntries(
-        statuses.map((status) => [
-          status,
-          messages.filter((item) => item.status === status).length,
-        ]),
-      ) as Record<Status, number>,
-    [messages],
-  );
+  const queuePages = Math.max(1, Math.ceil(queueTotal / queuePageSize));
   async function generate() {
     if (!selectedContact) return;
     setBusy(true);
@@ -337,9 +345,10 @@ export default function Home() {
       const response = await fetch("/api/admin/outreach", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ kind: "message", id }),
       });
       if (!response.ok) throw new Error();
+      setMessages((current) => current.filter((message) => message.id !== id));
       toast.success(t("deleted"));
       await load();
     } catch {
@@ -470,7 +479,7 @@ export default function Home() {
         {statuses.map((status) => (
           <Card
             key={status}
-            onClick={() => setFilter(filter === status ? "all" : status)}
+            onClick={() => { setFilter(filter === status ? "all" : status); setQueuePage(1); }}
             className={
               filter === status
                 ? "cursor-pointer border-[#81a6ff]/40 bg-[#81a6ff]/10"
@@ -681,14 +690,14 @@ export default function Home() {
                 <Clock3 className="size-4 shrink-0 text-[#54d8ac]" />
                 <span className="truncate">{t("queue")}</span>
                 <Badge variant="muted" className="h-5 min-w-5 px-1.5 text-[10px] text-slate-400">
-                  {messages.length}
+                  {queueTotal}
                 </Badge>
               </span>
               <Button
                 variant="ghost"
                 size="icon-sm"
                 className="rounded-md border border-white/[0.08] bg-white/[0.03] text-slate-400 shadow-sm hover:border-red-400/30 hover:bg-red-500/10 hover:text-red-300"
-                disabled={busy || !messages.length}
+                disabled={busy || Object.values(counts).every((count) => count === 0)}
                 onClick={() => void clearQueue()}
                 title={t("clearQueue")}
                 aria-label={t("clearQueue")}
@@ -697,17 +706,27 @@ export default function Home() {
               </Button>
             </CardTitle>
           </CardHeader>
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] px-4 py-3">
+            <div className="min-w-[14rem] flex-1">
+              <Input value={queueSearch} onChange={(event) => setQueueSearch(event.target.value)} placeholder={t("searchQueue")} aria-label={t("searchQueue")} />
+            </div>
+            <Select value={String(queuePageSize)} onValueChange={(value) => { setQueuePageSize(Number(value)); setQueuePage(1); }} items={[{ value: "25", label: "25" }, { value: "50", label: "50" }]}>
+              <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="25">25 / page</SelectItem><SelectItem value="50">50 / page</SelectItem></SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">{queueTotal} {t("conversations")}</span>
+          </div>
           <CardContent className="divide-y divide-white/[0.06] px-0">
             {loading ? (
               <p className="px-6 py-8 text-sm text-muted-foreground">
                 {t("loading")}
               </p>
-            ) : visibleMessages.length === 0 ? (
+            ) : messages.length === 0 ? (
               <p className="px-6 py-10 text-center text-sm text-muted-foreground">
                 {t("emptyQueue")}
               </p>
             ) : (
-              visibleMessages.map((message) => {
+              messages.map((message) => {
                 const contact = contacts.find(
                   (item) => item.id === message.contact_id,
                 );
@@ -765,6 +784,13 @@ export default function Home() {
               })
             )}
           </CardContent>
+          <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] px-4 py-3">
+            <span className="text-xs text-muted-foreground">{t("pageOf", { page: queuePage, pages: queuePages })}</span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={queuePage <= 1 || loading} onClick={() => setQueuePage((page) => page - 1)}><ChevronLeft className="size-4 rtl:rotate-180" />{t("previous")}</Button>
+              <Button variant="outline" size="sm" disabled={!queueHasMore || loading} onClick={() => setQueuePage((page) => page + 1)}>{t("next")}<ChevronRight className="size-4 rtl:rotate-180" /></Button>
+            </div>
+          </div>
         </Card>
       </div>
       <Dialog
@@ -824,9 +850,9 @@ export default function Home() {
       <Sheet open={contactsOpen} onOpenChange={setContactsOpen}>
         <SheetContent>
           <SheetHeader><SheetTitle className="flex items-center gap-2"><UserRound className="size-5 text-cyan-300" />{t("contactsTitle")}</SheetTitle><SheetDescription>{t("contactsDescription")}</SheetDescription></SheetHeader>
-          <div className="flex-1 space-y-4 overflow-y-auto p-6">
-            <div className="relative"><Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" /><Input value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} placeholder={t("searchContacts")} className="h-10 rounded-xl border-white/[0.12] bg-black/20 ps-9" /></div>
-            <div className="space-y-2">{filteredContacts.map((contact) => <div key={contact.id} className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-medium text-white">{contact.name}</p><p className="truncate text-xs text-slate-400">{contact.email}</p>{contact.company && <p className="mt-1 text-[11px] text-slate-500">{contact.company}</p>}</div><div className="flex shrink-0 gap-1"><Button variant="ghost" size="icon-sm" onClick={() => startContactEdit(contact)} aria-label={t("editContact")}><Pencil /></Button><Button variant="ghost" size="icon-sm" className="text-slate-500 hover:text-red-300" disabled={busy} onClick={() => void deleteContact(contact)} aria-label={t("deleteContact")}><Trash2 /></Button></div></div></div>)}{!filteredContacts.length && <p className="rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-500">{t("noContacts")}</p>}</div>
+          <div className="flex-1 space-y-4 overflow-y-auto bg-white/[0.018] p-6">
+            <div className="relative"><Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-cyan-200/50" /><Input value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} placeholder={t("searchContacts")} className="h-11 rounded-2xl border-white/[0.16] bg-white/[0.07] ps-9 text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,.12)] placeholder:text-slate-400/70" /></div>
+            <div className="space-y-3">{filteredContacts.map((contact) => <div key={contact.id} className="liquid-glass rounded-2xl p-3.5"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-medium text-white">{contact.name}</p><p className="truncate text-xs text-slate-300/80">{contact.email}</p>{contact.company && <p className="mt-1 text-[11px] text-cyan-100/55">{contact.company}</p>}</div><div className="flex shrink-0 gap-1"><Button variant="ghost" size="icon-sm" className="rounded-xl text-slate-300 hover:bg-white/[0.1] hover:text-white" onClick={() => startContactEdit(contact)} aria-label={t("editContact")}><Pencil /></Button><Button variant="ghost" size="icon-sm" className="rounded-xl text-slate-400 hover:bg-red-400/10 hover:text-red-200" disabled={busy} onClick={() => void deleteContact(contact)} aria-label={t("deleteContact")}><Trash2 /></Button></div></div></div>)}{!filteredContacts.length && <p className="liquid-glass rounded-2xl border-dashed px-4 py-8 text-center text-sm text-slate-300/70">{t("noContacts")}</p>}</div>
           </div>
         </SheetContent>
       </Sheet>
