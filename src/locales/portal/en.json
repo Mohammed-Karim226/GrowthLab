@@ -124,6 +124,13 @@
       "recentReports": "Recent reports",
       "noReports": "No reports yet. Create a client, then add a reporting period.",
       "quickCreate": "New client"
+      ,"quickActionsTitle": "VIP actions",
+      "quickNewClient": "Add a client",
+      "quickNewClientHint": "Build a new account profile",
+      "quickOutreach": "Compose outreach",
+      "quickOutreachHint": "Prepare a high-touch message",
+      "quickReports": "Review reports",
+      "quickReportsHint": "Monitor recent performance"
     },
     "clients": {
       "title": "Clients",

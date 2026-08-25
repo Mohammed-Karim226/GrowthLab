@@ -124,6 +124,13 @@
       "recentReports": "أحدث التقارير",
       "noReports": "لا توجد تقارير بعد. أنشئ عميلًا ثم أضف فترة تقرير.",
       "quickCreate": "عميل جديد"
+      ,"quickActionsTitle": "إجراءات VIP",
+      "quickNewClient": "إضافة عميل",
+      "quickNewClientHint": "إنشاء ملف حساب جديد",
+      "quickOutreach": "إنشاء رسالة تواصل",
+      "quickOutreachHint": "إعداد رسالة عالية الاهتمام",
+      "quickReports": "مراجعة التقارير",
+      "quickReportsHint": "متابعة أحدث الأداء"
     },
     "clients": {
       "title": "العملاء",
