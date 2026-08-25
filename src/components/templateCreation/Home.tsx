@@ -60,7 +60,8 @@ type Sender = {
 };
 type Status = "draft" | "ready" | "sent" | "replied" | "no_reply" | "closed";
 type CopyLanguage = "en" | "ar";
-const DEFAULT_OUTREACH_WEBSITE = "https://growthlab.agency";
+const DEFAULT_OUTREACH_WEBSITE = "https://growth-lab-lac.vercel.app/ar";
+const LEGACY_OUTREACH_WEBSITE = "https://growthlab.agency";
 const DEFAULT_OUTREACH_WHATSAPP = "201126421602";
 type Message = {
   id: string;
@@ -221,7 +222,12 @@ export default function Home() {
     void load();
   }, [load]);
   useEffect(() => {
-    setWebsiteUrl(window.localStorage.getItem("growthlab-outreach-website") || DEFAULT_OUTREACH_WEBSITE);
+    const storedWebsite = window.localStorage.getItem("growthlab-outreach-website");
+    setWebsiteUrl(
+      !storedWebsite || storedWebsite === LEGACY_OUTREACH_WEBSITE
+        ? DEFAULT_OUTREACH_WEBSITE
+        : storedWebsite,
+    );
     setWhatsappNumber(window.localStorage.getItem("growthlab-outreach-whatsapp") || DEFAULT_OUTREACH_WHATSAPP);
   }, []);
   useEffect(() => {
