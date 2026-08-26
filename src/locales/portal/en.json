@@ -124,6 +124,13 @@
       "recentReports": "Recent reports",
       "noReports": "No reports yet. Create a client, then add a reporting period.",
       "quickCreate": "New client"
+      ,"quickActionsTitle": "VIP actions",
+      "quickNewClient": "Add a client",
+      "quickNewClientHint": "Build a new account profile",
+      "quickOutreach": "Compose outreach",
+      "quickOutreachHint": "Prepare a high-touch message",
+      "quickReports": "Review reports",
+      "quickReportsHint": "Monitor recent performance"
     },
     "clients": {
       "title": "Clients",
@@ -683,6 +690,11 @@
       "queue": "Conversation queue",
       "loading": "Loading outreach records...",
       "emptyQueue": "No messages in this view.",
+      "searchQueue": "Search subject, message, or contact...",
+      "conversations": "conversations",
+      "pageOf": "Page {page} of {pages}",
+      "previous": "Previous",
+      "next": "Next",
       "unknownContact": "Unknown contact",
       "created": "Created",
       "newRecord": "New {kind}",

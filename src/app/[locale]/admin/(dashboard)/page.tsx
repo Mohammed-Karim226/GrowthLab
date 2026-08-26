@@ -6,6 +6,8 @@ import {
   Crown,
   FileCheck2,
   Files,
+  MessageCircle,
+  Plus,
   ShieldCheck,
   Sparkles,
   UserCheck,
@@ -124,6 +126,24 @@ export default async function AdminOverviewPage({
           <Crown className="size-48 rotate-12" strokeWidth={1} />
         </div>
       </header>
+
+      <section className="grid gap-3 sm:grid-cols-3" aria-label={t("overview.quickActionsTitle")}>
+        <Link href={`/${locale}/admin/clients`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-[#ead178]/35 hover:bg-white/[0.08]">
+          <span className="flex size-10 items-center justify-center rounded-xl border border-[#ead178]/20 bg-[#ead178]/10 text-[#efd77f]"><Plus className="size-4" /></span>
+          <span><span className="block text-sm font-semibold text-white">{t("overview.quickNewClient")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickNewClientHint")}</span></span>
+          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-[#efd77f]" />
+        </Link>
+        <Link href={`/${locale}/admin/template-creation`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white/[0.08]">
+          <span className="flex size-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200"><MessageCircle className="size-4" /></span>
+          <span><span className="block text-sm font-semibold text-white">{t("overview.quickOutreach")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickOutreachHint")}</span></span>
+          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-cyan-200" />
+        </Link>
+        <Link href={`/${locale}/admin/clients`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-emerald-300/35 hover:bg-white/[0.08]">
+          <span className="flex size-10 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-200"><FileCheck2 className="size-4" /></span>
+          <span><span className="block text-sm font-semibold text-white">{t("overview.quickReports")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickReportsHint")}</span></span>
+          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-emerald-200" />
+        </Link>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => {

@@ -124,6 +124,13 @@
       "recentReports": "أحدث التقارير",
       "noReports": "لا توجد تقارير بعد. أنشئ عميلًا ثم أضف فترة تقرير.",
       "quickCreate": "عميل جديد"
+      ,"quickActionsTitle": "إجراءات VIP",
+      "quickNewClient": "إضافة عميل",
+      "quickNewClientHint": "إنشاء ملف حساب جديد",
+      "quickOutreach": "إنشاء رسالة تواصل",
+      "quickOutreachHint": "إعداد رسالة عالية الاهتمام",
+      "quickReports": "مراجعة التقارير",
+      "quickReportsHint": "متابعة أحدث الأداء"
     },
     "clients": {
       "title": "العملاء",
@@ -693,6 +700,11 @@
       "queue": "قائمة المحادثات",
       "loading": "جارٍ تحميل سجلات التواصل...",
       "emptyQueue": "لا توجد رسائل في هذه القائمة.",
+      "searchQueue": "ابحث في الموضوع أو الرسالة أو جهة الاتصال...",
+      "conversations": "محادثة",
+      "pageOf": "الصفحة {page} من {pages}",
+      "previous": "السابق",
+      "next": "التالي",
       "unknownContact": "جهة اتصال غير معروفة",
       "created": "تم الإنشاء",
       "newRecord": "{kind} جديد",
