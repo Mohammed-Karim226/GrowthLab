@@ -1,20 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import { FileBarChart, Sparkles } from "lucide-react";
 
-import KpiGrid from "@/components/portal/KpiGrid";
-import PlatformBreakdown from "@/components/portal/PlatformBreakdown";
 import InsightsPanel from "@/components/portal/InsightsPanel";
-import PerformanceLineChart from "@/components/portal/charts/PerformanceLineChart";
-import PlatformComparisonChart from "@/components/portal/charts/PlatformComparisonChart";
-import MetricTrendChart from "@/components/portal/charts/MetricTrendChart";
 import { requireClient } from "@/lib/auth";
-import { listPublishedPeriods, loadMetrics } from "@/lib/portal/data";
-import { buildMetricSeries } from "@/lib/portal/series";
-import { buildTrendSeries, comparePeriods } from "@/lib/analytics/comparisons";
+import { listPublishedPeriods, loadPortalMetrics } from "@/lib/portal/data";
+import { comparePeriods } from "@/lib/analytics/comparisons";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import PortalHero from "@/components/portal/PortalHero";
 import ReportIntelligenceBrief from "@/components/portal/ReportIntelligenceBrief";
+import AnalyticsWorkspace from "@/components/portal/AnalyticsWorkspace";
 
 export const dynamic = "force-dynamic";
 
@@ -63,27 +58,13 @@ export default async function PortalOverviewPage({
     );
   }
 
-  const metricsByVersion = await loadMetrics(periods.map((period) => period.versionId));
+  const metricsByVersion = await loadPortalMetrics(periods.map((period) => period.versionId));
 
   const [latest, previous] = periods;
   const latestMetrics = metricsByVersion.get(latest.versionId) ?? [];
   const previousMetrics = previous ? (metricsByVersion.get(previous.versionId) ?? []) : null;
 
   const comparison = comparePeriods(latestMetrics, previousMetrics);
-
-  // Oldest-first for the charts; `periods` itself is newest-first.
-  const chronological = [...periods].reverse().map((period) => ({
-    reportId: period.reportId,
-    versionId: period.versionId,
-    title: period.title,
-    periodEnd: period.periodEnd,
-    metrics: metricsByVersion.get(period.versionId) ?? [],
-  }));
-
-  const trend = buildTrendSeries(chronological);
-  const metricSeries = buildMetricSeries(
-    chronological.map((period) => ({ label: period.title, metrics: period.metrics }))
-  );
 
   return (
     <div className="space-y-6">
@@ -111,7 +92,7 @@ export default async function PortalOverviewPage({
 
       <ReportIntelligenceBrief locale={locale} comparison={comparison} />
 
-      <KpiGrid locale={locale} comparison={comparison} compact />
+      <AnalyticsWorkspace locale={locale} periods={periods.map((period) => ({ ...period, metrics: metricsByVersion.get(period.versionId) ?? [] }))} />
 
       <section className="portal-feature-gateway relative space-y-6 rounded-[30px] border border-[#8f78e8]/20 bg-[#110f26]/45 p-3 sm:space-y-8 sm:p-5 lg:p-6">
         <div className="portal-feature-gateway-heading flex flex-col gap-3 border-b border-[#d8be78]/15 pb-5 sm:flex-row sm:items-end sm:justify-between">
@@ -122,23 +103,6 @@ export default async function PortalOverviewPage({
           <p className="max-w-md text-xs leading-relaxed text-[#9992b2]">{t("deepDiveHint")}</p>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          <PerformanceLineChart locale={locale} points={trend} />
-          <PlatformComparisonChart
-            locale={locale}
-            platforms={comparison.platforms.map((platform) => ({
-              platform: platform.platform,
-              views: platform.current.views,
-              reach: platform.current.reach,
-              engagement: platform.current.engagement,
-              followers: platform.current.followers,
-            }))}
-          />
-        </div>
-
-        {metricSeries.length > 0 && <MetricTrendChart locale={locale} series={metricSeries} />}
-
-        <PlatformBreakdown locale={locale} platforms={comparison.platforms} metrics={comparison.metrics} />
         <InsightsPanel summary={latest.summary} aiSummary={latest.aiSummary} />
       </section>
     </div>

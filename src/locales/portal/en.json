@@ -392,6 +392,13 @@
       "add": "Add account",
       "empty": "No social accounts added yet.",
       "created": "Account added",
+      "updated": "Account updated",
+      "edit": "Edit account",
+      "editTitle": "Edit social account",
+      "editHint": "Update the platform, profile details, or account stage.",
+      "stagePlaceholder": "Stage, for example active or paused",
+      "cancel": "Cancel",
+      "save": "Save changes",
       "deleted": "Account removed",
       "delete": "Delete account",
       "deleteConfirm": "Remove this account?"
@@ -422,6 +429,7 @@
       "invalidUpload": "That upload could not be read.",
       "accountExists": "That platform account already exists for this client.",
       "accountInUse": "This account already has report uploads and cannot be removed.",
+      "accountPlatformLocked": "The platform cannot be changed after analysis images have been uploaded.",
       "accountPlatformMismatch": "The selected account does not match this platform.",
       "notFound": "We could not find that.",
       "forbidden": "You do not have access to this.",
@@ -435,6 +443,8 @@
     }
   },
   "portal": {
+    "filters": { "allPlatforms": "All platforms", "allAccounts": "All accounts", "allMetrics": "All metrics", "previous": "Previous period", "mom": "Month over month", "qoq": "Quarter over quarter", "yoy": "Year over year", "from": "From", "to": "To", "empty": "No data matches these filters." },
+    "gallery": { "eyebrow": "Analysis gallery", "title": "Monthly analysis", "subtitle": "Source screenshots attached to your published reports.", "privateOnly": "Private client access", "sourceNote": "Reviewed source images", "allMonths": "All months", "allPlatforms": "All platforms", "empty": "No analysis images are available yet.", "imageAlt": "Analysis screenshot", "close": "Close image" },
     "brand": "GrowthLab",
     "payments": {
       "eyebrow": "Client care",
@@ -476,6 +486,7 @@
       "label": "Portal sections",
       "overview": "Dashboard",
       "reports": "Reports",
+      "gallery": "Analysis gallery",
       "payments": "Payments & plan",
       "open": "Open menu",
       "close": "Close menu",

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CreditCard,
   FileBarChart,
+  Images,
   Menu,
   ShieldCheck,
   Sparkles,
@@ -53,6 +54,7 @@ function accountHref(account: AccountRow) {
 const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
   { key: "reports", href: "/reports", icon: FileBarChart },
+  { key: "gallery", href: "/gallery", icon: Images },
   { key: "payments", href: "/payments", icon: CreditCard },
 ] as const;
 
