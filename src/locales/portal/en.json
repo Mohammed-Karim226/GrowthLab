@@ -140,6 +140,7 @@
       "empty": "No clients yet.",
       "emptyHint": "Create your first client to start building reports.",
       "noMatches": "No clients match that search.",
+      "pagination": "Page {page} of {pages} · {total} clients",
       "columns": {
         "name": "Client",
         "company": "Company",

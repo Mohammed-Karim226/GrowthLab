@@ -221,6 +221,10 @@
   }
 
   .button-primary {
+    --button-reveal: rgba(255, 255, 255, 0.22);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     background: linear-gradient(135deg, #22d3ee 0%, #1586c9 52%, #3854dc 100%);
     box-shadow:
       0 14px 34px rgba(20, 141, 212, 0.24),
@@ -229,6 +233,40 @@
       transform 180ms ease,
       box-shadow 180ms ease,
       filter 180ms ease;
+  }
+
+  .app-button-motion {
+    --button-reveal: rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .app-button-motion::before,
+  .button-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    clip-path: circle(18% at 22% 50%);
+    background: radial-gradient(circle at 22% 50%, var(--button-reveal) 0%, var(--button-reveal) 28%, transparent 72%);
+    transition:
+      opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      clip-path 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .app-button-motion:hover::before,
+  .app-button-motion:focus-visible::before,
+  .button-primary:hover::before,
+  .button-primary:focus-visible::before {
+    opacity: 1;
+    clip-path: circle(145% at 22% 50%);
+  }
+
+  .app-button-motion:disabled::before,
+  .button-primary[aria-disabled="true"]::before {
+    display: none;
   }
 
   .button-primary:hover {
@@ -243,7 +281,7 @@
     transform: translateY(0);
   }
 
-  /* Sweeping sheen for primary CTAs. */
+  /* Legacy class retained for callers; radial reveal is now the global motion. */
   .button-shine {
     position: relative;
     overflow: hidden;
@@ -251,22 +289,18 @@
   }
 
   .button-shine::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      110deg,
-      transparent 28%,
-      rgba(255, 255, 255, 0.32) 50%,
-      transparent 72%
-    );
-    transform: translateX(-120%);
-    transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-    pointer-events: none;
+    display: none;
   }
 
   .button-shine:hover::after {
-    transform: translateX(120%);
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-button-motion::before,
+    .button-primary::before {
+      transition-duration: 0ms;
+    }
   }
 
   .glow-teal {

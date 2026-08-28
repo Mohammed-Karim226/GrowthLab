@@ -6,7 +6,7 @@ import { decodeCursor, encodeCursor } from "@/lib/pagination";
 import type { ClientRow } from "@/types/database";
 
 export const dynamic = "force-dynamic";
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 type ClientWithCount = ClientRow & { reports: Array<{ count: number }> };
 
 export default async function AdminClientsPage({
@@ -14,7 +14,7 @@ export default async function AdminClientsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ cursor?: string; direction?: string; q?: string }>;
+  searchParams: Promise<{ cursor?: string; direction?: string; q?: string; page?: string }>;
 }) {
   const [{ locale: raw }, search] = await Promise.all([params, searchParams]);
   const locale = isLocale(raw) ? raw : defaultLocale;
@@ -22,6 +22,8 @@ export default async function AdminClientsPage({
   const cursor = decodeCursor(search.cursor);
   const previousDirection = search.direction === "prev";
   const searchTerm = (search.q ?? "").trim().slice(0, 100);
+  const requestedPage = Number(search.page ?? "1");
+  const currentPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const safeTerm = searchTerm.replace(/[,()%]/g, " ").trim();
   const supabase = await createClient();
   let query = supabase
@@ -40,8 +42,14 @@ export default async function AdminClientsPage({
       `created_at.${operator}.${cursor.value},and(created_at.eq.${cursor.value},id.${operator}.${cursor.id})`,
     );
   }
-  const { data, error } = await query.returns<ClientWithCount[]>();
+  let countQuery = supabase.from("clients").select("id", { count: "exact", head: true });
+  if (safeTerm) countQuery = countQuery.or(`name.ilike.%${safeTerm}%,company_name.ilike.%${safeTerm}%,contact_email.ilike.%${safeTerm}%`);
+  const [{ data, error }, { count: totalClients, error: countError }] = await Promise.all([
+    query.returns<ClientWithCount[]>(),
+    countQuery,
+  ]);
   if (error) throw error;
+  if (countError) throw countError;
   const rawRows = data ?? [];
   const hasMore = rawRows.length > PAGE_SIZE;
   const rows = rawRows.slice(0, PAGE_SIZE);
@@ -63,6 +71,7 @@ export default async function AdminClientsPage({
       direction,
     });
     if (searchTerm) values.set("q", searchTerm);
+    values.set("page", String(direction === "next" ? currentPage + 1 : Math.max(1, currentPage - 1)));
     return `${base}?${values}`;
   };
   const previousHref = (previousDirection ? hasMore : Boolean(cursor))
@@ -86,6 +95,9 @@ export default async function AdminClientsPage({
         query={searchTerm}
         previousHref={previousHref}
         nextHref={nextHref}
+        currentPage={currentPage}
+        totalClients={totalClients ?? 0}
+        pageSize={PAGE_SIZE}
       />
     </div>
   );
