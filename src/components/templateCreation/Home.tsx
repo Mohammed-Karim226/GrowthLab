@@ -2,21 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  Archive,
+  BadgeCheck,
   Bot,
   Check,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Copy,
+  FilePenLine,
   Globe2,
   ListX,
   Mail,
   MessageCircle,
+  MessageSquareReply,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  Send,
+  TimerOff,
   Trash2,
   UserRound,
 } from "lucide-react";
@@ -96,6 +103,14 @@ const statusStyles: Record<Status, { badge: string; trigger: string; dot: string
   replied: { badge: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300", trigger: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200", dot: "bg-emerald-300" },
   no_reply: { badge: "border-amber-400/25 bg-amber-400/10 text-amber-300", trigger: "border-amber-400/30 bg-amber-400/10 text-amber-200", dot: "bg-amber-300" },
   closed: { badge: "border-slate-500/25 bg-slate-500/10 text-slate-400", trigger: "border-slate-500/30 bg-slate-500/10 text-slate-300", dot: "bg-slate-500" },
+};
+const statusCards: Record<Status, { icon: typeof FilePenLine; color: string; soft: string }> = {
+  draft: { icon: FilePenLine, color: "#38bdf8", soft: "rgba(56,189,248,0.18)" },
+  ready: { icon: BadgeCheck, color: "#22d3ee", soft: "rgba(34,211,238,0.18)" },
+  sent: { icon: Send, color: "#a78bfa", soft: "rgba(167,139,250,0.2)" },
+  replied: { icon: MessageSquareReply, color: "#34d399", soft: "rgba(52,211,153,0.18)" },
+  no_reply: { icon: TimerOff, color: "#fbbf24", soft: "rgba(251,191,36,0.18)" },
+  closed: { icon: Archive, color: "#fb7185", soft: "rgba(251,113,133,0.18)" },
 };
 
 function escapeHtml(value: string) {
@@ -190,6 +205,7 @@ export default function Home() {
   const [queueTotal, setQueueTotal] = useState(0);
   const [queueHasMore, setQueueHasMore] = useState(false);
   const [counts, setCounts] = useState<Record<Status, number>>({ draft: 0, ready: 0, sent: 0, replied: 0, no_reply: 0, closed: 0 });
+  const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -475,28 +491,57 @@ export default function Home() {
           {t("refresh")}
         </Button>
       </header>
-      <section className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {statuses.map((status) => (
-          <Card
+      <section className="relative overflow-hidden rounded-[24px] bg-[#090e1b]/90 p-3 shadow-[0_22px_55px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-4">
+        <div className="relative grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {statuses.map((status, index) => {
+          const visual = statusCards[status];
+          const Icon = visual.icon;
+          const active = filter === status;
+          return <motion.button
             key={status}
-            onClick={() => { setFilter(filter === status ? "all" : status); setQueuePage(1); }}
-            className={
-              filter === status
-                ? "cursor-pointer border-[#81a6ff]/40 bg-[#81a6ff]/10"
-                : "cursor-pointer"
-            }
-            size="sm"
+            type="button"
+            aria-pressed={active}
+            onClick={() => { setFilter(active ? "all" : status); setQueuePage(1); }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: active && !reduceMotion ? -2 : 0, backgroundColor: active ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.035)" }}
+            whileHover={reduceMotion ? undefined : { y: active ? -3 : -2 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+            transition={{ duration: reduceMotion ? 0 : 0.36, ease: [0.16, 1, 0.3, 1] }}
+            className="group relative min-h-[132px] overflow-hidden rounded-[18px] bg-white/[0.035] p-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
-            <CardContent>
-              <p className="font-satoshi text-2xl text-white">
-                {counts[status] || 0}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {labels[status]}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 rounded-[18px]"
+              initial={false}
+              animate={active
+                ? { opacity: 1, clipPath: "circle(145% at 22% 22%)" }
+                : { opacity: 0, clipPath: "circle(22% at 22% 22%)" }}
+              transition={{ duration: reduceMotion ? 0 : 0.62, ease: [0.16, 1, 0.3, 1] }}
+              style={{ background: `radial-gradient(circle at 22% 22%, ${visual.soft} 0%, ${visual.soft} 28%, rgba(255,255,255,0.018) 72%)`, boxShadow: "0 12px 24px rgba(0,0,0,0.14)" }}
+            />
+            <span className="relative flex items-center justify-between gap-3">
+              <motion.span
+                className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#111827]"
+                whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+                animate={reduceMotion ? undefined : { scale: active ? 1.04 : 1 }}
+                transition={{ duration: reduceMotion ? 0 : 0.34, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  color: visual.color,
+                  boxShadow: active ? `0 0 20px ${visual.soft}, inset 0 0 0 1px ${visual.color}35` : `inset 0 0 0 1px ${visual.color}20`,
+                }}
+              >
+                <Icon className="size-5" strokeWidth={1.9} />
+              </motion.span>
+              <span className="text-[9px] font-semibold tracking-[0.14em] text-white/30">{String(index + 1).padStart(2, "0")}</span>
+            </span>
+            <span className="relative mt-4 flex items-end justify-between gap-2">
+              <span className="font-satoshi text-[30px] leading-none tabular-nums text-white">{counts[status] || 0}</span>
+              <span className="mb-0.5 size-2 rounded-full" style={{ backgroundColor: visual.color, boxShadow: active ? `0 0 12px ${visual.color}` : undefined }} />
+            </span>
+            <span className="relative mt-2 block truncate text-[11px] font-medium text-white/55 transition-colors group-hover:text-white/80">{labels[status]}</span>
+          </motion.button>;
+        })}
+        </div>
       </section>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground">
