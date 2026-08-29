@@ -444,6 +444,40 @@
     }
   },
   "portal": {
+    "intelligenceCenter": {
+      "private": "Private strategic intelligence",
+      "title": "Intelligence Center",
+      "subtitle": "Evidence-linked discoveries, early warnings, opportunities, and controlled scenario estimates derived only from your published data.",
+      "confidence": "Data confidence",
+      "riskScore": "Risk exposure",
+      "signals": "Signals detected",
+      "emptyTitle": "Intelligence is waiting for data",
+      "emptyHint": "This section activates after your first report is reviewed and published.",
+      "tabs": { "discoveries": "Discoveries", "risks": "Risk radar", "opportunities": "Opportunities", "scenario": "Scenario lab" },
+      "severity": { "critical": "Critical", "high": "High", "moderate": "Moderate", "positive": "Opportunity", "informational": "Information" },
+      "discoveryTitle": "{metric} shifted on {platform}",
+      "discoveryDescription": "Movement of {change} was detected. The latest verified value is {current}.",
+      "riskTitle": "{metric} requires attention on {platform}",
+      "riskDescription": "The verified value moved {change} to {current}. Review the source before changing strategy.",
+      "opportunityTitle": "{metric} is gaining momentum on {platform}",
+      "opportunityDescription": "The verified value improved {change} to {current}, creating a measurable signal to build on.",
+      "evidence": "Evidence: {report}",
+      "noDiscoveries": "A second published period is required before movement discoveries can be calculated.",
+      "noRisks": "No material decline was detected in the latest comparison.",
+      "noOpportunities": "No metric crossed the opportunity threshold in the latest comparison.",
+      "scenario": {
+        "title": "Controlled scenario estimate",
+        "hint": "Adjust execution and time horizon to explore a directional estimate based on historical movement.",
+        "metric": "Metric",
+        "execution": "Execution change (%)",
+        "horizon": "Time horizon",
+        "days": "{count} days",
+        "baseline": "Verified baseline",
+        "projected": "Estimated outcome",
+        "estimatedChange": "Estimated movement",
+        "disclaimer": "Estimate only. Historical average trend: {trend}. This is not a guaranteed result or a verified report value."
+      }
+    },
     "filters": { "allPlatforms": "All platforms", "allAccounts": "All accounts", "allMetrics": "All metrics", "previous": "Previous period", "mom": "Month over month", "qoq": "Quarter over quarter", "yoy": "Year over year", "from": "From", "to": "To", "empty": "No data matches these filters." },
     "gallery": { "eyebrow": "Analysis gallery", "title": "Monthly analysis", "subtitle": "Source screenshots attached to your published reports.", "privateOnly": "Private client access", "sourceNote": "Reviewed source images", "allMonths": "All months", "allPlatforms": "All platforms", "empty": "No analysis images are available yet.", "imageAlt": "Analysis screenshot", "close": "Close image" },
     "brand": "GrowthLab",
@@ -486,6 +520,7 @@
     "nav": {
       "label": "Portal sections",
       "overview": "Dashboard",
+      "intelligence": "Intelligence",
       "reports": "Reports",
       "gallery": "Analysis gallery",
       "payments": "Payments & plan",
