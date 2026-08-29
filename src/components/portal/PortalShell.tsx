@@ -8,9 +8,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
   BarChart3,
+  BrainCircuit,
   ChevronRight,
   CreditCard,
   FileBarChart,
+  Images,
   Menu,
   ShieldCheck,
   Sparkles,
@@ -52,7 +54,9 @@ function accountHref(account: AccountRow) {
 
 const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
+  { key: "intelligence", href: "/intelligence", icon: BrainCircuit, disabled: true },
   { key: "reports", href: "/reports", icon: FileBarChart },
+  { key: "gallery", href: "/gallery", icon: Images },
   { key: "payments", href: "/payments", icon: CreditCard },
 ] as const;
 
@@ -89,7 +93,23 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
       </p>
       {NAV.map((item) => {
         const Icon = item.icon;
+        const disabled = "disabled" in item && item.disabled;
         const active = isActive(item.href);
+
+        if (disabled) {
+          return (
+            <div
+              key={item.key}
+              aria-disabled="true"
+              className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium text-[#5f5e59] opacity-60"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.04] bg-white/[0.015] text-[#5f5e59]">
+                <Icon className="size-[17px]" strokeWidth={1.8} aria-hidden />
+              </span>
+              <span className="flex-1">{t(`nav.${item.key}` as never)}</span>
+            </div>
+          );
+        }
 
         return (
           <Link

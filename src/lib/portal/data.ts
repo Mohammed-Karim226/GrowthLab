@@ -1,10 +1,24 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { INSIGHTS_BUCKET } from "@/lib/uploads";
 import { decodeCursor, encodeCursor } from "@/lib/pagination";
-import type { AiSummaryPayload, MetricRow } from "@/types/database";
+import type { AiSummaryPayload, MetricRow, Platform } from "@/types/database";
 
 export type PublishedPeriod = { reportId: string; versionId: string; versionNumber: number; title: string; periodStart: string; periodEnd: string; publishedAt: string | null; summary: string | null; aiSummary: AiSummaryPayload | null };
 export type PublishedPeriodsPage = { periods: PublishedPeriod[]; total: number; previousCursor: string | null; nextCursor: string | null };
+export type PortalMetric = MetricRow & { accountId: string | null };
+export type GalleryImage = {
+  id: string;
+  url: string;
+  filename: string | null;
+  platform: Platform;
+  accountId: string | null;
+  reportId: string;
+  reportTitle: string;
+  periodStart: string;
+  periodEnd: string;
+};
 type ReportBase = { id: string; title: string; period_start: string; period_end: string; current_published_version_id: string | null };
 type Version = { id: string; version_number: number; status: string; published_at: string | null; summary: string | null; ai_summary: AiSummaryPayload | null };
 
@@ -89,4 +103,68 @@ export async function loadMetrics(versionIds: string[]): Promise<Map<string, Met
   for (const id of versionIds) grouped.set(id, []);
   for (const metric of data ?? []) grouped.get(metric.report_version_id)?.push(metric);
   return grouped;
+}
+
+export async function loadPortalMetrics(versionIds: string[]): Promise<Map<string, PortalMetric[]>> {
+  const grouped = new Map<string, PortalMetric[]>();
+  if (!versionIds.length) return grouped;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("metrics")
+    .select("*, insight_batches(account_id)")
+    .in("report_version_id", versionIds)
+    .order("platform", { ascending: true })
+    .returns<Array<MetricRow & { insight_batches: { account_id: string | null } | null }>>();
+  if (error) throw error;
+  for (const id of versionIds) grouped.set(id, []);
+  for (const metric of data ?? []) {
+    const { insight_batches, ...row } = metric;
+    grouped.get(row.report_version_id)?.push({ ...row, accountId: insight_batches?.account_id ?? null });
+  }
+  return grouped;
+}
+
+/** Client-visible source screenshots for published reports only. */
+export async function loadPublishedAnalysisGallery(clientId: string): Promise<GalleryImage[]> {
+  const periods = await listPublishedPeriods(clientId, 36);
+  if (!periods.length) return [];
+
+  // The regular tenant-scoped query above proves ownership and publication.
+  // The service client is used only to mint short-lived URLs for the private bucket.
+  const admin = createAdminClient();
+  const versionIds = periods.map((period) => period.versionId);
+  const { data, error } = await admin.from("insight_batches")
+    .select("id, report_version_id, platform, account_id, insight_images(id, storage_path, original_filename, sort_order)")
+    .in("report_version_id", versionIds)
+    .returns<Array<{
+      id: string;
+      report_version_id: string;
+      platform: Platform;
+      account_id: string | null;
+      insight_images: Array<{ id: string; storage_path: string; original_filename: string | null; sort_order: number }>;
+    }>>();
+  if (error) throw error;
+
+  const periodByVersion = new Map(periods.map((period) => [period.versionId, period]));
+  const rows = (data ?? []).flatMap((batch) => batch.insight_images.map((image) => ({ batch, image })));
+  if (!rows.length) return [];
+  const { data: signed, error: signedError } = await admin.storage.from(INSIGHTS_BUCKET)
+    .createSignedUrls(rows.map(({ image }) => image.storage_path), 60 * 15);
+  if (signedError) throw signedError;
+
+  return rows.flatMap(({ batch, image }, index) => {
+    const period = periodByVersion.get(batch.report_version_id);
+    const url = signed?.[index]?.signedUrl;
+    if (!period || !url) return [];
+    return [{
+      id: image.id,
+      url,
+      filename: image.original_filename,
+      platform: batch.platform,
+      accountId: batch.account_id,
+      reportId: period.reportId,
+      reportTitle: period.title,
+      periodStart: period.periodStart,
+      periodEnd: period.periodEnd,
+    }];
+  }).sort((a, b) => Date.parse(b.periodEnd) - Date.parse(a.periodEnd));
 }

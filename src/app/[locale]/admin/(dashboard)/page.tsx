@@ -5,13 +5,7 @@ import {
   ArrowUpRight,
   Crown,
   FileCheck2,
-  Files,
-  MessageCircle,
-  Plus,
-  ShieldCheck,
   Sparkles,
-  UserCheck,
-  Users,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +15,7 @@ import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import { statusBadgeVariant } from "@/components/admin/status";
 import type { ReportStatus } from "@/types/database";
+import { DashboardQuickAction, DashboardStatBox } from "@/components/admin/DashboardMotion";
 
 export const dynamic = "force-dynamic";
 
@@ -75,23 +70,23 @@ export default async function AdminOverviewPage({
   ).length;
 
   const stats = [
-    { key: "totalClients", value: clients.length, icon: Users, tone: "violet" },
+    { key: "totalClients", value: clients.length, icon: "users", tone: "violet" },
     {
       key: "activeClients",
       value: clients.filter((client) => client.is_active).length,
-      icon: UserCheck,
+      icon: "active",
       tone: "emerald",
     },
     {
       key: "totalReports",
       value: totalReports ?? 0,
-      icon: Files,
+      icon: "files",
       tone: "gold",
     },
     {
       key: "awaitingReview",
       value: awaitingReview,
-      icon: ShieldCheck,
+      icon: "review",
       tone: "cyan",
     },
   ] as const;
@@ -128,47 +123,13 @@ export default async function AdminOverviewPage({
       </header>
 
       <section className="grid gap-3 sm:grid-cols-3" aria-label={t("overview.quickActionsTitle")}>
-        <Link href={`/${locale}/admin/clients`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-[#ead178]/35 hover:bg-white/[0.08]">
-          <span className="flex size-10 items-center justify-center rounded-xl border border-[#ead178]/20 bg-[#ead178]/10 text-[#efd77f]"><Plus className="size-4" /></span>
-          <span><span className="block text-sm font-semibold text-white">{t("overview.quickNewClient")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickNewClientHint")}</span></span>
-          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-[#efd77f]" />
-        </Link>
-        <Link href={`/${locale}/admin/template-creation`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white/[0.08]">
-          <span className="flex size-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200"><MessageCircle className="size-4" /></span>
-          <span><span className="block text-sm font-semibold text-white">{t("overview.quickOutreach")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickOutreachHint")}</span></span>
-          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-cyan-200" />
-        </Link>
-        <Link href={`/${locale}/admin/clients`} className="admin-quick-action group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.045] p-4 transition-all hover:-translate-y-0.5 hover:border-emerald-300/35 hover:bg-white/[0.08]">
-          <span className="flex size-10 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-200"><FileCheck2 className="size-4" /></span>
-          <span><span className="block text-sm font-semibold text-white">{t("overview.quickReports")}</span><span className="mt-0.5 block text-xs text-slate-500">{t("overview.quickReportsHint")}</span></span>
-          <ArrowUpRight className="ms-auto size-4 text-slate-600 transition-colors group-hover:text-emerald-200" />
-        </Link>
+        <DashboardQuickAction href={`/${locale}/admin/clients`} icon="plus" tone="gold" title={t("overview.quickNewClient")} hint={t("overview.quickNewClientHint")} />
+        <DashboardQuickAction href={`/${locale}/admin/template-creation`} icon="message" tone="cyan" title={t("overview.quickOutreach")} hint={t("overview.quickOutreachHint")} />
+        <DashboardQuickAction href={`/${locale}/admin/clients`} icon="report" tone="emerald" title={t("overview.quickReports")} hint={t("overview.quickReportsHint")} />
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card
-              key={stat.key}
-              className={`admin-stat-card admin-stat-${stat.tone}`}
-            >
-              <CardContent className="flex items-center justify-between gap-4 p-5">
-                <div className="space-y-1">
-                  <p className="text-xs tracking-wide text-slate-500 uppercase">
-                    {t(`overview.${stat.key}` as never)}
-                  </p>
-                  <p className="font-satoshi text-2xl text-white">
-                    {stat.value}
-                  </p>
-                </div>
-                <span className="admin-stat-icon flex size-11 items-center justify-center rounded-2xl">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {stats.map((stat) => <DashboardStatBox key={stat.key} label={t(`overview.${stat.key}` as never)} value={stat.value} icon={stat.icon} tone={stat.tone} />)}
       </div>
 
       <Card className="admin-reports-card">

@@ -57,12 +57,18 @@ export default function ClientsView({
   query,
   previousHref,
   nextHref,
+  currentPage,
+  totalClients,
+  pageSize,
 }: {
   clients: ClientListItem[];
   locale: Locale;
   query: string;
   previousHref: string | null;
   nextHref: string | null;
+  currentPage: number;
+  totalClients: number;
+  pageSize: number;
 }) {
   const t = useTranslations("admin.clients");
   const tCommon = useTranslations("common");
@@ -252,6 +258,7 @@ export default function ClientsView({
         nextHref={nextHref}
         previousLabel={tCommon("previous")}
         nextLabel={tCommon("next")}
+        statusLabel={t("pagination", { page: currentPage, pages: Math.max(1, Math.ceil(totalClients / pageSize)), total: totalClients })}
       />
 
       <CreateClientDialog

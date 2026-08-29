@@ -380,7 +380,7 @@ export default function TestimonialsSection({
               onClick={() => goTo(index)}
               aria-current={index === activeIndex}
               className={cn(
-                "liquid-glass hover-lift flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
+                "app-button-motion liquid-glass hover-lift flex min-h-20 items-center gap-3 rounded-[24px] p-3 text-left",
                 index === activeIndex &&
                   "border-cyan-300/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]",
                 isRTL && "text-right",

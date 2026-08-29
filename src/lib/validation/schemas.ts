@@ -37,6 +37,7 @@ export const createAccountSchema = z.object({
 }).strict();
 
 export const updateAccountSchema = z.object({
+  platform: platformSchema.optional(),
   pageName: z.string().trim().min(1).max(160).optional(),
   pageId: z.string().trim().max(160).nullable().optional(),
   stage: z.string().trim().max(80).nullable().optional(),
