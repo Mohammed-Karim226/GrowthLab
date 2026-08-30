@@ -245,6 +245,18 @@ export const testimonials: Testimonial[] = [
     quote:
       "I was plateaued for 6 weeks. One discovery call later, everything changed. Real ROI.",
   },
+  {
+    name: "مايند | Mind",
+    category: "Mental Health & Healthcare Podcast Series",
+    avatar:
+      "https://yt3.googleusercontent.com/OEx0vweIN-6qt3vhl7RJJFojC5toag92XqrmuycZz0OaA5ilA4iA8sEjaNgvJrDqWzPo9e8=s160-c-k-c0x00ffffff-no-rj",
+    before: "0",
+    after: "4.5M",
+    afterDays: 30,
+    monthlyViews: 4.5e6,
+    quote:
+      "Mind is a podcast series covering mental health, healthcare, and more. Thanks to the GrowthLab team, we reached 4.5 million views across social media in just 30 days. Their strategy, creativity, and support made a real difference, and we are truly grateful for the partnership.",
+  },
 ];
 
 export const faqs: FaqItem[] = [

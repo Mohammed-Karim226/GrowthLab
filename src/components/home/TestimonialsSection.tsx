@@ -11,7 +11,16 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion, useReducedMotion } from "framer-motion";
-import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Quote,
+  Radar,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
@@ -90,6 +99,9 @@ export default function TestimonialsSection({
   const goTo = (index: number) => {
     setActiveIndex((index + stories.length) % stories.length);
   };
+
+  const goLeft = () => goTo(activeIndex + (isRTL ? 1 : -1));
+  const goRight = () => goTo(activeIndex + (isRTL ? -1 : 1));
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowRight") {
@@ -233,6 +245,7 @@ export default function TestimonialsSection({
 
           <SectionReveal delay={0.12}>
             <motion.article
+              id="active-testimonial"
               key={activeIndex}
               initial={{ opacity: 0, scale: 0.96, y: 28 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -344,6 +357,25 @@ export default function TestimonialsSection({
               </div>
             </motion.article>
           </SectionReveal>
+
+          {stories.length > 1 && (
+            <>
+              <CarouselArrow
+                side="left"
+                label={
+                  isRTL ? t("nextTestimonial") : t("previousTestimonial")
+                }
+                onClick={goLeft}
+              />
+              <CarouselArrow
+                side="right"
+                label={
+                  isRTL ? t("previousTestimonial") : t("nextTestimonial")
+                }
+                onClick={goRight}
+              />
+            </>
+          )}
         </div>
 
         <div
@@ -442,6 +474,47 @@ export default function TestimonialsSection({
         </SectionReveal>
       </div>
     </section>
+  );
+}
+
+function CarouselArrow({
+  side,
+  label,
+  onClick,
+}: {
+  side: "left" | "right";
+  label: string;
+  onClick: () => void;
+}) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight;
+
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      aria-controls="active-testimonial"
+      title={label}
+      onClick={onClick}
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.08 }}
+      className={cn(
+        "group absolute top-1/2 z-30 grid size-12 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[#06101d]/85 text-white shadow-[0_12px_36px_rgba(0,0,0,0.5),0_0_28px_rgba(34,211,238,0.14)] backdrop-blur-xl transition-colors hover:border-cyan-300/60 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/35 sm:size-14 lg:hidden",
+        side === "left" ? "-left-1 sm:left-2" : "-right-1 sm:right-2",
+      )}
+    >
+      <span className="absolute inset-1 rounded-full bg-linear-to-br from-white/15 via-cyan-300/5 to-blue-500/15 opacity-80 transition-opacity group-hover:opacity-100" />
+      <span
+        className={cn(
+          "absolute top-1/2 h-px w-3 -translate-y-1/2 bg-linear-to-r from-transparent to-cyan-300/70 opacity-0 transition-all group-hover:w-4 group-hover:opacity-100",
+          side === "left" ? "right-1" : "left-1 rotate-180",
+        )}
+      />
+      <Icon
+        className="relative z-10 size-6 transition-transform group-hover:scale-110 sm:size-7"
+        strokeWidth={2.2}
+        aria-hidden
+      />
+    </motion.button>
   );
 }
 
