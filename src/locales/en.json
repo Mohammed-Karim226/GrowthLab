@@ -140,6 +140,9 @@
     "before": "BEFORE",
     "now": "NOW",
     "verified": "VERIFIED",
+    "achievementBadge": "Verified achievement",
+    "viewAchievement": "View achievement",
+    "achievementDialogTitle": "{name} achievement",
     "previousTestimonial": "Previous testimonial",
     "nextTestimonial": "Next testimonial",
     "trustedByCreatorsOn": "TRUSTED BY CREATORS ON",
@@ -176,6 +179,8 @@
     "before": "0",
     "after": "4.5M",
     "monthlyViews": 4.5e6,
+    "achievementAlt": "Mind Podcast achievement banner celebrating one million views on its first Instagram post",
+    "achievementSummary": "First Instagram post reached 1M views",
     "quote": "Mind is a podcast series covering mental health, healthcare, and more. Thanks to the GrowthLab team, we reached 4.5 million views across social media in just 30 days. Their strategy, creativity, and support made a real difference, and we are truly grateful for the partnership."
   }
     ]
