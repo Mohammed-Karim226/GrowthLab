@@ -1,6 +1,12 @@
 "use client";
 
 import SectionReveal from "@/components/home/SectionReveal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Testimonial } from "@/lib/landing";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +17,18 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion, useReducedMotion } from "framer-motion";
-import { Eye, Quote, Radar, Sparkles, TrendingUp, Users } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Expand,
+  Eye,
+  Medal,
+  Quote,
+  Radar,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
@@ -74,22 +91,32 @@ export default function TestimonialsSection({
   const prefersReducedMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-
+  const [achievementOpen, setAchievementOpen] = useState(false);
 
   const stories = useMemo(() => testimonials.slice(0, 6), [testimonials]);
   const active = stories[activeIndex] ?? stories[0];
 
   useEffect(() => {
-    if (stories.length <= 1 || prefersReducedMotion || isPaused) return;
+    if (
+      stories.length <= 1 ||
+      prefersReducedMotion ||
+      isPaused ||
+      achievementOpen
+    )
+      return;
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % stories.length);
     }, AUTOPLAY_MS);
     return () => window.clearInterval(interval);
-  }, [prefersReducedMotion, stories.length, isPaused]);
+  }, [achievementOpen, prefersReducedMotion, stories.length, isPaused]);
 
   const goTo = (index: number) => {
+    setAchievementOpen(false);
     setActiveIndex((index + stories.length) % stories.length);
   };
+
+  const goLeft = () => goTo(activeIndex + (isRTL ? 1 : -1));
+  const goRight = () => goTo(activeIndex + (isRTL ? -1 : 1));
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowRight") {
@@ -233,6 +260,7 @@ export default function TestimonialsSection({
 
           <SectionReveal delay={0.12}>
             <motion.article
+              id="active-testimonial"
               key={activeIndex}
               initial={{ opacity: 0, scale: 0.96, y: 28 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -261,22 +289,35 @@ export default function TestimonialsSection({
                     <Sparkles className="h-5 w-5 text-amber-300" />
                   </div>
 
-                  <div className="mx-auto my-10 grid place-items-center">
-                    <div className="relative h-52 w-52 sm:h-64 sm:w-64">
-                      <div className="absolute inset-0 rounded-[42px] bg-linear-to-br from-cyan-300/30 via-white/10 to-amber-300/30 blur-2xl" />
-                      <div className="absolute inset-4 rotate-6 rounded-[38px] border border-white/15 bg-white/5" />
-                      <div className="relative h-full w-full overflow-hidden rounded-[42px] border border-white/20 shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
-                        <Image
-                          src={active.avatar}
-                          alt={t(`items.${activeIndex}.name`)}
-                          fill
-                          className="object-cover"
-                          sizes="(min-width: 640px) 256px, 208px"
-                          priority={activeIndex === 0}
-                        />
+                  {active.achievementImage ? (
+                    <AchievementProof
+                      image={active.achievementImage}
+                      avatar={active.avatar}
+                      name={t(`items.${activeIndex}.name`)}
+                      alt={t(`items.${activeIndex}.achievementAlt`)}
+                      badge={t("achievementBadge")}
+                      summary={t(`items.${activeIndex}.achievementSummary`)}
+                      viewLabel={t("viewAchievement")}
+                      onOpen={() => setAchievementOpen(true)}
+                    />
+                  ) : (
+                    <div className="mx-auto my-10 grid place-items-center">
+                      <div className="relative h-52 w-52 sm:h-64 sm:w-64">
+                        <div className="absolute inset-0 rounded-[42px] bg-linear-to-br from-cyan-300/30 via-white/10 to-amber-300/30 blur-2xl" />
+                        <div className="absolute inset-4 rotate-6 rounded-[38px] border border-white/15 bg-white/5" />
+                        <div className="relative h-full w-full overflow-hidden rounded-[42px] border border-white/20 shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
+                          <Image
+                            src={active.avatar}
+                            alt={t(`items.${activeIndex}.name`)}
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 640px) 256px, 208px"
+                            priority={activeIndex === 0}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3">
                     <MetricPill label={t("before")} value={active.before} />
@@ -344,6 +385,25 @@ export default function TestimonialsSection({
               </div>
             </motion.article>
           </SectionReveal>
+
+          {stories.length > 1 && (
+            <>
+              <CarouselArrow
+                side="left"
+                label={
+                  isRTL ? t("nextTestimonial") : t("previousTestimonial")
+                }
+                onClick={goLeft}
+              />
+              <CarouselArrow
+                side="right"
+                label={
+                  isRTL ? t("previousTestimonial") : t("nextTestimonial")
+                }
+                onClick={goRight}
+              />
+            </>
+          )}
         </div>
 
         <div
@@ -441,7 +501,133 @@ export default function TestimonialsSection({
           </div>
         </SectionReveal>
       </div>
+
+      {active.achievementImage && (
+        <Dialog open={achievementOpen} onOpenChange={setAchievementOpen}>
+          <DialogContent className="max-w-5xl overflow-hidden border-emerald-300/25 bg-[#02070b]/95 p-3 sm:p-5">
+            <DialogTitle className="sr-only">
+              {t("achievementDialogTitle", {
+                name: t(`items.${activeIndex}.name`),
+              })}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {t(`items.${activeIndex}.achievementSummary`)}
+            </DialogDescription>
+            <div className="flex max-h-[86vh] items-center justify-center overflow-hidden rounded-2xl bg-black/40">
+              <Image
+                src={active.achievementImage}
+                alt={t(`items.${activeIndex}.achievementAlt`)}
+                width={1024}
+                height={1536}
+                className="max-h-[86vh] w-auto max-w-full object-contain"
+                sizes="(min-width: 1024px) 900px, calc(100vw - 3rem)"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </section>
+  );
+}
+
+function AchievementProof({
+  image,
+  avatar,
+  name,
+  alt,
+  badge,
+  summary,
+  viewLabel,
+  onOpen,
+}: {
+  image: string;
+  avatar: string;
+  name: string;
+  alt: string;
+  badge: string;
+  summary: string;
+  viewLabel: string;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={viewLabel}
+      className="group mx-auto my-8 block w-full max-w-[310px] text-start outline-none sm:max-w-[340px]"
+    >
+      <span className="mb-4 flex items-center gap-4 px-1">
+        <span className="relative size-16 shrink-0 overflow-hidden rounded-[20px] border border-emerald-300/35 bg-[#07110f] shadow-[0_10px_30px_rgba(0,0,0,0.4),0_0_24px_rgba(52,211,153,0.16)] ring-4 ring-emerald-300/[0.06] transition group-hover:border-emerald-300/65 group-hover:ring-emerald-300/[0.12]">
+          <Image src={avatar} alt={name} fill className="object-cover" sizes="64px" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-base font-semibold text-white">
+            {name}
+          </span>
+          <span className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+            <Medal className="size-3.5 shrink-0" aria-hidden />
+            {badge}
+          </span>
+          <span className="mt-1.5 block text-xs leading-5 text-slate-400">
+            {summary}
+          </span>
+        </span>
+      </span>
+
+      <div className="relative aspect-[2/3] overflow-hidden rounded-[28px] border border-emerald-300/25 bg-[#050b0d] shadow-[0_28px_80px_rgba(0,0,0,0.5),0_0_40px_rgba(52,211,153,0.1)] transition duration-500 group-hover:-translate-y-1 group-hover:border-emerald-300/55 group-hover:shadow-[0_34px_90px_rgba(0,0,0,0.55),0_0_48px_rgba(52,211,153,0.18)] group-focus-visible:ring-4 group-focus-visible:ring-emerald-300/30">
+        <Image
+          src={image}
+          alt={alt}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.015]"
+          sizes="(min-width: 640px) 340px, 310px"
+        />
+        <span className="absolute end-3 top-3 grid size-10 place-items-center rounded-full border border-white/20 bg-black/65 text-white shadow-lg backdrop-blur-md transition group-hover:border-emerald-300/50 group-hover:bg-emerald-950/80 group-hover:text-emerald-200">
+          <Expand className="size-4" aria-hidden />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function CarouselArrow({
+  side,
+  label,
+  onClick,
+}: {
+  side: "left" | "right";
+  label: string;
+  onClick: () => void;
+}) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight;
+
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      aria-controls="active-testimonial"
+      title={label}
+      onClick={onClick}
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.08 }}
+      className={cn(
+        "group absolute top-1/2 z-30 grid size-12 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[#06101d]/85 text-white shadow-[0_12px_36px_rgba(0,0,0,0.5),0_0_28px_rgba(34,211,238,0.14)] backdrop-blur-xl transition-colors hover:border-cyan-300/60 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/35 sm:size-14 lg:hidden",
+        side === "left" ? "-left-1 sm:left-2" : "-right-1 sm:right-2",
+      )}
+    >
+      <span className="absolute inset-1 rounded-full bg-linear-to-br from-white/15 via-cyan-300/5 to-blue-500/15 opacity-80 transition-opacity group-hover:opacity-100" />
+      <span
+        className={cn(
+          "absolute top-1/2 h-px w-3 -translate-y-1/2 bg-linear-to-r from-transparent to-cyan-300/70 opacity-0 transition-all group-hover:w-4 group-hover:opacity-100",
+          side === "left" ? "right-1" : "left-1 rotate-180",
+        )}
+      />
+      <Icon
+        className="relative z-10 size-6 transition-transform group-hover:scale-110 sm:size-7"
+        strokeWidth={2.2}
+        aria-hidden
+      />
+    </motion.button>
   );
 }
 
