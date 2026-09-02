@@ -95,8 +95,8 @@ export default function CreateReportDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
+      <DialogContent className="dialog-form-content max-w-xl overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
               <FilePlus2 className="size-4" />
@@ -106,8 +106,8 @@ export default function CreateReportDialog({
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <FieldGroup className="gap-5 pt-1">
+        <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col gap-5">
+          <FieldGroup className="dialog-form-body min-h-0 flex-1 gap-5 overflow-y-auto pt-1 pe-1">
             <Field>
               <FieldLabel htmlFor="report-title">{t("titleField")}</FieldLabel>
               <Input
@@ -147,7 +147,7 @@ export default function CreateReportDialog({
             )}
           </FieldGroup>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-0 shrink-0">
             <Button
               type="button"
               variant="outline"

@@ -24,6 +24,9 @@ export const createClientSchema = z
       .max(128)
       .refine((value) => !/^\s|\s$/.test(value), "No leading or trailing spaces"),
     notes: z.string().trim().max(2000).optional().or(z.literal("")),
+    projectName: z.string().trim().max(160).optional().or(z.literal("")),
+    serviceDescription: z.string().trim().max(300).optional().or(z.literal("")),
+    followupPriority: z.enum(["low", "normal", "high"]).default("normal"),
   })
   .strict();
 

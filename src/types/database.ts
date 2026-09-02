@@ -46,6 +46,9 @@ export type ClientRow = {
   company_name: string | null;
   avatar_url: string | null;
   notes: string | null;
+  project_name: string | null;
+  service_description: string | null;
+  followup_priority: "low" | "normal" | "high";
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -254,7 +257,7 @@ export type Database = {
         ClientRow,
         InsertOf<
           ClientRow,
-          "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active"
+          "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active" | "project_name" | "service_description" | "followup_priority"
         >
       >;
       client_payment_plans: Table<

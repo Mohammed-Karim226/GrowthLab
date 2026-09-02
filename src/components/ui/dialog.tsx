@@ -39,9 +39,9 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "portal-glass-panel scrollbar-slim fixed start-1/2 top-1/2 z-50 flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col gap-5 overflow-y-auto rounded-3xl border border-white/[0.2] p-6 text-slate-200 shadow-[0_28px_90px_rgba(2,6,23,.55),inset_0_1px_0_rgba(255,255,255,.16)] outline-none transition-[transform,opacity] duration-300 ease-[cubic-bezier(.22,1,.36,1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none",
-          "[&_[data-slot=dialog-header]]:-mx-6 [&_[data-slot=dialog-header]]:-mt-6 [&_[data-slot=dialog-header]]:border-b [&_[data-slot=dialog-header]]:border-white/[0.08] [&_[data-slot=dialog-header]]:bg-white/[0.02] [&_[data-slot=dialog-header]]:px-6 [&_[data-slot=dialog-header]]:py-5",
-          "[&_[data-slot=dialog-footer]]:-mx-6 [&_[data-slot=dialog-footer]]:-mb-6 [&_[data-slot=dialog-footer]]:border-t [&_[data-slot=dialog-footer]]:border-white/[0.08] [&_[data-slot=dialog-footer]]:px-6 [&_[data-slot=dialog-footer]]:py-4",
+          "portal-glass-panel dialog-content dialog-scrollbar-hidden fixed start-1/2 top-1/2 z-50 flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col gap-5 overflow-y-auto rounded-3xl border border-white/[0.2] p-6 text-slate-200 shadow-[0_28px_90px_rgba(2,6,23,.55),inset_0_1px_0_rgba(255,255,255,.16)] outline-none transition-[transform,opacity] duration-300 ease-[cubic-bezier(.22,1,.36,1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none",
+          "[&_[data-slot=dialog-header]]:sticky [&_[data-slot=dialog-header]]:top-[-1.5rem] [&_[data-slot=dialog-header]]:z-20 [&_[data-slot=dialog-header]]:-mx-6 [&_[data-slot=dialog-header]]:-mt-6 [&_[data-slot=dialog-header]]:border-b [&_[data-slot=dialog-header]]:border-white/[0.08] [&_[data-slot=dialog-header]]:px-6 [&_[data-slot=dialog-header]]:py-5 [&_[data-slot=dialog-header]]:backdrop-blur-xl",
+          "[&_[data-slot=dialog-footer]]:sticky [&_[data-slot=dialog-footer]]:bottom-[-1.5rem] [&_[data-slot=dialog-footer]]:z-20 [&_[data-slot=dialog-footer]]:-mx-6 [&_[data-slot=dialog-footer]]:-mb-6 [&_[data-slot=dialog-footer]]:border-t [&_[data-slot=dialog-footer]]:border-white/[0.08] [&_[data-slot=dialog-footer]]:px-6 [&_[data-slot=dialog-footer]]:py-4 [&_[data-slot=dialog-footer]]:backdrop-blur-xl",
           "[&_[data-slot=input]]:h-11 [&_[data-slot=input]]:rounded-2xl [&_[data-slot=input]]:border-white/[0.16] [&_[data-slot=input]]:bg-white/[0.06] [&_[data-slot=input]]:px-3 [&_[data-slot=input]]:text-slate-100 [&_[data-slot=input]]:shadow-[inset_0_1px_0_rgba(255,255,255,.1)] [&_[data-slot=input]]:focus-visible:border-cyan-300/50 [&_[data-slot=input]]:focus-visible:ring-cyan-300/15",
           "[&_[data-slot=textarea]]:rounded-2xl [&_[data-slot=textarea]]:border-white/[0.16] [&_[data-slot=textarea]]:bg-white/[0.06] [&_[data-slot=textarea]]:px-3 [&_[data-slot=textarea]]:text-slate-100 [&_[data-slot=textarea]]:shadow-[inset_0_1px_0_rgba(255,255,255,.1)] [&_[data-slot=textarea]]:focus-visible:border-cyan-300/50 [&_[data-slot=textarea]]:focus-visible:ring-cyan-300/15",
           "[&_[data-slot=select-trigger]]:h-11 [&_[data-slot=select-trigger]]:rounded-2xl [&_[data-slot=select-trigger]]:border-white/[0.16] [&_[data-slot=select-trigger]]:bg-white/[0.06] [&_[data-slot=select-trigger]]:shadow-[inset_0_1px_0_rgba(255,255,255,.1)]",
@@ -67,7 +67,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-start pe-10", className)}
+          className={cn("dialog-sticky-header flex flex-col gap-2 text-start pe-10", className)}
       {...props}
     />
   )
@@ -77,7 +77,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+    className={cn("dialog-sticky-footer flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
       {...props}
     />
   )
@@ -113,3 +113,4 @@ export {
   DialogTitle,
   DialogDescription,
 }
+
