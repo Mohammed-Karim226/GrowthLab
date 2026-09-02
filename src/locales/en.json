@@ -234,6 +234,18 @@
     "titleHighlight": "6-Figure Creator",
     "trustedBy": "Trusted by creators from",
     "formTitle": "Start Your Free Growth Strategy",
+    "contactTitle": "Choose how you want to reach us",
+    "contactDescription": "Start a direct conversation with our growth team on WhatsApp or Gmail.",
+    "actions": {
+      "whatsapp": {
+        "label": "Chat on WhatsApp",
+        "description": "Open a direct conversation with our team"
+      },
+      "gmail": {
+        "label": "Email us on Gmail",
+        "description": "Compose an email to our growth team"
+      }
+    },
     "firstNameLabel": "FIRST NAME",
     "lastNameLabel": "LAST NAME",
     "emailLabel": "EMAIL ADDRESS",

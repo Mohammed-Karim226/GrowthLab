@@ -93,12 +93,12 @@ export default function NavBar({
           >
             {localeSwitchLabel}
           </Link>
-          <a
-            href="#contact"
+          <Link
+            href={`/${locale}/portal/login`}
             className="rounded-full px-3 py-2 text-sm font-medium text-slate-300 transition hover:text-white xl:px-4"
           >
             {signInLabel}
-          </a>
+          </Link>
           <a
             href="#contact"
             className="button-primary rounded-full px-4 py-2.5 text-sm font-semibold text-white xl:px-5"

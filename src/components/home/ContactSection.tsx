@@ -1,66 +1,51 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CheckCircle, Shield, Clock, Users, Star, Zap, TrendingUp, Youtube, Instagram, Music, ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
+import { motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  Clock,
+  Instagram,
+  Mail,
+  MessageCircle,
+  Music,
+  Shield,
+  TrendingUp,
+  Users,
+  Youtube,
+  Zap,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Input } from "@base-ui/react/input";
-import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
-import { useLocale, useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
-
-const formSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters."),
-  lastName: z.string().min(2, "Last name must be at least 2 characters."),
-  email: z.string().email("Please enter a valid email address."),
-  channelName: z.string().min(2, "Channel name must be at least 2 characters."),
-  phone: z
-    .string()
-    .min(10, "Phone number must be at least 10 digits.")
-    .regex(/^[\d\s\-\+\(\)]+$/, "Please enter a valid phone number."),
-});
-
-type FormData = z.infer<typeof formSchema>;
+const contactActions = [
+  {
+    key: "whatsapp",
+    href: "https://wa.me/201126421602",
+    icon: MessageCircle,
+    accent: "text-emerald-300",
+    iconBackground: "bg-emerald-400/15",
+    border: "hover:border-emerald-400/60",
+    glow: "hover:shadow-[0_18px_50px_rgba(52,211,153,0.16)]",
+  },
+  {
+    key: "gmail",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=growthlabagency2090@gmail.com",
+    icon: Mail,
+    accent: "text-cyan-300",
+    iconBackground: "bg-cyan-400/15",
+    border: "hover:border-cyan-400/60",
+    glow: "hover:shadow-[0_18px_50px_rgba(34,211,238,0.16)]",
+  },
+] as const;
 
 export default function ContactSection() {
-  const disableContent = false;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const locale = useLocale();
-  const isAr = locale === "ar";
   const t = useTranslations("contact");
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", channelName: "" , phone: ""},
-  });
-
-  const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1450));
-
-    console.log("Form Submitted:", data);
-
-    toast.success("🎉 Request Received Successfully!", {
-      description: `Confirmation SMS sent to ${data.phone}`,
-      duration: 6500,
-    });
-
-    setIsSuccess(true);
-    form.reset();
-    setTimeout(() => setIsSuccess(false), 4800);
-    setIsSubmitting(false);
-  };
 
   return (
-    <section id="contact" className="relative pt-2 pb-10 overflow-hidden bg-[#030614]">
+    <section id="contact" className="relative overflow-hidden bg-[#030614] pt-2 pb-10">
       <div className="dot-overlay-lg pointer-events-none absolute inset-0 opacity-40" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+        <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
           <motion.div
             initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -68,67 +53,64 @@ export default function ContactSection() {
             transition={{ duration: 1 }}
             className="space-y-12"
           >
-            <div className = "max-sm:flex max-sm:flex-col max-sm:items-center max-sm:justify-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-3xl bg-linear-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-400/30 mb-8">
-                <Zap className="h-6 w-6 text-cyan-400 animate-pulse" />
-                <span className="text-sm font-mono tracking-[3px] text-cyan-300 font-semibold">{t("badge")}</span>
+            <div className="max-sm:flex max-sm:flex-col max-sm:items-center max-sm:justify-center">
+              <div className="mb-8 inline-flex items-center gap-3 rounded-3xl border border-cyan-400/30 bg-linear-to-r from-cyan-500/10 to-violet-500/10 px-6 py-3">
+                <Zap className="h-6 w-6 animate-pulse text-cyan-400" />
+                <span className="text-sm font-mono font-semibold tracking-[3px] text-cyan-300">
+                  {t("badge")}
+                </span>
               </div>
 
-              <h2 className="text-5xl max-sm:text-4xl max-sm:text-center font-bold tracking-tighter leading-12 max-sm:leading-16">
-              {t("titleLine1")}{" "}
-                <span className="bg-linear-to-r from-[#67E8F9] via-[#C084FC] to-[#F472B6] bg-clip-text text-transparent animate-gradient">
+              <h2 className="text-5xl leading-12 font-bold tracking-tighter max-sm:text-center max-sm:text-4xl max-sm:leading-16">
+                {t("titleLine1")} {" "}
+                <span className="animate-gradient bg-linear-to-r from-[#67E8F9] via-[#C084FC] to-[#F472B6] bg-clip-text text-transparent">
                   {t("titleHighlight")}
-                </span>{" "}
+                </span>
               </h2>
             </div>
 
             <div className="space-y-8">
-              {[
-                { icon: TrendingUp, title: "Proven Growth Tactics", desc: "Strategies used by top creators in 2026" },
-                { icon: Users, title: "1,200+ Success Stories", desc: "Real creators making real money" },
-                { icon: Clock, title: "Response in &lt; 2 Hours", desc: "Dedicated strategy team" },
-                { icon: Shield, title: "100% Private & Secure", desc: "Your data is protected" },
-              ].map((item, i) => (
+              {[TrendingUp, Users, Clock, Shield].map((Icon, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.15 }}
-                  className="flex gap-6 group"
+                  className="group flex gap-6"
                 >
-                  <div className="h-12 w-12 rounded-2xl bg-linear-to-br from-cyan-400/10 to-violet-400/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
-                    <item.icon className="h-7 w-7 text-cyan-400" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-400/10 to-violet-400/10 transition-transform group-hover:rotate-12">
+                    <Icon className="h-7 w-7 text-cyan-400" />
                   </div>
                   <div>
                     <p className="text-xl font-semibold text-white">{t(`features.${i}.title`)}</p>
-                    <p className="text-slate-400 mt-1.5">{t(`features.${i}.desc`)}</p>
+                    <p className="mt-1.5 text-slate-400">{t(`features.${i}.desc`)}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            <div className="flex items-center gap-4 pt-8 border-t border-white/10">
+            <div className="flex items-center gap-4 border-t border-white/10 pt-8">
               <div className="flex -space-x-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-2 border-[#030614] overflow-hidden ring-2 ring-cyan-400/30">
-                    <img src={`https://randomuser.me/api/portraits/men/${i + 15}.jpg`} alt="Creator" />
+                  <div
+                    key={i}
+                    className="h-10 w-10 overflow-hidden rounded-full border-2 border-[#030614] ring-2 ring-cyan-400/30"
+                  >
+                    <img src={`https://randomuser.me/api/portraits/men/${i + 15}.jpg`} alt="" />
                   </div>
                 ))}
               </div>
               <div className="relative text-sm leading-tight text-slate-400">
-                <p className="text-sm text-slate-400 leading-tight">{t("trustedBy")}</p>
+                <p>{t("trustedBy")}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(248,113,113,0.18)]">
-                    <Youtube className="h-4 w-4 text-red-400" />
-                    YouTube
+                    <Youtube className="h-4 w-4 text-red-400" /> YouTube
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(148,163,184,0.2)]">
-                    <Music className="h-4 w-4 text-slate-200" />
-                    TikTok
+                    <Music className="h-4 w-4 text-slate-200" /> TikTok
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_0_15px_rgba(244,114,182,0.2)]">
-                    <Instagram className="h-4 w-4 text-pink-300" />
-                    Instagram
+                    <Instagram className="h-4 w-4 text-pink-300" /> Instagram
                   </span>
                 </div>
               </div>
@@ -141,183 +123,40 @@ export default function ContactSection() {
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <div className="relative rounded-3xl border border-white/10 bg-[#0A0E27] p-10 lg:p-12 shadow-2xl backdrop-blur-3xl">
-              <div className="absolute -inset-px bg-linear-to-br from-cyan-400/20 via-violet-400/10 to-transparent rounded-3xl -z-10" />
+            <div className="relative rounded-3xl border border-white/10 bg-[#0A0E27] p-6 shadow-2xl backdrop-blur-3xl sm:p-10 lg:p-12">
+              <div className="absolute -inset-px -z-10 rounded-3xl bg-linear-to-br from-cyan-400/20 via-violet-400/10 to-transparent" />
 
-              <h3 className="text-3xl max-sm:text-2xl font-bold text-white mb-10">{t("formTitle")}</h3>
+              <div className="mb-9 max-w-lg">
+                <h3 className="text-3xl font-bold text-white max-sm:text-2xl">{t("contactTitle")}</h3>
+                <p className="mt-3 text-base leading-7 text-slate-400">{t("contactDescription")}</p>
+              </div>
 
-             {
-              disableContent ? (
-                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("firstNameLabel")}</FieldLabel>
-                    <Controller
-                      name="firstName"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <Input
-                            {...field}
-                            placeholder={isAr ? "أحمد" : "John"}
-                            className={cn("h-14 bg-white/5 border border-white/10 focus:border-cyan-400 rounded-lg text-base placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-400/30 transition-all",
-                              isAr ? "placeholder:pr-4" : "placeholder:pl-4"
-                            )}
-                          />
-                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                      )}
-                    />
-                  </div>
+              <div className="grid gap-4">
+                {contactActions.map((action) => {
+                  const Icon = action.icon;
 
-                  <div>
-                    <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("lastNameLabel")}</FieldLabel>
-                    <Controller
-                      name="lastName"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <Input
-                            {...field}
-                            placeholder={isAr ? "العمري" : "Rivera"}
- className={cn("h-14 bg-white/5 border border-white/10 focus:border-cyan-400 rounded-lg text-base placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-400/30 transition-all",
-                              isAr ? "placeholder:pr-4" : "placeholder:pl-4"
-                            )}                          />
-                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("emailLabel")}</FieldLabel>
-                  <Controller
-                    name="email"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder={isAr ? "you@creator.com" : "you@creator.com"}
-                          className={cn("h-14 bg-white/5 border border-white/10 focus:border-cyan-400 rounded-lg text-base placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-400/30 transition-all",
-                            isAr ? "placeholder:pr-4" : "placeholder:pl-4"
-                          )}
-                        />
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                      </Field>
-                    )}
-                  />
-                </div>
- <div>
-                    <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("channelNameLabel")}</FieldLabel>
-                    <Controller
-                      name="channelName"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <Input
-                            {...field}
-                            placeholder={isAr ? "اسم القناة" : "Channel Name"}
-                            className={cn("h-14 bg-white/5 border border-white/10 focus:border-cyan-400 rounded-lg text-base placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-400/30 transition-all",
-                              isAr ? "placeholder:pr-4" : "placeholder:pl-4"
-                            )}
-                          />
-                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                      )}
-                    />
-                  </div>
-                <div>
-                  <FieldLabel className="text-xs font-mono tracking-widest text-cyan-400 mb-2">{t("phoneLabel")}</FieldLabel>
-                  <Controller
-                    name="phone"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <Input
-                          {...field}
-                          type="tel"
-                          placeholder={isAr ? "+966 50 123 4567" : "+1 (555) 123-4567"}
-                          className={cn("h-14 bg-white/5 border border-white/10 focus:border-cyan-400 rounded-lg text-base placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-400/30 transition-all",
-                            isAr ? "placeholder:pr-4 text-right" : "placeholder:pl-4"
-                          )}
-                        />
-                        <FieldDescription className="text-emerald-400 text-xs mt-2 flex items-center gap-2">
-                          <span className="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
-                          {t("smsConfirmation")}
-                        </FieldDescription>
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                      </Field>
-                    )}
-                  />
-                </div>
-
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="cursor-pointer relative mt-6 w-full h-16 max-sm:h-12 rounded-2xl overflow-hidden group font-semibold text-lg shadow-2xl shadow-cyan-500/40 bg-gradient-to-r from-[#67E8F9] via-[#C084FC] to-[#F472B6]"
-                >
-                  <div className="absolute inset-0 bg-white/30 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                  <div className="relative flex items-center justify-center gap-3 text-black font-bold max-sm:text-base">
-                    {isSubmitting ? (
-                      <>
-                        <span className="animate-spin h-5 w-5 border-2 border-black/30 border-t-black rounded-full" />
-                        {t("processing")}
-                      </>
-                    ) : isSuccess ? (
-                      <>
-                        <CheckCircle className="h-7 w-7" />
-                        {t("successMessage")}
-                      </>
-                    ) : (
-                      <>
-                        {t("submitButton")}
-                        {isAr ? <ArrowLeft className="group-hover:translate-x-2 transition-transform max-sm:size-6" /> : <ArrowRight className="group-hover:translate-x-2 transition-transform max-sm:size-6" />}
-                      </>
-                    )}
-                  </div>
-                </motion.button>
-              </form>
-              ):(
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center gap-6 py-12"
-                >
-                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-cyan-400/20 to-violet-400/20 flex items-center justify-center border border-cyan-400/30">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
+                  return (
+                    <motion.a
+                      key={action.key}
+                      href={action.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ y: -3 }}
+                      whileTap={{ scale: 0.99 }}
+                      className={`group flex min-h-24 items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all sm:p-5 ${action.border} ${action.glow}`}
                     >
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="text-cyan-400">
-                        <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
-                      </svg>
-                    </motion.div>
-                  </div>
-                  <div className="text-center space-y-3">
-                    <h4 className="text-2xl font-bold text-white">
-                      {isAr ? "بما انك اصبحت هنا" : "as you are here"}
-                    </h4>
-                    <p className="text-slate-400 text-lg w-full">
-                      {isAr 
-                        ? "📧تابع التواصل معنا من خلال الايميل الذي تتابع معنا عليه" 
-                        : "📧 Continue to communicate with us via the email address we use to contact you"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-400/30">
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                    <span className="text-emerald-400 text-sm font-medium">
-                      {isAr ? "فريق العمل معك الان" : "Our team is with you now"}
-                    </span>
-                  </div>
-                </motion.div>
-              )
-             }
+                      <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${action.iconBackground}`}>
+                        <Icon className={`h-7 w-7 ${action.accent}`} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-lg font-semibold text-white">{t(`actions.${action.key}.label`)}</span>
+                        <span className="mt-1 block text-sm leading-5 text-slate-400">{t(`actions.${action.key}.description`)}</span>
+                      </span>
+                      <ArrowUpRight className={`h-5 w-5 shrink-0 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 ${action.accent}`} />
+                    </motion.a>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         </div>
