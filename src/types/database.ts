@@ -134,6 +134,24 @@ export type AccountRow = {
   updated_at: string;
 };
 
+export type ClientGmailRelatedAccount = {
+  id: string;
+  service: string;
+  username: string;
+  password: string;
+};
+
+export type ClientGmailRow = {
+  id: string;
+  client_id: string;
+  email: string;
+  password: string;
+  notes: string | null;
+  related_accounts: ClientGmailRelatedAccount[];
+  created_at: string;
+  updated_at: string;
+};
+
 export type InsightImageRow = {
   id: string;
   insight_batch_id: string;
@@ -265,6 +283,10 @@ export type Database = {
       accounts: Table<
         AccountRow,
         InsertOf<AccountRow, "page_name" | "page_id" | "stage">
+      >;
+      client_gmail_accounts: Table<
+        ClientGmailRow,
+        InsertOf<ClientGmailRow, "notes" | "related_accounts">
       >;
       insight_images: Table<
         InsightImageRow,

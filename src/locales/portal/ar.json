@@ -12,6 +12,12 @@
     "signOut": "تسجيل الخروج",
     "secureNotice": "الدخول للمصرح لهم فقط",
     "noSelfSignup": "يتم إنشاء الحسابات بواسطة مدير حسابك في GrowthLab",
+    "gmail": {
+      "title": "خزينة بيانات Gmail", "hint": "تخزين خاص بالمشرفين لصناديق البريد والخدمات المرتبطة.", "add": "إضافة Gmail", "empty": "لا توجد بيانات Gmail محفوظة بعد.", "addTitle": "إضافة بيانات Gmail", "editTitle": "تعديل بيانات Gmail", "dialogHint": "تظهر البيانات للمشرفين فقط. احفظها بأمان.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "كلمة المرور", "notesPlaceholder": "ملاحظات (اختياري)", "related": "الحسابات المرتبطة", "servicePlaceholder": "الخدمة", "usernamePlaceholder": "اسم المستخدم أو الملف", "addRelated": "إضافة حساب مرتبط", "removeRelated": "حذف الحساب المرتبط", "togglePassword": "إظهار أو إخفاء كلمة المرور", "copyPassword": "نسخ كلمة المرور", "edit": "تعديل Gmail", "delete": "حذف Gmail", "deleteConfirm": "حذف هذه البيانات نهائيا؟", "cancel": "إلغاء", "save": "حفظ البيانات", "created": "تمت إضافة بيانات Gmail", "updated": "تم تحديث بيانات Gmail", "deleted": "تم حذف بيانات Gmail", "copied": "تم نسخ كلمة المرور", "error": "تعذر حفظ البيانات"
+    },
+    "gmail": {
+      "title": "خزينة بيانات Gmail", "hint": "تخزين خاص بالمشرفين لصناديق البريد والخدمات المرتبطة.", "add": "إضافة Gmail", "empty": "لا توجد بيانات Gmail محفوظة بعد.", "addTitle": "إضافة بيانات Gmail", "editTitle": "تعديل بيانات Gmail", "dialogHint": "تظهر البيانات للمشرفين فقط. احفظها بأمان.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "كلمة المرور", "notesPlaceholder": "ملاحظات (اختياري)", "related": "الحسابات المرتبطة", "servicePlaceholder": "الخدمة", "usernamePlaceholder": "اسم المستخدم أو الملف", "addRelated": "إضافة حساب مرتبط", "removeRelated": "حذف الحساب المرتبط", "togglePassword": "إظهار أو إخفاء كلمة المرور", "copyPassword": "نسخ كلمة المرور", "edit": "تعديل Gmail", "delete": "حذف Gmail", "deleteConfirm": "حذف هذه البيانات نهائيا؟", "cancel": "إلغاء", "save": "حفظ البيانات", "created": "تمت إضافة بيانات Gmail", "updated": "تم تحديث بيانات Gmail", "deleted": "تم حذف بيانات Gmail", "copied": "تم نسخ كلمة المرور", "error": "تعذر حفظ البيانات"
+    },
     "errors": {
       "invalidInput": "أدخل بريدًا إلكترونيًا وكلمة مرور صحيحين.",
       "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",

@@ -43,6 +43,22 @@ export const updateAccountSchema = z.object({
   stage: z.string().trim().max(80).nullable().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
+const relatedGmailAccountSchema = z.object({
+  id: z.string().min(1).max(80),
+  service: z.string().trim().min(1).max(120),
+  username: z.string().trim().min(1).max(240),
+  password: z.string().min(1).max(256),
+}).strict();
+
+export const clientGmailSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1).max(256),
+  notes: z.string().trim().max(1000).optional().or(z.literal("")),
+  relatedAccounts: z.array(relatedGmailAccountSchema).max(20).default([]),
+}).strict();
+
+export const updateClientGmailSchema = clientGmailSchema.partial().strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
+
 export const updateClientSchema = z
   .object({
     name: z.string().trim().min(2).max(120).optional(),

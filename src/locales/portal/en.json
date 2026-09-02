@@ -12,6 +12,12 @@
     "signOut": "Sign out",
     "secureNotice": "Authorised access only",
     "noSelfSignup": "Accounts are created by your GrowthLab manager",
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
+    },
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
+    },
     "errors": {
       "invalidInput": "Enter a valid email and password.",
       "invalidCredentials": "Incorrect email or password.",
@@ -403,6 +409,9 @@
       "deleted": "Account removed",
       "delete": "Delete account",
       "deleteConfirm": "Remove this account?"
+    },
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
     },
     "errors": {
       "emailTaken": "That email already has an account.",
