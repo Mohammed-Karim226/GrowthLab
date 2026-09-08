@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Check,
-  Crown,
   Loader2,
   Pause,
   Search,
   Trash2,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -134,10 +134,11 @@ export default function ClientsView({
 
         <Button
           type="button"
+          size="lg"
           onClick={() => setDialogOpen(true)}
-          className="button-primary button-shine h-10 rounded-full px-5 text-sm font-semibold text-white"
+          className="h-10 rounded-xl border-[#ead38b]/30 bg-[#d8be78]/12 px-4 font-semibold text-[#f2dc98] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_28px_rgba(184,145,48,0.1)] hover:border-[#f0d98e]/50 hover:bg-[#d8be78]/20 hover:text-[#fff3c4]"
         >
-          <Crown className="size-4" aria-hidden />
+          <UserPlus className="size-4" strokeWidth={1.8} aria-hidden />
           {t("newClient")}
         </Button>
       </div>
@@ -258,7 +259,11 @@ export default function ClientsView({
         nextHref={nextHref}
         previousLabel={tCommon("previous")}
         nextLabel={tCommon("next")}
-        statusLabel={t("pagination", { page: currentPage, pages: Math.max(1, Math.ceil(totalClients / pageSize)), total: totalClients })}
+        statusLabel={t("pagination", {
+          page: currentPage,
+          pages: Math.max(1, Math.ceil(totalClients / pageSize)),
+          total: totalClients,
+        })}
       />
 
       <CreateClientDialog

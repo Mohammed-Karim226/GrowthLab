@@ -115,7 +115,11 @@ export default async function ClientDetailPage({
     .returns<AccountRow[]>();
   if (accountsError) throw accountsError;
   const { data: gmailAccounts, error: gmailError } = await supabase
-    .from("client_gmail_accounts").select("*").eq("client_id", clientId).order("created_at").returns<import("@/types/database").ClientGmailRow[]>();
+    .from("client_gmail_accounts")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("created_at")
+    .returns<import("@/types/database").ClientGmailRow[]>();
   if (gmailError) throw gmailError;
   const { data: payments, error: paymentsError } = await supabase
     .from("client_payment_plans")
@@ -176,7 +180,10 @@ export default async function ClientDetailPage({
 
         <aside className="space-y-6">
           <AccountManager clientId={client.id} accounts={accounts ?? []} />
-          <GmailCredentialManager clientId={client.id} initial={gmailAccounts ?? []} />
+          <GmailCredentialManager
+            clientId={client.id}
+            initial={gmailAccounts ?? []}
+          />
           <PaymentPlanManager clientId={client.id} initial={payments ?? []} />
           <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
             <CardHeader>
