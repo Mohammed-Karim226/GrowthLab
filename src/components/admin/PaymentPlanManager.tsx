@@ -39,7 +39,11 @@ export default function PaymentPlanManager({ clientId, initial }: { clientId: st
   const update = useMutation({
     mutationFn: ({ id, value }: { id: string; value: PaymentDraft }) => apiPatch<{ payment: ClientPaymentPlanRow }>(`/api/admin/clients/${clientId}/payments?paymentId=${id}`, { ...value, amount: value.amount, totalPlanPrice: value.totalPlanPrice || null, dueDate: value.dueDate || null, notes: value.notes || null }),
     onSuccess: ({ payment }) => { setPayments((rows) => rows.map((row) => row.id === payment.id ? payment : row)); setEditing(null); setEditDraft(null); setError(null); toast.success(t("updated")); },
-    onError: () => setError(t("saveError")),
+    onError: (cause) => {
+      const message = cause instanceof ApiRequestError && cause.errorKey === "paymentMonthExists" ? t("monthExists") : t("saveError");
+      setError(message);
+      toast.error(message);
+    },
   });
   const remove = useMutation({
     mutationFn: (id: string) => apiDelete<{ deleted: string }>(`/api/admin/clients/${clientId}/payments?paymentId=${id}`),

@@ -12,6 +12,12 @@
     "signOut": "Sign out",
     "secureNotice": "Authorised access only",
     "noSelfSignup": "Accounts are created by your GrowthLab manager",
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
+    },
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
+    },
     "errors": {
       "invalidInput": "Enter a valid email and password.",
       "invalidCredentials": "Incorrect email or password.",
@@ -64,6 +70,7 @@
   },
   "metrics": {
     "views": "Views",
+    "average_views": "Average views",
     "reach": "Reach",
     "impressions": "Impressions",
     "followers": "Followers",
@@ -157,6 +164,14 @@
         "namePlaceholder": "Acme Coffee Co.",
         "company": "Company name",
         "companyPlaceholder": "Optional",
+        "project": "Project",
+        "projectPlaceholder": "Mind Podcast",
+        "service": "Service",
+        "servicePlaceholder": "Content management and distribution",
+        "priority": "Follow-up priority",
+        "priorityHigh": "High",
+        "priorityNormal": "Normal",
+        "priorityLow": "Low",
         "email": "Login email",
         "password": "Initial password",
         "passwordHint": "At least 10 characters. Shown once after creation, then never stored.",
@@ -307,6 +322,9 @@
       "analysisCached": "All uploaded images are already analyzed. Saved results will be reused.",
       "analyzeAllDone": "{total} metrics extracted · {needsReview} to review",
       "analyzeAllQueued": "Queued {count} image groups for AI analysis. Inngest will process them in the background.",
+      "analysisInProgress": "AI analysis in progress",
+      "analysisProgressCount": "{completed} of {total} groups complete",
+      "analysisProgressDetail": "{processing} {processing, plural, one {group is} other {groups are}} being processed. This panel will update automatically.",
       "analyzing": "Reading screenshotsâ€¦",
       "analyzeHint": "The AI reads the screenshots and extracts the numbers. You review them before anything is published.",
       "analyzeConfirm": "Re-running replaces the values the AI extracted for this platform. Corrections you made by hand are kept. Continue?",
@@ -323,6 +341,15 @@
       "summaryEmpty": "No summary yet. Review the metrics, then generate one.",
       "summaryConfirm": "Replace the current summary with a newly generated one?",
       "summaryGenerated": "Generated {date}",
+      "editSummary": "Edit report",
+      "executiveSummary": "Executive summary",
+      "addInsight": "Add item",
+      "removeInsight": "Remove item",
+      "cancelEdit": "Cancel",
+      "saveSummary": "Save report",
+      "savingSummary": "Saving report...",
+      "summarySaved": "Report copy saved.",
+      "summarySavedReview": "Report copy saved. Approve it again before publishing.",
       "wentWell": "What went well",
       "whatChanged": "What changed",
       "needsAttention": "Needs attention",
@@ -403,6 +430,9 @@
       "deleted": "Account removed",
       "delete": "Delete account",
       "deleteConfirm": "Remove this account?"
+    },
+    "gmail": {
+      "title": "Gmail credential vault", "hint": "Admin-only storage for mailbox access and connected services.", "add": "Add Gmail", "empty": "No Gmail credentials stored yet.", "addTitle": "Add Gmail credentials", "editTitle": "Edit Gmail credentials", "dialogHint": "Credentials are visible only to administrators. Store them securely.", "emailPlaceholder": "name@company.com", "passwordPlaceholder": "Password", "notesPlaceholder": "Notes (optional)", "related": "Related accounts", "servicePlaceholder": "Service", "usernamePlaceholder": "Username or profile", "addRelated": "Add related account", "removeRelated": "Remove related account", "togglePassword": "Show or hide password", "copyPassword": "Copy password", "edit": "Edit Gmail", "delete": "Delete Gmail", "deleteConfirm": "Delete these credentials permanently?", "cancel": "Cancel", "save": "Save credentials", "created": "Gmail credentials added", "updated": "Gmail credentials updated", "deleted": "Gmail credentials deleted", "copied": "Password copied", "error": "Could not save credentials"
     },
     "errors": {
       "emailTaken": "That email already has an account.",
@@ -744,6 +774,7 @@
       "next": "Next",
       "unknownContact": "Unknown contact",
       "created": "Created",
+      "updated": "Updated",
       "newRecord": "New {kind}",
       "recordDescription": "Save this record once and reuse it across future outreach.",
       "name": "Name",

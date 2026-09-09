@@ -80,6 +80,14 @@ export const generateSummarySchema = z
   })
   .strict();
 
+/** Admin-edited client-facing copy for an unpublished report version. */
+export const updateSummarySchema = z
+  .object({
+    reportVersionId: z.string().uuid(),
+    summary: aiSummarySchema,
+  })
+  .strict();
+
 /**
  * Parse a model response, returning issue paths rather than throwing.
  *

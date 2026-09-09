@@ -56,7 +56,7 @@ export default function ClientReports({
             type="button"
             size="sm"
             onClick={() => setDialogOpen(true)}
-            className="button-primary rounded-full text-white"
+            className="dashboard-dialog-action button-primary text-white"
           >
             <Crown className="size-3.5" aria-hidden />
             {t("newReport")}

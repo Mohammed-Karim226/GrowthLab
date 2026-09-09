@@ -121,6 +121,10 @@ export default async function ReportWorkspacePage({
       const account = (accounts ?? []).find((candidate) => candidate.id === batch?.account_id);
       return account?.page_name ?? account?.page_id ?? null;
     })(),
+    accountStage: (() => {
+      const batch = (batches ?? []).find((candidate) => candidate.id === metric.insight_batch_id);
+      return (accounts ?? []).find((candidate) => candidate.id === batch?.account_id)?.stage ?? null;
+    })(),
     metricName: metric.metric_name,
     metricValue: metric.metric_value,
     metricUnit: metric.metric_unit,

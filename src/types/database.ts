@@ -46,6 +46,9 @@ export type ClientRow = {
   company_name: string | null;
   avatar_url: string | null;
   notes: string | null;
+  project_name: string | null;
+  service_description: string | null;
+  followup_priority: "low" | "normal" | "high";
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -130,6 +133,24 @@ export type AccountRow = {
   page_name: string | null;
   page_id: string | null;
   stage: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClientGmailRelatedAccount = {
+  id: string;
+  service: string;
+  username: string;
+  password: string;
+};
+
+export type ClientGmailRow = {
+  id: string;
+  client_id: string;
+  email: string;
+  password: string;
+  notes: string | null;
+  related_accounts: ClientGmailRelatedAccount[];
   created_at: string;
   updated_at: string;
 };
@@ -236,7 +257,7 @@ export type Database = {
         ClientRow,
         InsertOf<
           ClientRow,
-          "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active"
+          "contact_email" | "company_name" | "avatar_url" | "notes" | "is_active" | "project_name" | "service_description" | "followup_priority"
         >
       >;
       client_payment_plans: Table<
@@ -265,6 +286,10 @@ export type Database = {
       accounts: Table<
         AccountRow,
         InsertOf<AccountRow, "page_name" | "page_id" | "stage">
+      >;
+      client_gmail_accounts: Table<
+        ClientGmailRow,
+        InsertOf<ClientGmailRow, "notes" | "related_accounts">
       >;
       insight_images: Table<
         InsightImageRow,

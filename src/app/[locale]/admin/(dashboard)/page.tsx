@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
-  ArrowRight,
   ArrowUpRight,
   Crown,
   FileCheck2,
-  Sparkles,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +13,11 @@ import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import { statusBadgeVariant } from "@/components/admin/status";
 import type { ReportStatus } from "@/types/database";
-import { DashboardQuickAction, DashboardStatBox } from "@/components/admin/DashboardMotion";
+import {
+  DashboardQuickAction,
+  ClientGrowthChart,
+  DashboardStatBox,
+} from "@/components/admin/DashboardMotion";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +47,7 @@ export default async function AdminOverviewPage({
   const supabase = await createClient();
 
   const [clientsResult, reportsResult] = await Promise.all([
-    supabase.from("clients").select("id, is_active"),
+    supabase.from("clients").select("id, is_active, created_at"),
     supabase
       .from("reports")
       .select(
@@ -61,6 +63,14 @@ export default async function AdminOverviewPage({
   const clients = clientsResult.data ?? [];
   const reports = reportsResult.data ?? [];
 
+  const monthFormatter = new Intl.DateTimeFormat(locale, { month: "short" });
+  const now = new Date();
+  const clientGrowth = Array.from({ length: 6 }, (_, index) => {
+    const month = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+    const value = clients.filter((client) => new Date(client.created_at) < new Date(month.getFullYear(), month.getMonth() + 1, 1)).length;
+    return { label: monthFormatter.format(month), value };
+  });
+
   const { count: totalReports } = await supabase
     .from("reports")
     .select("id", { count: "exact", head: true });
@@ -70,7 +80,12 @@ export default async function AdminOverviewPage({
   ).length;
 
   const stats = [
-    { key: "totalClients", value: clients.length, icon: "users", tone: "violet" },
+    {
+      key: "totalClients",
+      value: clients.length,
+      icon: "users",
+      tone: "violet",
+    },
     {
       key: "activeClients",
       value: clients.filter((client) => client.is_active).length,
@@ -106,14 +121,7 @@ export default async function AdminOverviewPage({
             {t("overview.subtitle")}
           </p>
         </div>
-        <Link
-          href={`/${locale}/admin/clients`}
-          className="button-primary button-shine relative z-10 inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#171204]"
-        >
-          <Sparkles className="size-4" aria-hidden />
-          {t("overview.quickCreate")}
-          <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
-        </Link>
+        <ClientGrowthChart points={clientGrowth} total={clients.length} title={t("overview.totalClients")} />
         <div
           aria-hidden
           className="admin-hero-crown absolute -end-7 -top-10 opacity-[0.07]"
@@ -122,14 +130,43 @@ export default async function AdminOverviewPage({
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-3" aria-label={t("overview.quickActionsTitle")}>
-        <DashboardQuickAction href={`/${locale}/admin/clients`} icon="plus" tone="gold" title={t("overview.quickNewClient")} hint={t("overview.quickNewClientHint")} />
-        <DashboardQuickAction href={`/${locale}/admin/template-creation`} icon="message" tone="cyan" title={t("overview.quickOutreach")} hint={t("overview.quickOutreachHint")} />
-        <DashboardQuickAction href={`/${locale}/admin/clients`} icon="report" tone="emerald" title={t("overview.quickReports")} hint={t("overview.quickReportsHint")} />
+      <section
+        className="grid gap-3 sm:grid-cols-3"
+        aria-label={t("overview.quickActionsTitle")}
+      >
+        <DashboardQuickAction
+          href={`/${locale}/admin/clients`}
+          icon="plus"
+          tone="gold"
+          title={t("overview.quickNewClient")}
+          hint={t("overview.quickNewClientHint")}
+        />
+        <DashboardQuickAction
+          href={`/${locale}/admin/template-creation`}
+          icon="message"
+          tone="cyan"
+          title={t("overview.quickOutreach")}
+          hint={t("overview.quickOutreachHint")}
+        />
+        <DashboardQuickAction
+          href={`/${locale}/admin/clients`}
+          icon="report"
+          tone="emerald"
+          title={t("overview.quickReports")}
+          hint={t("overview.quickReportsHint")}
+        />
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => <DashboardStatBox key={stat.key} label={t(`overview.${stat.key}` as never)} value={stat.value} icon={stat.icon} tone={stat.tone} />)}
+        {stats.map((stat) => (
+          <DashboardStatBox
+            key={stat.key}
+            label={t(`overview.${stat.key}` as never)}
+            value={stat.value}
+            icon={stat.icon}
+            tone={stat.tone}
+          />
+        ))}
       </div>
 
       <Card className="admin-reports-card">

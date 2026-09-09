@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientReports from "@/components/admin/ClientReports";
 import AccountManager from "@/components/admin/AccountManager";
+import GmailCredentialManager from "@/components/admin/GmailCredentialManager";
 import PaymentPlanManager from "@/components/admin/PaymentPlanManager";
 import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
@@ -113,6 +114,13 @@ export default async function ClientDetailPage({
     .order("page_name")
     .returns<AccountRow[]>();
   if (accountsError) throw accountsError;
+  const { data: gmailAccounts, error: gmailError } = await supabase
+    .from("client_gmail_accounts")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("created_at")
+    .returns<import("@/types/database").ClientGmailRow[]>();
+  if (gmailError) throw gmailError;
   const { data: payments, error: paymentsError } = await supabase
     .from("client_payment_plans")
     .select("*")
@@ -172,6 +180,10 @@ export default async function ClientDetailPage({
 
         <aside className="space-y-6">
           <AccountManager clientId={client.id} accounts={accounts ?? []} />
+          <GmailCredentialManager
+            clientId={client.id}
+            initial={gmailAccounts ?? []}
+          />
           <PaymentPlanManager clientId={client.id} initial={payments ?? []} />
           <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
             <CardHeader>

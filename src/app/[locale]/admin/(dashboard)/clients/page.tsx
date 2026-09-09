@@ -14,7 +14,12 @@ export default async function AdminClientsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ cursor?: string; direction?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    cursor?: string;
+    direction?: string;
+    q?: string;
+    page?: string;
+  }>;
 }) {
   const [{ locale: raw }, search] = await Promise.all([params, searchParams]);
   const locale = isLocale(raw) ? raw : defaultLocale;
@@ -23,7 +28,8 @@ export default async function AdminClientsPage({
   const previousDirection = search.direction === "prev";
   const searchTerm = (search.q ?? "").trim().slice(0, 100);
   const requestedPage = Number(search.page ?? "1");
-  const currentPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const currentPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const safeTerm = searchTerm.replace(/[,()%]/g, " ").trim();
   const supabase = await createClient();
   let query = supabase
@@ -42,12 +48,15 @@ export default async function AdminClientsPage({
       `created_at.${operator}.${cursor.value},and(created_at.eq.${cursor.value},id.${operator}.${cursor.id})`,
     );
   }
-  let countQuery = supabase.from("clients").select("id", { count: "exact", head: true });
-  if (safeTerm) countQuery = countQuery.or(`name.ilike.%${safeTerm}%,company_name.ilike.%${safeTerm}%,contact_email.ilike.%${safeTerm}%`);
-  const [{ data, error }, { count: totalClients, error: countError }] = await Promise.all([
-    query.returns<ClientWithCount[]>(),
-    countQuery,
-  ]);
+  let countQuery = supabase
+    .from("clients")
+    .select("id", { count: "exact", head: true });
+  if (safeTerm)
+    countQuery = countQuery.or(
+      `name.ilike.%${safeTerm}%,company_name.ilike.%${safeTerm}%,contact_email.ilike.%${safeTerm}%`,
+    );
+  const [{ data, error }, { count: totalClients, error: countError }] =
+    await Promise.all([query.returns<ClientWithCount[]>(), countQuery]);
   if (error) throw error;
   if (countError) throw countError;
   const rawRows = data ?? [];
@@ -71,7 +80,12 @@ export default async function AdminClientsPage({
       direction,
     });
     if (searchTerm) values.set("q", searchTerm);
-    values.set("page", String(direction === "next" ? currentPage + 1 : Math.max(1, currentPage - 1)));
+    values.set(
+      "page",
+      String(
+        direction === "next" ? currentPage + 1 : Math.max(1, currentPage - 1),
+      ),
+    );
     return `${base}?${values}`;
   };
   const previousHref = (previousDirection ? hasMore : Boolean(cursor))

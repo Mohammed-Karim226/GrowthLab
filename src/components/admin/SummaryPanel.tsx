@@ -4,15 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, Sparkles } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ApiRequestError, apiPost } from "@/lib/api-client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ApiRequestError, apiPatch, apiPost } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import type { AiSummaryPayload } from "@/types/database";
+
+type EditableSummary = Omit<AiSummaryPayload, "generated_at">;
+type SummaryListKey = Exclude<keyof EditableSummary, "summary">;
 
 /**
  * The written interpretation.
@@ -41,6 +46,7 @@ export default function SummaryPanel({
   const router = useRouter();
 
   const [current, setCurrent] = useState<AiSummaryPayload | null>(summary);
+  const [draft, setDraft] = useState<EditableSummary | null>(null);
 
   const mutation = useMutation({
     mutationFn: (force: boolean) =>
@@ -60,7 +66,65 @@ export default function SummaryPanel({
     },
   });
 
-  const busy = mutation.isPending;
+  const save = useMutation({
+    mutationFn: (value: EditableSummary) =>
+      apiPatch<{ aiSummary: AiSummaryPayload; status: string }>(
+        `/api/admin/reports/${reportId}/summary`,
+        { reportVersionId, summary: value }
+      ),
+    onSuccess: (data) => {
+      setCurrent(data.aiSummary);
+      setDraft(null);
+      toast.success(t(data.status === "needs_review" ? "summarySavedReview" : "summarySaved"));
+      router.refresh();
+    },
+    onError: (error) => {
+      const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
+      toast.error(tErrors(key as never));
+    },
+  });
+
+  const busy = mutation.isPending || save.isPending;
+  const editing = draft !== null;
+
+  function startEditing() {
+    if (!current) return;
+    const { generated_at: _generatedAt, ...editable } = current;
+    setDraft(editable);
+  }
+
+  function updateList(key: SummaryListKey, index: number, value: string) {
+    setDraft((existing) => {
+      if (!existing) return existing;
+      const items = [...existing[key]];
+      items[index] = value;
+      return { ...existing, [key]: items };
+    });
+  }
+
+  function removeListItem(key: SummaryListKey, index: number) {
+    setDraft((existing) => existing
+      ? { ...existing, [key]: existing[key].filter((_, itemIndex) => itemIndex !== index) }
+      : existing);
+  }
+
+  function addListItem(key: SummaryListKey) {
+    setDraft((existing) => existing && existing[key].length < 6
+      ? { ...existing, [key]: [...existing[key], ""] }
+      : existing);
+  }
+
+  function submitDraft() {
+    if (!draft) return;
+    save.mutate({
+      ...draft,
+      summary: draft.summary.trim(),
+      went_well: cleanItems(draft.went_well),
+      what_changed: cleanItems(draft.what_changed),
+      needs_attention: cleanItems(draft.needs_attention),
+      recommendations: cleanItems(draft.recommendations),
+    });
+  }
 
   return (
     <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
@@ -70,34 +134,73 @@ export default function SummaryPanel({
           <p className="text-xs text-slate-500">{t("summaryHint")}</p>
         </div>
 
-        {!locked && (
-          <Button
-            type="button"
-            variant={current ? "outline" : "default"}
-            size="sm"
-            disabled={busy || !hasReviewedMetrics}
-            onClick={() => {
-              if (current && !window.confirm(t("summaryConfirm"))) return;
-              mutation.mutate(Boolean(current));
-            }}
-            className={current ? "border-white/10" : "button-primary button-shine text-white"}
-          >
-            {busy ? (
-              <Loader2 className="size-3.5 animate-spin" aria-hidden />
-            ) : (
-              <Sparkles className="size-3.5" aria-hidden />
+        {!locked && !editing && (
+          <div className="flex flex-wrap gap-2">
+            {current && (
+              <Button type="button" variant="outline" size="sm" disabled={busy} onClick={startEditing}>
+                <Pencil className="size-3.5" aria-hidden />
+                {t("editSummary")}
+              </Button>
             )}
-            {busy
-              ? t("generatingSummary")
-              : current
-                ? t("regenerateSummary")
-                : t("generateSummary")}
-          </Button>
+            <Button
+              type="button"
+              variant={current ? "outline" : "default"}
+              size="sm"
+              disabled={busy || !hasReviewedMetrics}
+              onClick={() => {
+                if (current && !window.confirm(t("summaryConfirm"))) return;
+                mutation.mutate(Boolean(current));
+              }}
+              className={current ? "border-white/10" : "button-primary button-shine text-white"}
+            >
+              {mutation.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              ) : (
+                <Sparkles className="size-3.5" aria-hidden />
+              )}
+              {mutation.isPending
+                ? t("generatingSummary")
+                : current
+                  ? t("regenerateSummary")
+                  : t("generateSummary")}
+            </Button>
+          </div>
         )}
       </CardHeader>
 
       <CardContent>
-        {!current ? (
+        {editing && draft ? (
+          <div className="space-y-5">
+            <label className="block space-y-2 text-xs font-medium text-slate-300">
+              <span>{t("executiveSummary")}</span>
+              <Textarea
+                rows={5}
+                maxLength={2000}
+                value={draft.summary}
+                onChange={(event) => setDraft({ ...draft, summary: event.target.value })}
+                className="min-h-32 resize-y border-white/10 bg-black/10 leading-relaxed"
+              />
+            </label>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <SummaryListEditor title={t("wentWell")} listKey="went_well" items={draft.went_well} onChange={updateList} onRemove={removeListItem} onAdd={addListItem} addLabel={t("addInsight")} removeLabel={t("removeInsight")} />
+              <SummaryListEditor title={t("whatChanged")} listKey="what_changed" items={draft.what_changed} onChange={updateList} onRemove={removeListItem} onAdd={addListItem} addLabel={t("addInsight")} removeLabel={t("removeInsight")} />
+              <SummaryListEditor title={t("needsAttention")} listKey="needs_attention" items={draft.needs_attention} onChange={updateList} onRemove={removeListItem} onAdd={addListItem} addLabel={t("addInsight")} removeLabel={t("removeInsight")} />
+              <SummaryListEditor title={t("recommendations")} listKey="recommendations" items={draft.recommendations} onChange={updateList} onRemove={removeListItem} onAdd={addListItem} addLabel={t("addInsight")} removeLabel={t("removeInsight")} />
+            </div>
+
+            <div className="flex flex-wrap justify-end gap-2 border-t border-white/[0.06] pt-4">
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setDraft(null)}>
+                <X aria-hidden />
+                {t("cancelEdit")}
+              </Button>
+              <Button type="button" disabled={busy || !draft.summary.trim()} onClick={submitDraft}>
+                {save.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Check aria-hidden />}
+                {save.isPending ? t("savingSummary") : t("saveSummary")}
+              </Button>
+            </div>
+          </div>
+        ) : !current ? (
           <p className="py-2 text-sm text-slate-500">{t("summaryEmpty")}</p>
         ) : (
           <div className="space-y-5">
@@ -117,6 +220,63 @@ export default function SummaryPanel({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function cleanItems(items: string[]) {
+  return items.map((item) => item.trim()).filter(Boolean);
+}
+
+function SummaryListEditor({
+  title,
+  listKey,
+  items,
+  onChange,
+  onRemove,
+  onAdd,
+  addLabel,
+  removeLabel,
+}: {
+  title: string;
+  listKey: SummaryListKey;
+  items: string[];
+  onChange: (key: SummaryListKey, index: number, value: string) => void;
+  onRemove: (key: SummaryListKey, index: number) => void;
+  onAdd: (key: SummaryListKey) => void;
+  addLabel: string;
+  removeLabel: string;
+}) {
+  return (
+    <fieldset className="space-y-2">
+      <legend className="text-xs font-medium text-slate-400">{title}</legend>
+      {items.map((item, index) => (
+        <div key={`${listKey}-${index}`} className="flex items-start gap-2">
+          <Input
+            value={item}
+            maxLength={400}
+            onChange={(event) => onChange(listKey, index, event.target.value)}
+            className="border-white/10 bg-black/10"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="shrink-0 text-slate-500 hover:text-red-300"
+            onClick={() => onRemove(listKey, index)}
+            aria-label={removeLabel}
+            title={removeLabel}
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </Button>
+        </div>
+      ))}
+      {items.length < 6 && (
+        <Button type="button" size="sm" variant="ghost" onClick={() => onAdd(listKey)}>
+          <Plus className="size-3.5" aria-hidden />
+          {addLabel}
+        </Button>
+      )}
+    </fieldset>
   );
 }
 

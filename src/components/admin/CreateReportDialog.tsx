@@ -14,10 +14,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ApiRequestError, apiPost } from "@/lib/api-client";
 import { createReportSchema } from "@/lib/validation/schemas";
 import type { ReportRow, ReportVersionRow } from "@/types/database";
@@ -95,8 +104,8 @@ export default function CreateReportDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
+      <DialogContent className="dialog-form-content max-w-xl overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
               <FilePlus2 className="size-4" />
@@ -106,8 +115,12 @@ export default function CreateReportDialog({
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <FieldGroup className="gap-5 pt-1">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="flex min-h-0 flex-1 flex-col gap-5"
+        >
+          <FieldGroup className="dialog-form-body min-h-0 flex-1 gap-5 overflow-y-auto pt-1 pe-1">
             <Field>
               <FieldLabel htmlFor="report-title">{t("titleField")}</FieldLabel>
               <Input
@@ -123,13 +136,26 @@ export default function CreateReportDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="period-start">{t("periodStart")}</FieldLabel>
-                <ReportDateField value={periodStart} onChange={setPeriodStart} label={t("periodStart")} disabled={mutation.isPending} />
+                <FieldLabel htmlFor="period-start">
+                  {t("periodStart")}
+                </FieldLabel>
+                <ReportDateField
+                  value={periodStart}
+                  onChange={setPeriodStart}
+                  label={t("periodStart")}
+                  disabled={mutation.isPending}
+                />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="period-end">{t("periodEnd")}</FieldLabel>
-                <ReportDateField value={periodEnd} onChange={setPeriodEnd} label={t("periodEnd")} minDate={periodStart} disabled={mutation.isPending} />
+                <ReportDateField
+                  value={periodEnd}
+                  onChange={setPeriodEnd}
+                  label={t("periodEnd")}
+                  minDate={periodStart}
+                  disabled={mutation.isPending}
+                />
               </Field>
             </div>
 
@@ -147,7 +173,7 @@ export default function CreateReportDialog({
             )}
           </FieldGroup>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-0 shrink-0">
             <Button
               type="button"
               variant="outline"
@@ -162,7 +188,9 @@ export default function CreateReportDialog({
               disabled={mutation.isPending}
               className="h-10 rounded-xl bg-cyan-300 px-5 font-semibold text-slate-950 shadow-[0_8px_24px_rgba(103,232,249,0.18)] hover:bg-cyan-200"
             >
-              {mutation.isPending && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
+              {mutation.isPending && (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              )}
               {mutation.isPending ? tCommon("creating") : t("submit")}
             </Button>
           </DialogFooter>
@@ -172,17 +200,44 @@ export default function CreateReportDialog({
   );
 }
 
-function ReportDateField({ value, onChange, label, minDate, disabled }: { value: string; onChange: (value: string) => void; label: string; minDate?: string; disabled?: boolean }) {
+function ReportDateField({
+  value,
+  onChange,
+  label,
+  minDate,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  minDate?: string;
+  disabled?: boolean;
+}) {
   const selected = parseLocalDate(value);
   const minimum = parseLocalDate(minDate || "");
   return (
     <Popover>
-      <PopoverTrigger render={<Button type="button" variant="outline" disabled={disabled} className="h-11 w-full justify-start rounded-xl border-white/[0.12] bg-black/20 px-3 text-start font-normal text-slate-200 shadow-none hover:bg-white/[0.06]" />}>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            className="h-11 w-full justify-start rounded-xl border-white/[0.12] bg-black/20 px-3 text-start font-normal text-slate-200 shadow-none hover:bg-white/[0.06]"
+          />
+        }
+      >
         <CalendarDays className="me-2 size-4 text-cyan-200/70" />
         {value || <span className="text-slate-500">{label}</span>}
       </PopoverTrigger>
       <PopoverContent className="w-auto border-white/[0.12] bg-[#0b1020] p-2">
-        <Calendar mode="single" selected={selected} disabled={minimum ? { before: minimum } : undefined} onSelect={(date) => date && onChange(formatLocalDate(date))} defaultMonth={selected || minimum} />
+        <Calendar
+          mode="single"
+          selected={selected}
+          disabled={minimum ? { before: minimum } : undefined}
+          onSelect={(date) => date && onChange(formatLocalDate(date))}
+          defaultMonth={selected || minimum}
+        />
       </PopoverContent>
     </Popover>
   );

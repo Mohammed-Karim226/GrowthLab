@@ -57,6 +57,7 @@ export function buildExtractionPrompt(input: {
     `- platform must be exactly "${input.platform}".`,
     "- period_label: copy the date range printed on the screenshot verbatim. If none is printed, use null. Never derive it from the file name or from today's date.",
     `- metric_name: snake_case. Prefer these names when they apply: ${METRIC_VOCABULARY}. If a platform shows something not on that list, keep its own name in snake_case rather than forcing it into a similar bucket.`,
+    "- If the screenshot explicitly shows Average views, Avg views, or Average views per video, use average_views. Keep it separate from the total views metric.",
     "- value: the number as displayed, expanded to a plain integer or decimal. 1.2K becomes 1200, 3.4M becomes 3400000, 12.5% becomes 12.5. No thousands separators, no suffixes.",
     "- value must be null when the figure is cut off, obscured, illegible, or simply not shown. Do not guess and do not substitute 0.",
     `- unit: one of ${UNIT_VOCABULARY}. Use percent for rates, seconds/minutes/hours for durations, count for everything else.`,

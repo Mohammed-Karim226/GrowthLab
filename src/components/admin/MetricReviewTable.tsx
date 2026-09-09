@@ -29,6 +29,7 @@ export type ReviewMetric = {
   id: string;
   platform: Platform;
   accountName: string | null;
+  accountStage: string | null;
   metricName: string;
   metricValue: number | null;
   metricUnit: string;
@@ -211,7 +212,11 @@ function MetricRowView({
     mutationFn: (body: Record<string, unknown>) =>
       apiPatch<{ metric: MetricRow }>(`/api/admin/metrics/${row.id}`, body),
     onSuccess: (data) => {
-      onPatched({ ...toReviewMetric(data.metric), accountName: row.accountName });
+      onPatched({
+        ...toReviewMetric(data.metric),
+        accountName: row.accountName,
+        accountStage: row.accountStage,
+      });
       setEditing(false);
       toast.success(t("saved"));
       router.refresh();
@@ -260,7 +265,11 @@ function MetricRowView({
             </span>
           )}
         </span>
-        {row.accountName && <p className="mt-0.5 text-[11px] text-cyan-300/70">{row.accountName}</p>}
+        {(row.accountName || row.accountStage) && (
+          <p className="mt-0.5 text-[11px] text-cyan-300/70">
+            {[row.accountName, row.accountStage].filter(Boolean).join(" · ")}
+          </p>
+        )}
         {row.note && <p className="mt-0.5 text-xs text-slate-500">{row.note}</p>}
       </TableCell>
 
@@ -374,6 +383,7 @@ function toReviewMetric(metric: MetricRow): ReviewMetric {
     id: metric.id,
     platform: metric.platform,
     accountName: null,
+    accountStage: null,
     metricName: metric.metric_name,
     metricValue: metric.metric_value,
     metricUnit: metric.metric_unit,

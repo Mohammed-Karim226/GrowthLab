@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   BarChart3,
   FilePenLine,
@@ -163,7 +164,7 @@ export default function AdminShell({
                 type="button"
                 onClick={() => setMenuOpen(true)}
                 aria-label={t("nav.open")}
-                className="border-white/[0.08] bg-white/[0.03] text-[#c8c4b9] hover:bg-white/[0.07] lg:hidden"
+                className="border-white/[0.08] bg-white/[0.03] text-[#c8c4b9] hover:bg-white/[0.07] lg:hidden cursor-pointer"
               >
                 <Menu className="size-4" aria-hidden />
               </Button>
@@ -176,35 +177,48 @@ export default function AdminShell({
           </main>
         </div>
       </div>
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label={t("nav.close")}
-            onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
-          />
-          <div className="portal-glass-sidebar absolute inset-y-3 start-3 flex min-h-0 w-[304px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-[30px] border border-white/[0.13] p-4 shadow-2xl sm:p-5">
-            <div className="mb-7 flex shrink-0 items-center justify-between">
-              {brand}
-              <Button
-                variant="outline"
-                size="icon-sm"
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                aria-label={t("nav.close")}
-                className="border-white/[0.08] text-[#9d9a91]"
-              >
-                <X className="size-4" aria-hidden />
-              </Button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto pe-1">{nav}</div>
-            <div className="shrink-0 border-t border-white/[0.07] pt-3">
-              {identity}
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <button
+              type="button"
+              aria-label={t("nav.close")}
+              onClick={() => setMenuOpen(false)}
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: locale === "ar" ? 36 : -36, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              className="portal-glass-sidebar absolute inset-y-3 start-3 flex min-h-0 w-[304px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-[30px] border border-white/[0.13] p-4 shadow-2xl sm:p-5"
+            >
+              <div className="mb-7 flex shrink-0 items-center justify-between">
+                {brand}
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label={t("nav.close")}
+                  className="border-white/[0.08] text-[#9d9a91] rounded-full hover:bg-red-500/10 hover:text-[#f3f0e8] cursor-pointer"
+                >
+                  <X className="size-4" aria-hidden />
+                </Button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto pe-1">{nav}</div>
+              <div className="shrink-0 border-t border-white/[0.07] pt-3">
+                {identity}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

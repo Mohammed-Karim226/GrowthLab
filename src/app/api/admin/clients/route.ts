@@ -49,7 +49,7 @@ export const POST = withAdmin("createClient", async (session, request) => {
   const parsed = await parseBody(request, createClientSchema);
   if (!parsed.ok) return parsed.response;
 
-  const { name, companyName, email, password, notes } = parsed.data;
+  const { name, companyName, email, password, notes, projectName, serviceDescription, followupPriority } = parsed.data;
   const supabase = await createClient();
   const admin = createAdminClient();
 
@@ -61,6 +61,9 @@ export const POST = withAdmin("createClient", async (session, request) => {
       company_name: companyName?.trim() || null,
       contact_email: email,
       notes: notes?.trim() || null,
+      project_name: projectName?.trim() || null,
+      service_description: serviceDescription?.trim() || null,
+      followup_priority: followupPriority,
       is_active: true,
     })
     .select("*")

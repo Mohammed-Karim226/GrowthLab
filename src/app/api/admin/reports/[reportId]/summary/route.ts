@@ -7,6 +7,7 @@ import {
   generateSummarySchema,
   INTERPRETATION_SYSTEM_INSTRUCTION,
   parseModelJson,
+  updateSummarySchema,
 } from "@/lib/ai";
 import { AiProviderError, errorKeyFor, withRetry } from "@/lib/ai/provider";
 import { buildInterpretationPayload } from "@/lib/ai/interpretation";
@@ -42,6 +43,65 @@ type VersionLookup = {
 };
 
 type Params = { params: Promise<{ reportId: string }> };
+
+/** Save the admin's reviewed client-facing narrative before publication. */
+export const PATCH = withAdmin<[Params]>("updateSummary", async (session, request, { params }) => {
+  const { reportId } = await params;
+
+  const parsed = await parseBody(request, updateSummarySchema);
+  if (!parsed.ok) return parsed.response;
+
+  const { reportVersionId, summary } = parsed.data;
+  const supabase = await createClient();
+
+  const { data: version, error } = await supabase
+    .from("report_versions")
+    .select("id, report_id, status, version_number, ai_summary")
+    .eq("id", reportVersionId)
+    .maybeSingle<{
+      id: string;
+      report_id: string;
+      status: string;
+      version_number: number;
+      ai_summary: AiSummaryPayload | null;
+    }>();
+
+  if (error) throw error;
+  if (!version || version.report_id !== reportId) return notFound();
+  if (version.status === "published" || version.status === "archived") {
+    return apiError(409, "versionLocked");
+  }
+
+  const aiSummary: AiSummaryPayload = {
+    ...summary,
+    generated_at: version.ai_summary?.generated_at ?? new Date().toISOString(),
+  };
+  const requiresReapproval = version.status === "approved";
+
+  const { error: updateError } = await supabase
+    .from("report_versions")
+    .update({
+      ai_summary: aiSummary,
+      ...(requiresReapproval ? { status: "needs_review" } : {}),
+    })
+    .eq("id", version.id);
+
+  if (updateError) throw updateError;
+
+  await writeAuditLog(supabase, {
+    actor_id: session.userId,
+    action: "SUMMARY_EDITED",
+    entity_type: "report_version",
+    entity_id: version.id,
+    metadata: {
+      report_id: reportId,
+      version_number: version.version_number,
+      required_reapproval: requiresReapproval,
+    },
+  });
+
+  return apiOk({ aiSummary, status: requiresReapproval ? "needs_review" as const : version.status });
+});
 
 export const POST = withAdmin<[Params]>("generateSummary", async (session, request, { params }) => {
   const { reportId } = await params;

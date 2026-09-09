@@ -7,7 +7,11 @@ import type { AiSummaryPayload, MetricRow, Platform } from "@/types/database";
 
 export type PublishedPeriod = { reportId: string; versionId: string; versionNumber: number; title: string; periodStart: string; periodEnd: string; publishedAt: string | null; summary: string | null; aiSummary: AiSummaryPayload | null };
 export type PublishedPeriodsPage = { periods: PublishedPeriod[]; total: number; previousCursor: string | null; nextCursor: string | null };
-export type PortalMetric = MetricRow & { accountId: string | null };
+export type PortalMetric = MetricRow & {
+  accountId: string | null;
+  accountName: string | null;
+  accountStage: string | null;
+};
 export type GalleryImage = {
   id: string;
   url: string;
@@ -110,15 +114,25 @@ export async function loadPortalMetrics(versionIds: string[]): Promise<Map<strin
   if (!versionIds.length) return grouped;
   const supabase = await createClient();
   const { data, error } = await supabase.from("metrics")
-    .select("*, insight_batches(account_id)")
+    .select("*, insight_batches(account_id, accounts(page_name, page_id, stage))")
     .in("report_version_id", versionIds)
     .order("platform", { ascending: true })
-    .returns<Array<MetricRow & { insight_batches: { account_id: string | null } | null }>>();
+    .returns<Array<MetricRow & {
+      insight_batches: {
+        account_id: string | null;
+        accounts: { page_name: string | null; page_id: string | null; stage: string | null } | null;
+      } | null;
+    }>>();
   if (error) throw error;
   for (const id of versionIds) grouped.set(id, []);
   for (const metric of data ?? []) {
     const { insight_batches, ...row } = metric;
-    grouped.get(row.report_version_id)?.push({ ...row, accountId: insight_batches?.account_id ?? null });
+    grouped.get(row.report_version_id)?.push({
+      ...row,
+      accountId: insight_batches?.account_id ?? null,
+      accountName: insight_batches?.accounts?.page_name ?? insight_batches?.accounts?.page_id ?? null,
+      accountStage: insight_batches?.accounts?.stage ?? null,
+    });
   }
   return grouped;
 }

@@ -24,6 +24,9 @@ export const createClientSchema = z
       .max(128)
       .refine((value) => !/^\s|\s$/.test(value), "No leading or trailing spaces"),
     notes: z.string().trim().max(2000).optional().or(z.literal("")),
+    projectName: z.string().trim().max(160).optional().or(z.literal("")),
+    serviceDescription: z.string().trim().max(300).optional().or(z.literal("")),
+    followupPriority: z.enum(["low", "normal", "high"]).default("normal"),
   })
   .strict();
 
@@ -42,6 +45,22 @@ export const updateAccountSchema = z.object({
   pageId: z.string().trim().max(160).nullable().optional(),
   stage: z.string().trim().max(80).nullable().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
+
+const relatedGmailAccountSchema = z.object({
+  id: z.string().min(1).max(80),
+  service: z.string().trim().min(1).max(120),
+  username: z.string().trim().min(1).max(240),
+  password: z.string().min(1).max(256),
+}).strict();
+
+export const clientGmailSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1).max(256),
+  notes: z.string().trim().max(1000).optional().or(z.literal("")),
+  relatedAccounts: z.array(relatedGmailAccountSchema).max(20).default([]),
+}).strict();
+
+export const updateClientGmailSchema = clientGmailSchema.partial().strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
 export const updateClientSchema = z
   .object({

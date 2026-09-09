@@ -60,6 +60,7 @@ export default function UploadWorkspace({
   const tErrors = useTranslations("admin.errors");
   const router = useRouter();
   const [activeJobIds, setActiveJobIds] = useState<string[]>([]);
+  const [jobStatuses, setJobStatuses] = useState<JobStatus[]>([]);
   // Completed batches are deliberately excluded: their stored AI result is the
   // cache. Only newly uploaded or failed work is sent to the provider again.
   const pendingPanels = panels.filter(
@@ -82,6 +83,12 @@ export default function UploadWorkspace({
     },
     onSuccess: (jobs) => {
       toast.success(t("analyzeAllQueued", { count: jobs.length }));
+      setJobStatuses(jobs.map((job) => ({
+        id: job.jobId,
+        status: "queued",
+        result: null,
+        error_key: null,
+      })));
       setActiveJobIds(jobs.map((job) => job.jobId));
     },
     onError: (error) => {
@@ -110,6 +117,7 @@ export default function UploadWorkspace({
         const finished = activeJobIds
           .map((id) => jobsById.get(id))
           .filter((job): job is JobStatus => Boolean(job));
+        setJobStatuses(finished);
         const hasActiveJobs = finished.some((job) => ACTIVE_JOB_STATUSES.has(job.status));
 
         if (!hasActiveJobs && finished.length === activeJobIds.length) {
@@ -189,7 +197,47 @@ export default function UploadWorkspace({
           />
         ))}
       </div>
+
+      {activeJobIds.length > 0 && (
+        <AnalysisProgress jobs={jobStatuses} total={activeJobIds.length} />
+      )}
     </section>
+  );
+}
+
+function AnalysisProgress({ jobs, total }: { jobs: JobStatus[]; total: number }) {
+  const t = useTranslations("admin.workspace");
+  const completed = jobs.filter((job) => job.status === "completed").length;
+  const processing = jobs.filter((job) => job.status === "processing").length;
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] p-4"
+    >
+      <div className="flex items-start gap-3">
+        <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-cyan-300" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <p className="text-sm font-medium text-white">{t("analysisInProgress")}</p>
+            <p className="text-xs tabular-nums text-cyan-200">
+              {t("analysisProgressCount", { completed, total })}
+            </p>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-cyan-300 transition-[width] duration-500"
+              style={{ width: `${Math.max(percent, processing > 0 ? 8 : 0)}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">
+            {t("analysisProgressDetail", { processing })}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

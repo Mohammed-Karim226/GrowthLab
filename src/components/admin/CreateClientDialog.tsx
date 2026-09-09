@@ -18,6 +18,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiRequestError, apiPost } from "@/lib/api-client";
 import { createClientSchema } from "@/lib/validation/schemas";
 import type { ClientRow } from "@/types/database";
@@ -50,6 +51,9 @@ export default function CreateClientDialog({
 
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [serviceDescription, setServiceDescription] = useState("");
+  const [followupPriority, setFollowupPriority] = useState<"low" | "normal" | "high">("normal");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notes, setNotes] = useState("");
@@ -62,6 +66,7 @@ export default function CreateClientDialog({
   function reset() {
     setName("");
     setCompanyName("");
+    setProjectName(""); setServiceDescription(""); setFollowupPriority("normal");
     setEmail("");
     setPassword("");
     setNotes("");
@@ -98,6 +103,9 @@ export default function CreateClientDialog({
       email: email.trim(),
       password,
       notes: notes.trim(),
+      projectName: projectName.trim(),
+      serviceDescription: serviceDescription.trim(),
+      followupPriority,
     };
 
     // Validate with the same schema the route uses, so the round-trip is only
@@ -233,6 +241,24 @@ export default function CreateClientDialog({
                 disabled={mutation.isPending}
                 className="border-white/10 bg-white/[0.02]"
               />
+            </Field>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field><FieldLabel htmlFor="client-project">{t("create.project")}</FieldLabel><Input id="client-project" value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder={t("create.projectPlaceholder")} disabled={mutation.isPending} /></Field>
+              <Field><FieldLabel htmlFor="client-service">{t("create.service")}</FieldLabel><Input id="client-service" value={serviceDescription} onChange={(e) => setServiceDescription(e.target.value)} placeholder={t("create.servicePlaceholder")} disabled={mutation.isPending} /></Field>
+            </div>
+            <Field>
+              <FieldLabel htmlFor="client-priority">{t("create.priority")}</FieldLabel>
+              <Select value={followupPriority} onValueChange={(value) => setFollowupPriority(value as "low" | "normal" | "high")}>
+                <SelectTrigger id="client-priority" className="border-white/10 bg-white/[0.02]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">{t("create.priorityHigh")}</SelectItem>
+                  <SelectItem value="normal">{t("create.priorityNormal")}</SelectItem>
+                  <SelectItem value="low">{t("create.priorityLow")}</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
 
             <Field>
