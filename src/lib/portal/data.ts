@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { INSIGHTS_BUCKET } from "@/lib/uploads";
 import { decodeCursor, encodeCursor } from "@/lib/pagination";
-import type { AiSummaryPayload, MetricRow, Platform } from "@/types/database";
+import { PLATFORMS, type AiSummaryPayload, type MetricRow, type Platform } from "@/types/database";
 
 export type PublishedPeriod = { reportId: string; versionId: string; versionNumber: number; title: string; periodStart: string; periodEnd: string; publishedAt: string | null; summary: string | null; aiSummary: AiSummaryPayload | null };
 export type PublishedPeriodsPage = { periods: PublishedPeriod[]; total: number; previousCursor: string | null; nextCursor: string | null };
@@ -20,6 +20,16 @@ export type GalleryImage = {
   accountId: string | null;
   reportId: string;
   reportTitle: string;
+  periodStart: string;
+  periodEnd: string;
+};
+export type GalleryMonth = {
+  month: string;
+  coverUrl: string | null;
+  imageCount: number;
+  reportCount: number;
+  platforms: Platform[];
+  reports: Array<{ id: string; title: string }>;
   periodStart: string;
   periodEnd: string;
 };
@@ -137,13 +147,86 @@ export async function loadPortalMetrics(versionIds: string[]): Promise<Map<strin
   return grouped;
 }
 
-/** Client-visible source screenshots for published reports only. */
-export async function loadPublishedAnalysisGallery(clientId: string): Promise<GalleryImage[]> {
-  const periods = await listPublishedPeriods(clientId, 36);
+/** Lightweight folder summaries for client-visible screenshots. */
+export async function loadPublishedAnalysisMonths(clientId: string): Promise<GalleryMonth[]> {
+  const periods = await listPublishedPeriods(clientId, 100);
   if (!periods.length) return [];
 
-  // The regular tenant-scoped query above proves ownership and publication.
-  // The service client is used only to mint short-lived URLs for the private bucket.
+  const admin = createAdminClient();
+  const versionIds = periods.map((period) => period.versionId);
+  const { data, error } = await admin.from("insight_batches")
+    .select("report_version_id, platform, insight_images(id, storage_path, sort_order)")
+    .in("report_version_id", versionIds)
+    .returns<Array<{
+      report_version_id: string;
+      platform: Platform;
+      insight_images: Array<{ id: string; storage_path: string; sort_order: number }>;
+    }>>();
+  if (error) throw error;
+
+  const periodByVersion = new Map(periods.map((period) => [period.versionId, period]));
+  const grouped = new Map<string, {
+    coverPath: string | null;
+    imageCount: number;
+    platforms: Set<Platform>;
+    reports: Map<string, string>;
+    periodStart: string;
+    periodEnd: string;
+  }>();
+
+  for (const batch of data ?? []) {
+    const period = periodByVersion.get(batch.report_version_id);
+    const imageCount = batch.insight_images?.length ?? 0;
+    if (!period || imageCount === 0) continue;
+
+    const month = period.periodEnd.slice(0, 7);
+    const current = grouped.get(month) ?? {
+      coverPath: null,
+      imageCount: 0,
+      platforms: new Set<Platform>(),
+      reports: new Map<string, string>(),
+      periodStart: period.periodStart,
+      periodEnd: period.periodEnd,
+    };
+    current.imageCount += imageCount;
+    const firstImage = [...(batch.insight_images ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0];
+    if (!current.coverPath && firstImage) current.coverPath = firstImage.storage_path;
+    current.platforms.add(batch.platform);
+    current.reports.set(period.reportId, period.title);
+    if (period.periodStart < current.periodStart) current.periodStart = period.periodStart;
+    if (period.periodEnd > current.periodEnd) current.periodEnd = period.periodEnd;
+    grouped.set(month, current);
+  }
+
+  const coverPaths = [...grouped.values()].flatMap((value) => value.coverPath ? [value.coverPath] : []);
+  const { data: signedCovers, error: signedCoverError } = coverPaths.length
+    ? await admin.storage.from(INSIGHTS_BUCKET).createSignedUrls(coverPaths, 60 * 15)
+    : { data: [], error: null };
+  if (signedCoverError) throw signedCoverError;
+  const coverUrls = new Map(coverPaths.map((path, index) => [path, signedCovers?.[index]?.signedUrl ?? null]));
+
+  return [...grouped.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([month, value]) => ({
+      month,
+      coverUrl: value.coverPath ? coverUrls.get(value.coverPath) ?? null : null,
+      imageCount: value.imageCount,
+      reportCount: value.reports.size,
+      platforms: PLATFORMS.filter((platform) => value.platforms.has(platform)),
+      reports: [...value.reports.entries()].map(([id, title]) => ({ id, title })),
+      periodStart: value.periodStart,
+      periodEnd: value.periodEnd,
+    }));
+}
+
+/** Client-visible source screenshots for published reports only. */
+export async function loadPublishedAnalysisGallery(clientId: string, month?: string): Promise<GalleryImage[]> {
+  const periods = (await listPublishedPeriods(clientId, 100))
+    .filter((period) => !month || period.periodEnd.startsWith(month));
+  if (!periods.length) return [];
+
+  // The tenant-scoped period query proves ownership and publication before the
+  // service client mints short-lived URLs for this client's private images.
   const admin = createAdminClient();
   const versionIds = periods.map((period) => period.versionId);
   const { data, error } = await admin.from("insight_batches")
@@ -159,7 +242,13 @@ export async function loadPublishedAnalysisGallery(clientId: string): Promise<Ga
   if (error) throw error;
 
   const periodByVersion = new Map(periods.map((period) => [period.versionId, period]));
-  const rows = (data ?? []).flatMap((batch) => batch.insight_images.map((image) => ({ batch, image })));
+  const rows = (data ?? [])
+    .flatMap((batch) => batch.insight_images.map((image) => ({ batch, image })))
+    .sort((a, b) => {
+      const periodA = periodByVersion.get(a.batch.report_version_id);
+      const periodB = periodByVersion.get(b.batch.report_version_id);
+      return (periodB?.periodEnd ?? "").localeCompare(periodA?.periodEnd ?? "") || a.image.sort_order - b.image.sort_order;
+    });
   if (!rows.length) return [];
   const { data: signed, error: signedError } = await admin.storage.from(INSIGHTS_BUCKET)
     .createSignedUrls(rows.map(({ image }) => image.storage_path), 60 * 15);

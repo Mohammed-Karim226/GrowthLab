@@ -1601,5 +1601,3 @@
     transition-duration: 0.001ms !important;
   }
 }
-.filter-select { min-width: 0; border: 1px solid rgb(255 255 255 / 0.1); border-radius: 0.75rem; background: rgb(0 0 0 / 0.2); padding: 0.55rem 0.7rem; font-size: 0.75rem; color: #d9d5ca; }
-.filter-select:focus { outline: 2px solid rgb(216 190 120 / 0.4); outline-offset: 1px; }
