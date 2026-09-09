@@ -8,7 +8,7 @@ import {
   type HeadlineKpis,
   type PlatformTotals,
 } from "./calculations";
-import { indexMetrics, platformsPresent } from "./normalization";
+import { platformsPresent } from "./normalization";
 
 /**
  * Period-over-period comparison.
@@ -22,10 +22,27 @@ export type MetricComparison = {
   platform: Platform;
   metricName: string;
   unit: string;
+  accountId: string | null;
+  accountName: string | null;
+  accountStage: string | null;
   current: number | null;
   previous: number | null;
   growth: GrowthResult;
 };
+
+type ScopedMetric = MetricRow & {
+  accountId?: string | null;
+  accountName?: string | null;
+  accountStage?: string | null;
+};
+
+function metricScopeKey(metric: ScopedMetric): string {
+  return metric.accountId ?? (metric.insight_batch_id ? `batch:${metric.insight_batch_id}` : "unscoped");
+}
+
+function comparisonKey(metric: ScopedMetric): string {
+  return `${metric.platform}:${metric.metric_name}:${metricScopeKey(metric)}`;
+}
 
 export type PlatformComparison = {
   platform: Platform;
@@ -52,24 +69,25 @@ export type PeriodComparison = {
 };
 
 export function comparePeriods(
-  currentMetrics: MetricRow[],
-  previousMetrics: MetricRow[] | null
+  currentMetrics: ScopedMetric[],
+  previousMetrics: ScopedMetric[] | null
 ): PeriodComparison {
   const current = headlineKpis(currentMetrics);
   const hasPrevious = Boolean(previousMetrics && previousMetrics.length > 0);
   const previous = hasPrevious ? headlineKpis(previousMetrics!) : null;
 
   const aggregate = (rows: MetricRow[]) => {
-    const groups = new Map<string, MetricRow[]>();
+    const groups = new Map<string, ScopedMetric[]>();
     for (const row of rows) {
-      const key = `${row.platform}:${row.metric_name}:${row.metric_unit}:${row.metric_date ?? ""}`;
+      const key = `${row.platform}:${row.metric_name}:${row.metric_unit}:${row.metric_date ?? ""}:${metricScopeKey(row)}`;
       groups.set(key, [...(groups.get(key) ?? []), row]);
     }
     return [...groups.values()].map((group) => {
       const first = group[0];
       const values = group.flatMap((row) => row.metric_value === null ? [] : [Number(row.metric_value)]);
+      const averageMetrics = new Set(["average_views"]);
       const averageUnits = new Set(["percent", "seconds", "minutes", "hours"]);
-      const metricValue = values.length === 0 ? null : averageUnits.has(first.metric_unit)
+      const metricValue = values.length === 0 ? null : averageUnits.has(first.metric_unit) || averageMetrics.has(first.metric_name)
         ? values.reduce((sum, value) => sum + value, 0) / values.length
         : values.reduce((sum, value) => sum + value, 0);
       return { ...first, id: first.id, insight_batch_id: null, metric_value: metricValue };
@@ -78,14 +96,17 @@ export function comparePeriods(
 
   const aggregatedCurrent = aggregate(currentMetrics);
   const aggregatedPrevious = aggregate(previousMetrics ?? []);
-  const previousIndex = indexMetrics(aggregatedPrevious);
+  const previousIndex = new Map(aggregatedPrevious.map((metric) => [comparisonKey(metric), metric]));
 
   const metricComparisons: MetricComparison[] = aggregatedCurrent.map((metric) => {
-    const counterpart = previousIndex.get(`${metric.platform}:${metric.metric_name}`);
+    const counterpart = previousIndex.get(comparisonKey(metric));
     return {
       platform: metric.platform,
       metricName: metric.metric_name,
       unit: metric.metric_unit,
+      accountId: metric.accountId ?? null,
+      accountName: metric.accountName ?? null,
+      accountStage: metric.accountStage ?? null,
       current: metric.metric_value,
       previous: counterpart?.metric_value ?? null,
       growth: calculateGrowth(metric.metric_value, counterpart?.metric_value ?? null),

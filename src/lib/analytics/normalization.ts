@@ -10,6 +10,7 @@ import type { MetricRow, Platform } from "@/types/database";
 
 export const COMMON_METRICS = [
   "views",
+  "average_views",
   "reach",
   "impressions",
   "followers",
@@ -35,6 +36,10 @@ const ALIASES: Record<string, CommonMetric> = {
   total_views: "views",
   plays: "views",
   video_plays: "views",
+  avg_views: "average_views",
+  average_video_views: "average_views",
+  avg_video_views: "average_views",
+  average_views_per_video: "average_views",
   accounts_reached: "reach",
   people_reached: "reach",
   unique_viewers: "reach",
@@ -83,6 +88,7 @@ export function isCommonMetric(name: string): name is CommonMetric {
 
 /** Metrics that are rates, not counts — never summed across platforms. */
 const RATE_METRICS = new Set<string>([
+  "average_views",
   "engagement_rate",
   "click_through_rate",
   "average_watch_time",

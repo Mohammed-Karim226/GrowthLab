@@ -52,8 +52,15 @@ export default function MetricsTable({ locale, metrics }: { locale: Locale; metr
                 {group.rows.map((row) => {
                   const label = tMetrics.has(row.metricName as never) ? tMetrics(row.metricName as never) : humanizeMetricName(row.metricName);
                   return (
-                    <div key={`${row.platform}:${row.metricName}`} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-white/[0.045] sm:gap-x-4 sm:px-5">
-                      <dt className="min-w-0 text-xs font-medium text-[#aaa79e]">{label}</dt>
+                    <div key={`${row.platform}:${row.metricName}:${row.accountId ?? "unscoped"}`} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-white/[0.045] sm:gap-x-4 sm:px-5">
+                      <dt className="min-w-0 text-xs font-medium text-[#aaa79e]">
+                        {label}
+                        {(row.accountName || row.accountStage) && (
+                          <span className="mt-1 block text-[9px] font-normal tracking-wide text-[#666d7c] uppercase">
+                            {[row.accountName, row.accountStage].filter(Boolean).join(" · ")}
+                          </span>
+                        )}
+                      </dt>
                       <dd className="max-w-[46vw] break-words text-end font-satoshi text-base tracking-[-0.03em] tabular-nums text-[#f0ede5] sm:max-w-none sm:text-lg">
                         {row.current === null ? t("notReported") : formatMetricValue(row.current, row.unit, locale)}
                       </dd>

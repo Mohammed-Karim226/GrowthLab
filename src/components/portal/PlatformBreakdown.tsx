@@ -175,10 +175,17 @@ function PlatformCard({
 
                 return (
                   <li
-                    key={`${metric.platform}:${metric.metricName}`}
+                    key={`${metric.platform}:${metric.metricName}:${metric.accountId ?? "unscoped"}`}
                     className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
                   >
-                    <span className="min-w-0 truncate text-[#8a8880]">{label}</span>
+                    <span className="min-w-0 text-[#8a8880]">
+                      <span className="block truncate">{label}</span>
+                      {(metric.accountName || metric.accountStage) && (
+                        <span className="mt-0.5 block truncate text-[9px] tracking-wide text-[#5f6571] uppercase">
+                          {[metric.accountName, metric.accountStage].filter(Boolean).join(" · ")}
+                        </span>
+                      )}
+                    </span>
                     <span className="flex shrink-0 items-center gap-2">
                       <span className="tabular-nums text-[#e7e3da]">
                         {formatMetricValue(metric.current, metric.unit, locale)}
