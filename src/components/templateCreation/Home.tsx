@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Archive,
@@ -58,6 +58,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
 
 type Contact = {
   id: string;
@@ -66,6 +68,8 @@ type Contact = {
   company: string | null;
   channel: string | null;
   notes: string | null;
+  created_at: string;
+  updated_at: string;
 };
 type Sender = {
   id: string;
@@ -74,6 +78,8 @@ type Sender = {
   title: string | null;
   signature: string | null;
   is_default: boolean;
+  created_at: string;
+  updated_at: string;
 };
 type Status = "draft" | "ready" | "sent" | "replied" | "no_reply" | "closed";
 type CopyLanguage = "en" | "ar";
@@ -88,6 +94,8 @@ type Message = {
   body: string;
   status: Status;
   last_event: string | null;
+  created_at: string;
+  updated_at: string;
 };
 type Draft = {
   subject: string;
@@ -343,6 +351,7 @@ function buildClassicGmailEmailHtml(
 
 export default function Home() {
   const t = useTranslations("adminOutreach.outreach");
+  const locale = useLocale() as Locale;
   const labels: Record<Status, string> = {
     draft: t("draft"),
     ready: t("ready"),
@@ -927,7 +936,7 @@ export default function Home() {
         <Button
           variant="outline"
           size="sm"
-          className="ms-auto"
+          className="ms-auto cursor-pointer rounded-full border-[#d8be78]/30 bg-[#d8be78]/[0.09] text-[#ead69e] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_8px_22px_rgba(216,190,120,.1)] hover:border-[#d8be78]/55 hover:bg-[#d8be78]/[0.16] hover:text-[#fff3c4]"
           onClick={() => setCreateKind("contact")}
         >
           <Plus />
@@ -936,6 +945,7 @@ export default function Home() {
         <Button
           variant="outline"
           size="sm"
+          className="cursor-pointer rounded-full border-[#54d8ac]/30 bg-[#54d8ac]/[0.08] text-[#8be4c5] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_8px_22px_rgba(84,216,172,.1)] hover:border-[#54d8ac]/55 hover:bg-[#54d8ac]/[0.15] hover:text-[#c4f7e5]"
           onClick={() => setCreateKind("sender")}
         >
           <Plus />
@@ -944,6 +954,7 @@ export default function Home() {
         <Button
           variant="outline"
           size="sm"
+          className="cursor-pointer rounded-full border-[#9f99f4]/30 bg-[#9f99f4]/[0.08] text-[#c6c1ff] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_8px_22px_rgba(159,153,244,.1)] hover:border-[#9f99f4]/55 hover:bg-[#9f99f4]/[0.15] hover:text-[#ebe9ff]"
           onClick={() => setContactsOpen(true)}
         >
           <UserRound />
@@ -981,6 +992,13 @@ export default function Home() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedContact && (
+                  <p className="text-[10px] text-slate-500">
+                    {t("created")}: {formatDate(selectedContact.created_at, locale)}
+                    <span className="px-1.5 text-slate-700">·</span>
+                    {t("updated")}: {formatDate(selectedContact.updated_at, locale)}
+                  </p>
+                )}
               </Field>
               <Field>
                 <FieldLabel>{t("senderIdentity")}</FieldLabel>
@@ -1011,6 +1029,13 @@ export default function Home() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedSender && (
+                  <p className="text-[10px] text-slate-500">
+                    {t("created")}: {formatDate(selectedSender.created_at, locale)}
+                    <span className="px-1.5 text-slate-700">·</span>
+                    {t("updated")}: {formatDate(selectedSender.updated_at, locale)}
+                  </p>
+                )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="outreach-website">
@@ -1281,9 +1306,16 @@ export default function Home() {
                       {message.body}
                     </p>
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-[10px] text-slate-600">
-                        {message.last_event || t("created")}
-                      </p>
+                      <div className="min-w-0 space-y-1">
+                        <p className="text-[10px] text-slate-600">
+                          {message.last_event || t("created")}
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          {t("created")}: {formatDate(message.created_at, locale)}
+                          <span className="px-1.5 text-slate-700">·</span>
+                          {t("updated")}: {formatDate(message.updated_at, locale)}
+                        </p>
+                      </div>
                       <Select
                         value={message.status}
                         onValueChange={(value) =>
@@ -1445,6 +1477,11 @@ export default function Home() {
                           {contact.company}
                         </p>
                       )}
+                      <p className="mt-2 text-[10px] text-slate-500">
+                        {t("created")}: {formatDate(contact.created_at, locale)}
+                        <span className="px-1.5 text-slate-700">·</span>
+                        {t("updated")}: {formatDate(contact.updated_at, locale)}
+                      </p>
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <Button

@@ -774,6 +774,7 @@
       "next": "Next",
       "unknownContact": "Unknown contact",
       "created": "Created",
+      "updated": "Updated",
       "newRecord": "New {kind}",
       "recordDescription": "Save this record once and reuse it across future outreach.",
       "name": "Name",
