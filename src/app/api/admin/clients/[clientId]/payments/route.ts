@@ -57,6 +57,7 @@ export const PATCH = withAdmin<[Params]>("updateClientPayment", async (session, 
   else if (input.status !== undefined && input.paidAt === undefined) patch.paid_at = null;
   const supabase = await createClient();
   const { data, error } = await supabase.from("client_payment_plans").update(patch).eq("id", paymentId).eq("client_id", clientId).select("*").maybeSingle<ClientPaymentPlanRow>();
+  if (error?.code === "23505") return apiError(409, "paymentMonthExists");
   if (error) throw error;
   if (!data) return notFound();
   await writeAuditLog(supabase, { actor_id: session.userId, action: "CLIENT_PAYMENT_UPDATED", entity_type: "client_payment_plan", entity_id: data.id, metadata: patch });
