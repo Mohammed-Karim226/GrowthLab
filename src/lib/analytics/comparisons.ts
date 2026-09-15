@@ -19,6 +19,7 @@ import { platformsPresent } from "./normalization";
  */
 
 export type MetricComparison = {
+  key: string;
   platform: Platform;
   metricName: string;
   unit: string;
@@ -41,7 +42,11 @@ function metricScopeKey(metric: ScopedMetric): string {
 }
 
 function comparisonKey(metric: ScopedMetric): string {
-  return `${metric.platform}:${metric.metric_name}:${metricScopeKey(metric)}`;
+  return JSON.stringify([metric.platform, metric.metric_name, metric.metric_unit, metricScopeKey(metric)]);
+}
+
+function metricRowKey(metric: ScopedMetric): string {
+  return JSON.stringify([metric.platform, metric.metric_name, metric.metric_unit, metric.metric_date, metricScopeKey(metric)]);
 }
 
 export type PlatformComparison = {
@@ -76,10 +81,10 @@ export function comparePeriods(
   const hasPrevious = Boolean(previousMetrics && previousMetrics.length > 0);
   const previous = hasPrevious ? headlineKpis(previousMetrics!) : null;
 
-  const aggregate = (rows: MetricRow[]) => {
+  const aggregate = (rows: ScopedMetric[]) => {
     const groups = new Map<string, ScopedMetric[]>();
     for (const row of rows) {
-      const key = `${row.platform}:${row.metric_name}:${row.metric_unit}:${row.metric_date ?? ""}:${metricScopeKey(row)}`;
+      const key = metricRowKey(row);
       groups.set(key, [...(groups.get(key) ?? []), row]);
     }
     return [...groups.values()].map((group) => {
@@ -90,7 +95,8 @@ export function comparePeriods(
       const metricValue = values.length === 0 ? null : averageUnits.has(first.metric_unit) || averageMetrics.has(first.metric_name)
         ? values.reduce((sum, value) => sum + value, 0) / values.length
         : values.reduce((sum, value) => sum + value, 0);
-      return { ...first, id: first.id, insight_batch_id: null, metric_value: metricValue };
+      // Keep the batch identity when account metadata is unavailable.
+      return { ...first, metric_value: metricValue };
     });
   };
 
@@ -101,6 +107,7 @@ export function comparePeriods(
   const metricComparisons: MetricComparison[] = aggregatedCurrent.map((metric) => {
     const counterpart = previousIndex.get(comparisonKey(metric));
     return {
+      key: metricRowKey(metric),
       platform: metric.platform,
       metricName: metric.metric_name,
       unit: metric.metric_unit,

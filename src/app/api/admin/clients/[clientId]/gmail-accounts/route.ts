@@ -1,27 +1,41 @@
+﻿import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
-import { apiError, apiOk, notFound, parseBody, withAdmin, writeAuditLog } from "@/lib/api";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
 import { clientGmailSchema } from "@/lib/validation/schemas";
+import { encryptSecret } from "@/lib/security/secrets";
+import { CREDENTIAL_METADATA_COLUMNS, credentialMetadata } from "@/lib/security/credential-metadata";
+import type { ClientGmailRow } from "@/types/database";
 
 type Params = { params: Promise<{ clientId: string }> };
-
-export const GET = withAdmin<[Params]>("listGmailAccounts", async (_session, _request, { params }) => {
+export const GET = withAdmin<[Params]>("listGmailAccounts", async (_session, request, { params }) => {
   const { clientId } = await params;
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("client_gmail_accounts").select("*").eq("client_id", clientId).order("created_at");
+  const after = new URL(request.url).searchParams.get("after");
+  const db = await createClient();
+  let query = db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("client_id", clientId).order("id").limit(51);
+  if (after && /^[0-9a-f-]{36}$/i.test(after)) query = query.gt("id", after);
+  const { data, error } = await query.returns<ClientGmailRow[]>();
   if (error) throw error;
-  return apiOk({ accounts: data ?? [] });
+  const accounts = (data ?? []).slice(0, 50).map(credentialMetadata);
+  return apiOk({ accounts, nextCursor: (data?.length ?? 0) > 50 ? accounts.at(-1)?.id : null });
 });
-
 export const POST = withAdmin<[Params]>("createGmailAccount", async (session, request, { params }) => {
   const { clientId } = await params;
   const parsed = await parseBody(request, clientGmailSchema);
   if (!parsed.ok) return parsed.response;
-  const supabase = await createClient();
-  const { data: client } = await supabase.from("clients").select("id").eq("id", clientId).maybeSingle();
+  const db = await createClient();
+  const { data: client, error: clientError } = await db.from("clients").select("id").eq("id", clientId).maybeSingle();
+  if (clientError) throw clientError;
   if (!client) return notFound();
+  const id = randomUUID();
   const input = parsed.data;
-  const { data, error } = await supabase.from("client_gmail_accounts").insert({ client_id: clientId, email: input.email, password: input.password, notes: input.notes || null, related_accounts: input.relatedAccounts }).select("*").single();
-  if (error) { if (error.code === "23505") return apiError(409, "gmailExists"); throw error; }
-  await writeAuditLog(supabase, { actor_id: session.userId, action: "GMAIL_ACCOUNT_CREATED", entity_type: "client_gmail_account", entity_id: data.id, metadata: { clientId, email: input.email } });
-  return apiOk({ account: data }, 201);
+  const services = input.relatedAccounts.map(({ id, service, username }) => ({ id, service, username, has_secret: true }));
+  const { error } = await createAdminClient().rpc("save_credential", {
+    p_id: id, p_client: clientId, p_email: input.email, p_actor: session.userId,
+    p_ciphertext: encryptSecret(input, `${clientId}:${id}`), p_services: services,
+  });
+  if (error) throw error;
+  const { data, error: readError } = await db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("id", id).single<ClientGmailRow>();
+  if (readError) throw readError;
+  return apiOk({ account: credentialMetadata(data) }, 201);
 });

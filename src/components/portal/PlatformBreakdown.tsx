@@ -175,7 +175,7 @@ function PlatformCard({
 
                 return (
                   <li
-                    key={`${metric.platform}:${metric.metricName}:${metric.accountId ?? "unscoped"}`}
+                    key={metric.key}
                     className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
                   >
                     <span className="min-w-0 text-[#8a8880]">

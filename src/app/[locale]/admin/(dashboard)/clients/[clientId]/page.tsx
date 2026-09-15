@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientReports from "@/components/admin/ClientReports";
 import AccountManager from "@/components/admin/AccountManager";
 import GmailCredentialManager from "@/components/admin/GmailCredentialManager";
+import { CREDENTIAL_METADATA_COLUMNS, credentialMetadata } from "@/lib/security/credential-metadata";
 import PaymentPlanManager from "@/components/admin/PaymentPlanManager";
 import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
@@ -116,7 +117,7 @@ export default async function ClientDetailPage({
   if (accountsError) throw accountsError;
   const { data: gmailAccounts, error: gmailError } = await supabase
     .from("client_gmail_accounts")
-    .select("*")
+    .select(CREDENTIAL_METADATA_COLUMNS)
     .eq("client_id", clientId)
     .order("created_at")
     .returns<import("@/types/database").ClientGmailRow[]>();
@@ -182,7 +183,7 @@ export default async function ClientDetailPage({
           <AccountManager clientId={client.id} accounts={accounts ?? []} />
           <GmailCredentialManager
             clientId={client.id}
-            initial={gmailAccounts ?? []}
+            initial={(gmailAccounts ?? []).map(credentialMetadata)}
           />
           <PaymentPlanManager clientId={client.id} initial={payments ?? []} />
           <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
