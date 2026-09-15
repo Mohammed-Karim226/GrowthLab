@@ -148,9 +148,8 @@ export type ClientGmailRow = {
   id: string;
   client_id: string;
   email: string;
-  password: string;
-  notes: string | null;
-  related_accounts: ClientGmailRelatedAccount[];
+  has_secret: boolean;
+  services: Array<{ id: string; service: string; username: string; has_secret: boolean }>;
   created_at: string;
   updated_at: string;
 };
@@ -289,7 +288,7 @@ export type Database = {
       >;
       client_gmail_accounts: Table<
         ClientGmailRow,
-        InsertOf<ClientGmailRow, "notes" | "related_accounts">
+        InsertOf<ClientGmailRow, "has_secret" | "services">
       >;
       insight_images: Table<
         InsightImageRow,
@@ -355,6 +354,8 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      save_credential: { Args: { p_id: string; p_client: string; p_email: string; p_ciphertext: string; p_services: unknown; p_actor: string }; Returns: undefined };
+      delete_credential: { Args: { p_id: string; p_actor: string }; Returns: undefined };
       auth_role: { Args: Record<never, never>; Returns: UserRole };
       auth_client_id: { Args: Record<never, never>; Returns: string | null };
       is_admin: { Args: Record<never, never>; Returns: boolean };

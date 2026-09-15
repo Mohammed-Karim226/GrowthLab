@@ -3,6 +3,8 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi, type SessionContext } from "@/lib/auth";
+import { errorCategory, logEvent, redact } from "@/lib/security/logging";
+import { boundedBody, BodyLimitError } from "@/lib/security/body";
 
 /**
  * Route-handler plumbing.
@@ -31,7 +33,8 @@ export const notFound = () => apiError(404, "notFound");
  * `context` is a short call-site label, e.g. "createClient".
  */
 export function serverError(context: string, cause: unknown) {
-  console.error(`[api:${context}]`, cause);
+  logEvent({ operation: context, outcome: "error", category: errorCategory(cause) });
+  if (["40001", "55000", "23505", "23503"].includes(errorCategory(cause))) return apiError(409, "versionLocked");
   return apiError(500, "serverError");
 }
 
@@ -42,15 +45,16 @@ export async function parseBody<S extends z.ZodTypeAny>(
 ): Promise<{ ok: true; data: z.infer<S> } | { ok: false; response: NextResponse }> {
   let raw: unknown;
   try {
-    raw = await request.json();
-  } catch {
+    raw = JSON.parse(new TextDecoder().decode(await boundedBody(request, 64 * 1024)));
+  } catch (error) {
+    if (error instanceof BodyLimitError) return { ok: false, response: apiError(413, "validationFailed") };
     return { ok: false, response: apiError(400, "invalidJson") };
   }
 
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     const details = parsed.error.issues.map((issue) =>
-      issue.path.length ? `${issue.path.join(".")}: ${issue.message}` : issue.message
+      issue.path.length ? issue.path.join(".") : "body"
     );
     return { ok: false, response: apiError(422, "validationFailed", details) };
   }
@@ -67,6 +71,8 @@ export function withAdmin<T extends unknown[]>(
   handler: (session: SessionContext, request: Request, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: Request, ...args: T): Promise<NextResponse> => {
+    const requestId = crypto.randomUUID();
+    const started = Date.now();
     let session: SessionContext | null;
     try {
       session = await requireAdminApi();
@@ -77,7 +83,11 @@ export function withAdmin<T extends unknown[]>(
     if (!session) return unauthorized();
 
     try {
-      return await handler(session, request, ...args);
+      const response = await handler(session, request, ...args);
+      response.headers.set("x-request-id", requestId);
+      response.headers.set("cache-control", "no-store");
+      logEvent({ operation: context, outcome: String(response.status), requestId, actorId: session.userId, tenantId: session.profile.client_id, durationMs: Date.now() - started });
+      return response;
     } catch (cause) {
       return serverError(context, cause);
     }
@@ -114,10 +124,10 @@ export async function writeAuditLog(
       action: entry.action,
       entity_type: entry.entity_type ?? null,
       entity_id: entry.entity_id ?? null,
-      metadata: entry.metadata ?? null,
+      metadata: redact(entry.metadata ?? null),
     } as never);
-    if (error) console.error("[audit]", entry.action, error);
+    if (error) logEvent({ operation: "audit", outcome: "error", category: errorCategory(error) });
   } catch (cause) {
-    console.error("[audit]", entry.action, cause);
+    logEvent({ operation: "audit", outcome: "error", category: errorCategory(cause) });
   }
 }

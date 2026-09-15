@@ -25,7 +25,7 @@ import type { ClientRow } from "@/types/database";
 
 type CreateResponse = {
   client: ClientRow;
-  credentials: { email: string; password: string };
+  credentials: { email: string };
 };
 
 /** Cryptographically random suggestion, so admins don't invent weak passwords. */
@@ -61,7 +61,7 @@ export default function CreateClientDialog({
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
 
   // Held in memory only, and only until the admin dismisses the panel (plan §28).
-  const [credentials, setCredentials] = useState<CreateResponse["credentials"] | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
 
   function reset() {
     setName("");
@@ -78,7 +78,7 @@ export default function CreateClientDialog({
     mutationFn: (input: Record<string, string>) =>
       apiPost<CreateResponse>("/api/admin/clients", input),
     onSuccess: (data) => {
-      setCredentials(data.credentials);
+      setCredentials({ email: data.credentials.email, password });
       reset();
       onCreated();
     },

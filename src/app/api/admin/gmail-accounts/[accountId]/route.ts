@@ -1,28 +1,35 @@
-import { createClient } from "@/lib/supabase/server";
-import { apiError, apiOk, parseBody, withAdmin, writeAuditLog } from "@/lib/api";
-import { updateClientGmailSchema } from "@/lib/validation/schemas";
+﻿import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
+import { clientGmailSchema } from "@/lib/validation/schemas";
+import { encryptSecret } from "@/lib/security/secrets";
+import { CREDENTIAL_METADATA_COLUMNS, credentialMetadata } from "@/lib/security/credential-metadata";
+import type { ClientGmailRow } from "@/types/database";
 type Params = { params: Promise<{ accountId: string }> };
 
-export const PATCH = withAdmin<[Params]>("updateGmailAccount", async (session, request, { params }) => {
+// Replacement is write-only. The operator supplies the full new secret set.
+export const PATCH = withAdmin<[Params]>("replaceGmailAccount", async (session, request, { params }) => {
   const { accountId } = await params;
-  const parsed = await parseBody(request, updateClientGmailSchema);
+  const parsed = await parseBody(request, clientGmailSchema);
   if (!parsed.ok) return parsed.response;
+  const db = await createClient();
+  const { data: existing, error: lookupError } = await db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("id", accountId).maybeSingle<ClientGmailRow>();
+  if (lookupError) throw lookupError;
+  if (!existing) return notFound();
   const input = parsed.data;
-  const patch = { ...(input.email !== undefined ? { email: input.email } : {}), ...(input.password !== undefined ? { password: input.password } : {}), ...(input.notes !== undefined ? { notes: input.notes || null } : {}), ...(input.relatedAccounts !== undefined ? { related_accounts: input.relatedAccounts } : {}) };
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("client_gmail_accounts").update(patch).eq("id", accountId).select("*").maybeSingle();
-  if (error) { if (error.code === "23505") return apiError(409, "gmailExists"); throw error; }
-  if (!data) return apiError(404, "notFound");
-  await writeAuditLog(supabase, { actor_id: session.userId, action: "GMAIL_ACCOUNT_UPDATED", entity_type: "client_gmail_account", entity_id: accountId, metadata: { fields: Object.keys(patch) } });
-  return apiOk({ account: data });
+  const { error } = await createAdminClient().rpc("save_credential", {
+    p_id: accountId, p_client: existing.client_id, p_email: input.email, p_actor: session.userId,
+    p_ciphertext: encryptSecret(input, `${existing.client_id}:${accountId}`),
+    p_services: input.relatedAccounts.map(({ id, service, username }) => ({ id, service, username, has_secret: true })),
+  });
+  if (error) throw error;
+  const { data, error: readError } = await db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("id", accountId).single<ClientGmailRow>();
+  if (readError) throw readError;
+  return apiOk({ account: credentialMetadata(data) });
 });
-
 export const DELETE = withAdmin<[Params]>("deleteGmailAccount", async (session, _request, { params }) => {
   const { accountId } = await params;
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("client_gmail_accounts").delete().eq("id", accountId).select("id").maybeSingle();
+  const { error } = await createAdminClient().rpc("delete_credential", { p_id: accountId, p_actor: session.userId });
   if (error) throw error;
-  if (!data) return apiError(404, "notFound");
-  await writeAuditLog(supabase, { actor_id: session.userId, action: "GMAIL_ACCOUNT_DELETED", entity_type: "client_gmail_account", entity_id: accountId });
   return apiOk({ deleted: accountId });
 });

@@ -116,7 +116,5 @@ export const POST = withAdmin("createClient", async (session, request) => {
     metadata: { email, name },
   });
 
-  // The password is echoed back exactly once, for the admin to hand over.
-  // It is never persisted (plan §28).
-  return apiOk({ client, credentials: { email, password } }, 201);
+  return apiOk({ client, credentials: { email } }, 201);
 });
