@@ -124,7 +124,7 @@ export async function loadPortalMetrics(versionIds: string[]): Promise<Map<strin
   if (!versionIds.length) return grouped;
   const supabase = await createClient();
   const { data, error } = await supabase.from("metrics")
-    .select("*, insight_batches(account_id, accounts(page_name, page_id, stage))")
+    .select("*, insight_batches!metrics_insight_batch_id_fkey(account_id, accounts(page_name, page_id, stage))")
     .in("report_version_id", versionIds)
     .order("platform", { ascending: true })
     .returns<Array<MetricRow & {

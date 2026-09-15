@@ -52,7 +52,7 @@ export default function MetricsTable({ locale, metrics }: { locale: Locale; metr
                 {group.rows.map((row) => {
                   const label = tMetrics.has(row.metricName as never) ? tMetrics(row.metricName as never) : humanizeMetricName(row.metricName);
                   return (
-                    <div key={`${row.platform}:${row.metricName}:${row.accountId ?? "unscoped"}`} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-white/[0.045] sm:gap-x-4 sm:px-5">
+                    <div key={row.key} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-white/[0.045] sm:gap-x-4 sm:px-5">
                       <dt className="min-w-0 text-xs font-medium text-[#aaa79e]">
                         {label}
                         {(row.accountName || row.accountStage) && (
