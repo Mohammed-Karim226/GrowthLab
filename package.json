@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:credentials": "node --test tests/gmail-credentials.test.mjs",
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
     "reset:admin-password": "node scripts/reset-admin-password.mjs",
     "db:apply": "node scripts/apply-migration.mjs",

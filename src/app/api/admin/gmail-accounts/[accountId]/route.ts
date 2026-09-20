@@ -1,8 +1,9 @@
 ﻿import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
+import { apiError, apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
 import { clientGmailSchema } from "@/lib/validation/schemas";
 import { encryptSecret } from "@/lib/security/secrets";
+import { errorCategory } from "@/lib/security/logging";
 import { CREDENTIAL_METADATA_COLUMNS, credentialMetadata } from "@/lib/security/credential-metadata";
 import type { ClientGmailRow } from "@/types/database";
 type Params = { params: Promise<{ accountId: string }> };
@@ -22,7 +23,11 @@ export const PATCH = withAdmin<[Params]>("replaceGmailAccount", async (session, 
     p_ciphertext: encryptSecret(input, `${existing.client_id}:${accountId}`),
     p_services: input.relatedAccounts.map(({ id, service, username }) => ({ id, service, username, has_secret: true })),
   });
-  if (error) throw error;
+  // Renaming onto an address the client already stores trips (client_id, lower(email)).
+  if (error) {
+    if (errorCategory(error) === "23505") return apiError(409, "gmailExists");
+    throw error;
+  }
   const { data, error: readError } = await db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("id", accountId).single<ClientGmailRow>();
   if (readError) throw readError;
   return apiOk({ account: credentialMetadata(data) });

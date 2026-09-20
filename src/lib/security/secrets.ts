@@ -4,6 +4,19 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 const MAX_SECRET_BYTES = 32_768;
 type Keyring = { active: string; keys: Record<string, string> };
 
+/**
+ * Missing or malformed keyring env vars: a deployment fault, not operator error.
+ * Carries a `code` so serverError() can answer 503 `credentialConfig` instead of
+ * a blank 500, which is otherwise indistinguishable from a database failure.
+ */
+export class CredentialConfigError extends Error {
+  readonly code = "CREDENTIAL_CONFIG";
+  constructor() {
+    super("Credential encryption configuration is invalid");
+    this.name = "CredentialConfigError";
+  }
+}
+
 function keyring(): Keyring {
   try {
     const keys = JSON.parse(process.env.CREDENTIAL_ENCRYPTION_KEYS ?? "{}");
@@ -14,10 +27,15 @@ function keyring(): Keyring {
           !/^[A-Za-z0-9+/]{43}=$/.test(key) || Buffer.from(key, "base64").length !== 32) throw new Error();
     }
     return { active, keys };
-  } catch { throw new Error("Credential encryption configuration is invalid"); }
+  } catch { throw new CredentialConfigError(); }
 }
 
 export function validateEncryptionConfiguration(): void { keyring(); }
+
+/** True when the keyring is usable, so callers can degrade instead of throwing. */
+export function isEncryptionConfigured(): boolean {
+  try { keyring(); return true; } catch { return false; }
+}
 
 /** AAD binds ciphertext to the owning row; moving a ciphertext cannot move a secret. */
 export function encryptSecret(value: unknown, context: string): string {
@@ -31,7 +49,7 @@ export function encryptSecret(value: unknown, context: string): string {
   return ["v1", active, nonce.toString("base64url"), cipher.getAuthTag().toString("base64url"), encrypted.toString("base64url")].join(".");
 }
 
-/** Only controlled repair/rotation uses decryption; no application read endpoint does. */
+/** Used by the audited admin reveal endpoint and controlled repair/rotation. */
 export function decryptSecret(ciphertext: string, context: string): unknown {
   try {
     if (ciphertext.length > MAX_SECRET_BYTES * 2) throw new Error();

@@ -34,7 +34,10 @@ export const notFound = () => apiError(404, "notFound");
  */
 export function serverError(context: string, cause: unknown) {
   logEvent({ operation: context, outcome: "error", category: errorCategory(cause) });
-  if (["40001", "55000", "23505", "23503"].includes(errorCategory(cause))) return apiError(409, "versionLocked");
+  const category = errorCategory(cause);
+  // Deployment fault, not operator error — say so rather than a blank 500.
+  if (category === "CREDENTIAL_CONFIG") return apiError(503, "credentialConfig");
+  if (["40001", "55000", "23505", "23503"].includes(category)) return apiError(409, "versionLocked");
   return apiError(500, "serverError");
 }
 

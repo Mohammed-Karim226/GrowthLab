@@ -1,9 +1,10 @@
 ﻿import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
+import { apiError, apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
 import { clientGmailSchema } from "@/lib/validation/schemas";
 import { encryptSecret } from "@/lib/security/secrets";
+import { errorCategory } from "@/lib/security/logging";
 import { CREDENTIAL_METADATA_COLUMNS, credentialMetadata } from "@/lib/security/credential-metadata";
 import type { ClientGmailRow } from "@/types/database";
 
@@ -34,7 +35,11 @@ export const POST = withAdmin<[Params]>("createGmailAccount", async (session, re
     p_id: id, p_client: clientId, p_email: input.email, p_actor: session.userId,
     p_ciphertext: encryptSecret(input, `${clientId}:${id}`), p_services: services,
   });
-  if (error) throw error;
+  // The only unique index here is (client_id, lower(email)); `on conflict (id)` cannot absorb it.
+  if (error) {
+    if (errorCategory(error) === "23505") return apiError(409, "gmailExists");
+    throw error;
+  }
   const { data, error: readError } = await db.from("client_gmail_accounts").select(CREDENTIAL_METADATA_COLUMNS).eq("id", id).single<ClientGmailRow>();
   if (readError) throw readError;
   return apiOk({ account: credentialMetadata(data) }, 201);
