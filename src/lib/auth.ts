@@ -42,7 +42,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   return { userId: user.id, email: user.email ?? null, profile };
 }
 
-/** Where a given role belongs, used for both guards and post-login routing. */
+/** Dashboard destination after the account's role has been authorized. */
 export function homePathForRole(role: UserRole, locale: string): string {
   return role === "admin" ? `/${safeLocale(locale)}/admin` : `/${safeLocale(locale)}/portal`;
 }
@@ -55,14 +55,8 @@ export async function requireAdmin(locale: string): Promise<SessionContext> {
   const context = await getSessionContext();
   const safe = safeLocale(locale);
 
-  if (!context) {
+  if (!context || context.profile.role !== "admin") {
     redirect(`/${safe}/admin/login`);
-  }
-
-  if (context.profile.role !== "admin") {
-    // Wrong role -> send them to their own dashboard rather than leaking that
-    // the admin area exists.
-    redirect(homePathForRole(context.profile.role, safe));
   }
 
   return context;
@@ -75,12 +69,8 @@ export async function requireClient(
   const context = await getSessionContext();
   const safe = safeLocale(locale);
 
-  if (!context) {
+  if (!context || context.profile.role !== "client") {
     redirect(`/${safe}/portal/login`);
-  }
-
-  if (context.profile.role !== "client") {
-    redirect(homePathForRole(context.profile.role, safe));
   }
 
   if (!context.profile.client_id) {
