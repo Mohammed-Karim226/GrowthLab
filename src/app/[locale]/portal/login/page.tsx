@@ -30,7 +30,7 @@ export default async function PortalLoginPage({
   const safeLocale = isLocale(locale) ? locale : defaultLocale;
 
   const session = await getSessionContext();
-  if (session) {
+  if (session?.profile.role === "client" && session.profile.client_id) {
     redirect(homePathForRole(session.profile.role, safeLocale));
   }
 
@@ -43,7 +43,14 @@ export default async function PortalLoginPage({
       subtitle={t("portalSubtitle")}
       footnote={t("noSelfSignup")}
     >
-      <LoginForm expectedRole="client" />
+      <LoginForm
+        expectedRole="client"
+        initialErrorKey={
+          session?.profile.role === "client" && !session.profile.client_id
+            ? "noClient"
+            : null
+        }
+      />
     </LoginShell>
   );
 }

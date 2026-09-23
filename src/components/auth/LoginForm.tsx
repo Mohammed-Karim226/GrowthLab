@@ -15,23 +15,22 @@ import type { UserRole } from "@/types/database";
 
 type LoginResponse = {
   redirectTo: string;
-  role: UserRole;
-  wrongArea: boolean;
 };
 
 type LoginFormProps = {
-  /** Which door this form is. UX only — never a security boundary. */
+  /** The API verifies that the stored profile role matches this login area. */
   expectedRole: UserRole;
+  initialErrorKey?: "noClient" | null;
 };
 
-export default function LoginForm({ expectedRole }: LoginFormProps) {
+export default function LoginForm({ expectedRole, initialErrorKey = null }: LoginFormProps) {
   const t = useTranslations("auth");
   const locale = useLocale();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(initialErrorKey);
 
   const mutation = useMutation({
     mutationFn: (credentials: { email: string; password: string }) =>

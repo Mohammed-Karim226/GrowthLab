@@ -29,9 +29,9 @@ export default async function AdminLoginPage({
   const { locale } = await params;
   const safeLocale = isLocale(locale) ? locale : defaultLocale;
 
-  // Already signed in? Don't show the door again.
+  // Only an authorized admin session can skip this area's login screen.
   const session = await getSessionContext();
-  if (session) {
+  if (session?.profile.role === "admin") {
     redirect(homePathForRole(session.profile.role, safeLocale));
   }
 
