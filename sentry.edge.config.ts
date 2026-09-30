@@ -4,17 +4,35 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  sentryDsn,
+  sentryEnvironment,
+  sentryRelease,
+  sentryTracesSampleRate,
+} from "@/lib/env";
+
+const dsn = sentryDsn();
 
 Sentry.init({
-  dsn: "https://29ff8650b724df1bcb37ba7857f2496e@o4512119130619904.ingest.de.sentry.io/4512119141105744",
+  dsn,
+  enabled: Boolean(dsn),
+  environment: sentryEnvironment(),
+  release: sentryRelease(),
+  sendDefaultPii: false,
+  tracesSampleRate: sentryTracesSampleRate(),
+  beforeSend(event) {
+    if (event.user) {
+      delete event.user.email;
+      delete event.user.ip_address;
+      delete event.user.username;
+    }
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+    if (event.request?.headers) {
+      delete event.request.headers.authorization;
+      delete event.request.headers.cookie;
+      delete event.request.headers["x-forwarded-for"];
+    }
 
-  dataCollection: {
-    // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#dataCollection
-    // userInfo: false,
-    // httpBodies: [],
+    return event;
   },
 });

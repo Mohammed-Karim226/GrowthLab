@@ -90,5 +90,44 @@ export function geminiModel(): string {
   return process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 }
 
+export function sentryDsn(): string | undefined {
+  return process.env.NEXT_PUBLIC_SENTRY_DSN?.trim() || process.env.SENTRY_DSN?.trim() || undefined;
+}
+
+export function sentryEnvironment(): string {
+  return process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "development";
+}
+
+export function sentryRelease(): string | undefined {
+  return (
+    process.env.SENTRY_RELEASE ||
+    process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA
+  );
+}
+
+export function sentryTracesSampleRate(): number {
+  const raw = process.env.SENTRY_TRACES_SAMPLE_RATE ?? (process.env.NODE_ENV === "production" ? "0.1" : "1");
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    return process.env.NODE_ENV === "production" ? 0.1 : 1;
+  }
+  return Math.min(Math.max(value, 0), 1);
+}
+
+export function sentryReplaySessionSampleRate(): number {
+  const raw = process.env.SENTRY_REPLAY_SESSION_SAMPLE_RATE ?? "0.05";
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return 0.05;
+  return Math.min(Math.max(value, 0), 1);
+}
+
+export function sentryReplayErrorSampleRate(): number {
+  const raw = process.env.SENTRY_REPLAY_ERROR_SAMPLE_RATE ?? "1";
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(Math.max(value, 0), 1);
+}
+
 // Upload limits are NOT here: the browser needs them, and nothing that runs in
 // the browser may import this module. See lib/uploads.ts.
