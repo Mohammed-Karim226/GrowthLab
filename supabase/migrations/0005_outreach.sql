@@ -1,5 +1,15 @@
 -- Outreach CRM: reusable contacts/senders and message status tracking.
-create type public.outreach_message_status as enum ('draft', 'ready', 'sent', 'replied', 'no_reply', 'closed');
+do $$ begin
+  if not exists (
+    select 1
+    from pg_type t
+    join pg_namespace n on n.oid = t.typnamespace
+    where n.nspname = 'public'
+      and t.typname = 'outreach_message_status'
+  ) then
+    create type public.outreach_message_status as enum ('draft', 'ready', 'sent', 'replied', 'no_reply', 'closed');
+  end if;
+end $$;
 
 create table if not exists public.outreach_senders (
   id uuid primary key default gen_random_uuid(),
