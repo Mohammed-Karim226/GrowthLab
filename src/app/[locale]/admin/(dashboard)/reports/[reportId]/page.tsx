@@ -34,6 +34,7 @@ type ReportRecord = {
   report_versions: Array<{
     id: string;
     version_number: number;
+    revision: number;
     status: ReportStatus;
     ai_summary: AiSummaryPayload | null;
     published_at: string | null;
@@ -75,7 +76,7 @@ export default async function ReportWorkspacePage({
     .select(
       // FK named explicitly: `current_published_version_id` points the other
       // way across the same pair of tables, so a bare embed is ambiguous.
-      "id, title, period_start, period_end, client_id, current_published_version_id, clients(id, name), report_versions!report_versions_report_id_fkey(id, version_number, status, ai_summary, published_at)"
+      "id, title, period_start, period_end, client_id, current_published_version_id, clients(id, name), report_versions!report_versions_report_id_fkey(id, version_number, revision, status, ai_summary, published_at)"
     )
     .eq("id", reportId)
     .maybeSingle<ReportRecord>();
@@ -89,6 +90,10 @@ export default async function ReportWorkspacePage({
   )[0];
 
   if (!version) notFound();
+
+  const publishedVersion = report.report_versions.find(
+    (candidate) => candidate.id === report.current_published_version_id
+  );
 
   const { data: batches, error: batchesError } = await supabase
     .from("insight_batches")
@@ -204,9 +209,12 @@ export default async function ReportWorkspacePage({
         locale={locale}
         reportId={report.id}
         reportVersionId={version.id}
+        revision={version.revision}
         versionNumber={version.version_number}
         status={version.status}
-        publishedAt={version.published_at}
+        currentPublishedVersionId={report.current_published_version_id}
+        publishedRevision={publishedVersion?.revision ?? null}
+        publishedAt={publishedVersion?.published_at ?? null}
         metricCount={metrics.length}
         pendingReview={pendingReview}
       />

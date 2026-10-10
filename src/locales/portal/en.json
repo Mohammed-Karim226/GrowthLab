@@ -479,6 +479,7 @@
       "notApproved": "Approve the report before publishing it.",
       "alreadyPublished": "This version is already published.",
       "notPublished": "This version is not the published one.",
+      "staleReport": "This report changed while you were viewing it. Check the refreshed report and try again.",
       "draftExists": "There is already an open version. Finish it before starting another.",
       "tooManyFiles": "Too many files at once. Upload up to 12 at a time.",
       "allFilesRejected": "None of those files could be uploaded.",

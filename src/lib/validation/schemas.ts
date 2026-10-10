@@ -153,23 +153,29 @@ export const createMetricSchema = z
   })
   .strict();
 
+const reportTransitionFields = {
+  reportVersionId: z.string().uuid(),
+  revision: z.number().int().min(0).max(2147483647).optional(),
+  expectedPublishedVersionId: z.string().uuid().nullable().optional(),
+};
+
 export const publishSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
     summary: z.string().trim().max(4000).optional(),
   })
   .strict();
 
 export const approveVersionSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
     summary: z.string().trim().max(4000).nullable().optional(),
   })
   .strict();
 
 export const unpublishSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
   })
   .strict();
 

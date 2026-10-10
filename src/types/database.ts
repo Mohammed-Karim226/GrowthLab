@@ -106,6 +106,7 @@ export type ReportVersionRow = {
   id: string;
   report_id: string;
   version_number: number;
+  revision: number;
   status: ReportStatus;
   summary: string | null;
   ai_summary: AiSummaryPayload | null;
@@ -275,7 +276,7 @@ export type Database = {
         ReportVersionRow,
         InsertOf<
           ReportVersionRow,
-          "status" | "summary" | "ai_summary" | "created_by" | "published_at"
+          "status" | "summary" | "ai_summary" | "created_by" | "published_at" | "revision"
         >
       >;
       insight_batches: Table<
@@ -354,6 +355,16 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      transition_report: {
+        Args: {
+          p_report: string;
+          p_version: string;
+          p_revision: number;
+          p_expected_published: string | null;
+          p_action: "approve" | "publish" | "unpublish" | "reopen";
+        };
+        Returns: ReportVersionRow;
+      };
       save_credential: { Args: { p_id: string; p_client: string; p_email: string; p_ciphertext: string; p_services: unknown; p_actor: string }; Returns: undefined };
       delete_credential: { Args: { p_id: string; p_actor: string }; Returns: undefined };
       auth_role: { Args: Record<never, never>; Returns: UserRole };

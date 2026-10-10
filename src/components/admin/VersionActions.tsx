@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
@@ -25,8 +25,11 @@ export default function VersionActions({
   locale,
   reportId,
   reportVersionId,
+  revision,
   versionNumber,
   status,
+  currentPublishedVersionId,
+  publishedRevision,
   publishedAt,
   metricCount,
   pendingReview,
@@ -34,8 +37,11 @@ export default function VersionActions({
   locale: Locale;
   reportId: string;
   reportVersionId: string;
+  revision: number;
   versionNumber: number;
   status: ReportStatus;
+  currentPublishedVersionId: string | null;
+  publishedRevision: number | null;
   publishedAt: string | null;
   metricCount: number;
   pendingReview: number;
@@ -45,36 +51,57 @@ export default function VersionActions({
   const router = useRouter();
 
   const [carryOver, setCarryOver] = useState(true);
+  const [isRefreshing, startRefresh] = useTransition();
+
+  function refresh() {
+    startRefresh(() => router.refresh());
+  }
 
   function reportError(error: unknown) {
     const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
     toast.error(tErrors(key as never));
+    if (error instanceof ApiRequestError && error.status === 409) refresh();
   }
 
   const approve = useMutation({
-    mutationFn: () => apiPost(`/api/admin/reports/${reportId}/approve`, { reportVersionId }),
+    mutationFn: () => apiPost(`/api/admin/reports/${reportId}/approve`, {
+      reportVersionId,
+      revision,
+      expectedPublishedVersionId: currentPublishedVersionId,
+    }),
     onSuccess: () => {
       toast.success(t("approved"));
-      router.refresh();
+      refresh();
     },
     onError: reportError,
   });
 
   const publish = useMutation({
-    mutationFn: () => apiPost(`/api/admin/reports/${reportId}/publish`, { reportVersionId }),
+    mutationFn: () => apiPost(`/api/admin/reports/${reportId}/publish`, {
+      reportVersionId,
+      revision,
+      expectedPublishedVersionId: currentPublishedVersionId,
+    }),
     onSuccess: () => {
       toast.success(t("published"));
-      router.refresh();
+      refresh();
     },
     onError: reportError,
   });
 
   const unpublish = useMutation({
-    // The version id rides along so the server refuses if this view is stale.
-    mutationFn: () => apiDelete(`/api/admin/reports/${reportId}/publish`, { reportVersionId }),
+    // A newer draft can be selected while an older version is still live.
+    mutationFn: () => {
+      if (!currentPublishedVersionId) throw new ApiRequestError(409, "notPublished");
+      return apiDelete(`/api/admin/reports/${reportId}/publish`, {
+        reportVersionId: currentPublishedVersionId,
+        revision: publishedRevision ?? undefined,
+        expectedPublishedVersionId: currentPublishedVersionId,
+      });
+    },
     onSuccess: () => {
       toast.success(t("unpublished"));
-      router.refresh();
+      refresh();
     },
     onError: reportError,
   });
@@ -87,7 +114,7 @@ export default function VersionActions({
       }),
     onSuccess: (data) => {
       toast.success(t("versionCreated", { number: data.version.version_number }));
-      router.refresh();
+      refresh();
     },
     onError: reportError,
   });
@@ -101,9 +128,10 @@ export default function VersionActions({
   });
 
   const busy =
-    approve.isPending || publish.isPending || unpublish.isPending || newVersion.isPending || deleteReport.isPending;
+    isRefreshing || approve.isPending || publish.isPending || unpublish.isPending || newVersion.isPending || deleteReport.isPending;
 
   const isPublished = status === "published";
+  const hasPublishedVersion = currentPublishedVersionId !== null;
   const isArchived = status === "archived";
   const canApprove = !isPublished && !isArchived && metricCount > 0 && pendingReview === 0;
 
@@ -118,7 +146,7 @@ export default function VersionActions({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {isPublished && publishedAt && (
+        {hasPublishedVersion && publishedAt && (
           <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2 text-sm text-emerald-200">
             {t("liveNow", { date: formatDate(publishedAt, locale) })}
           </p>
@@ -153,7 +181,7 @@ export default function VersionActions({
             </Button>
           )}
 
-          {isPublished && (
+          {hasPublishedVersion && (
             <Button
               variant="outline"
               onClick={() => {
@@ -193,7 +221,7 @@ export default function VersionActions({
           </label>
         )}
 
-        {!isPublished && !isArchived && (
+        {!hasPublishedVersion && !isPublished && !isArchived && (
           <div className="border-t border-red-500/10 pt-4">
             <Button type="button" variant="outline" className="border-red-500/25 text-red-300 hover:bg-red-500/10" disabled={busy} onClick={() => { if (window.confirm(t("deleteConfirm"))) deleteReport.mutate(); }}>
               {deleteReport.isPending ? <Loader2 className="animate-spin" /> : <Trash2 />}
