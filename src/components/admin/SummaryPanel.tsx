@@ -18,6 +18,7 @@ import type { AiSummaryPayload } from "@/types/database";
 
 type EditableSummary = Omit<AiSummaryPayload, "generated_at">;
 type SummaryListKey = Exclude<keyof EditableSummary, "summary">;
+type SavedSummary = { aiSummary: AiSummaryPayload; status: string; revision: number };
 
 /**
  * The written interpretation.
@@ -30,6 +31,7 @@ export default function SummaryPanel({
   locale,
   reportId,
   reportVersionId,
+  revision,
   summary,
   locked,
   hasReviewedMetrics,
@@ -37,6 +39,7 @@ export default function SummaryPanel({
   locale: Locale;
   reportId: string;
   reportVersionId: string;
+  revision: number;
   summary: AiSummaryPayload | null;
   locked: boolean;
   hasReviewedMetrics: boolean;
@@ -45,35 +48,41 @@ export default function SummaryPanel({
   const tErrors = useTranslations("admin.errors");
   const router = useRouter();
 
-  const [current, setCurrent] = useState<AiSummaryPayload | null>(summary);
+  const [saved, setSaved] = useState<SavedSummary | null>(null);
   const [draft, setDraft] = useState<EditableSummary | null>(null);
+  const [draftRevision, setDraftRevision] = useState(revision);
+  // Keep a successful local save visible while the server refresh catches up.
+  const latestSave = saved && saved.revision >= revision ? saved : null;
+  const current = latestSave ? latestSave.aiSummary : summary;
+  const currentRevision = latestSave?.revision ?? revision;
 
   const mutation = useMutation({
     mutationFn: (force: boolean) =>
-      apiPost<{ aiSummary: AiSummaryPayload }>(
+      apiPost<SavedSummary>(
         // Locale rides in the query string: the summary is written in the
         // language the admin is working in.
         `/api/admin/reports/${reportId}/summary?locale=${locale}`,
-        { reportVersionId, force }
+        { reportVersionId, revision: currentRevision, force }
       ),
     onSuccess: (data) => {
-      setCurrent(data.aiSummary);
+      setSaved(data);
       router.refresh();
     },
     onError: (error) => {
       const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
       toast.error(tErrors(key as never));
+      if (key === "staleReport") router.refresh();
     },
   });
 
   const save = useMutation({
     mutationFn: (value: EditableSummary) =>
-      apiPatch<{ aiSummary: AiSummaryPayload; status: string }>(
+      apiPatch<SavedSummary>(
         `/api/admin/reports/${reportId}/summary`,
-        { reportVersionId, summary: value }
+        { reportVersionId, revision: draftRevision, summary: value }
       ),
     onSuccess: (data) => {
-      setCurrent(data.aiSummary);
+      setSaved(data);
       setDraft(null);
       toast.success(t(data.status === "needs_review" ? "summarySavedReview" : "summarySaved"));
       router.refresh();
@@ -81,6 +90,7 @@ export default function SummaryPanel({
     onError: (error) => {
       const key = error instanceof ApiRequestError ? error.errorKey : "serverError";
       toast.error(tErrors(key as never));
+      if (key === "staleReport") router.refresh();
     },
   });
 
@@ -90,6 +100,8 @@ export default function SummaryPanel({
   function startEditing() {
     if (!current) return;
     const { generated_at: _generatedAt, ...editable } = current;
+    // Refreshes must not silently rebase a draft onto somebody else's edits.
+    setDraftRevision(currentRevision);
     setDraft(editable);
   }
 

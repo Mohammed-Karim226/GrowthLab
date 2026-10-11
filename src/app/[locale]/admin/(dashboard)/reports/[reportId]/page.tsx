@@ -195,9 +195,11 @@ export default async function ReportWorkspacePage({
       <MetricReviewTable locale={locale} metrics={metrics} locked={locked} />
 
       <SummaryPanel
+        key={version.id}
         locale={locale}
         reportId={report.id}
         reportVersionId={version.id}
+        revision={version.revision}
         summary={version.ai_summary}
         locked={locked}
         // The summary is written from reviewed numbers only, so it stays out of

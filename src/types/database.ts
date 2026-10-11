@@ -355,6 +355,17 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      save_report_summary: {
+        Args: {
+          p_report: string;
+          p_version: string;
+          p_revision: number;
+          p_summary: AiSummaryPayload;
+          p_action: "generate" | "edit";
+          p_metadata?: Record<string, unknown>;
+        };
+        Returns: ReportVersionRow;
+      };
       transition_report: {
         Args: {
           p_report: string;

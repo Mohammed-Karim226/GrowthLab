@@ -72,6 +72,27 @@ Client accounts are created from the admin UI. The generated password is shown
 once, on screen, immediately after creation; it is never persisted in `clients`
 or anywhere else, so if it is lost the account needs a new one.
 
+### Summary persistence upgrade
+
+After migrations `0008_report_transactions.sql` and
+`0009_report_publication_fixes.sql`, apply the summary RPC before deploying the
+updated summary routes:
+
+```bash
+npm run db:apply -- supabase/migrations/0010_report_summary.sql
+npm run test:reports
+npm run verify:report-summary
+```
+
+Generation and manual edits use `save_report_summary` to save the copy, its
+review status and audit history in one transaction. Editing an approved version
+reopens it for review. Published and archived versions remain locked, and a
+revision check rejects saves if the version changes during generation or editing.
+The authenticated role still cannot update status columns directly.
+
+The database verification script uses the configured Postgres connection, creates
+isolated fixtures, and rolls back its entire transaction, including the migration.
+
 ## 4. The isolation suite (plan §72, §77)
 
 ```bash

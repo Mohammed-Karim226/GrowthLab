@@ -76,6 +76,7 @@ export const analyzeBatchSchema = z
 export const generateSummarySchema = z
   .object({
     reportVersionId: z.string().uuid(),
+    revision: z.number().int().min(0).max(2147483647).optional(),
     force: z.boolean().optional(),
   })
   .strict();
@@ -84,6 +85,7 @@ export const generateSummarySchema = z
 export const updateSummarySchema = z
   .object({
     reportVersionId: z.string().uuid(),
+    revision: z.number().int().min(0).max(2147483647).optional(),
     summary: aiSummarySchema,
   })
   .strict();

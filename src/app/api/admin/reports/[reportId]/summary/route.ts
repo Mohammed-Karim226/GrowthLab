@@ -1,5 +1,7 @@
-import { apiError, apiOk, notFound, parseBody, withAdmin, writeAuditLog } from "@/lib/api";
+import { z } from "zod";
+import { apiError, apiOk, notFound, parseBody, withAdmin } from "@/lib/api";
 import { createClient } from "@/lib/supabase/server";
+import { saveReportSummary } from "@/lib/reports/summary";
 import { getAiProvider } from "@/lib/ai";
 import {
   aiSummarySchema,
@@ -31,6 +33,7 @@ type VersionLookup = {
   id: string;
   status: string;
   report_id: string;
+  revision: number;
   ai_summary: AiSummaryPayload | null;
   reports: {
     id: string;
@@ -45,24 +48,26 @@ type VersionLookup = {
 type Params = { params: Promise<{ reportId: string }> };
 
 /** Save the admin's reviewed client-facing narrative before publication. */
-export const PATCH = withAdmin<[Params]>("updateSummary", async (session, request, { params }) => {
+export const PATCH = withAdmin<[Params]>("updateSummary", async (_session, request, { params }) => {
   const { reportId } = await params;
+  if (!z.string().uuid().safeParse(reportId).success) return notFound();
 
   const parsed = await parseBody(request, updateSummarySchema);
   if (!parsed.ok) return parsed.response;
 
-  const { reportVersionId, summary } = parsed.data;
+  const { reportVersionId, summary, revision } = parsed.data;
   const supabase = await createClient();
 
   const { data: version, error } = await supabase
     .from("report_versions")
-    .select("id, report_id, status, version_number, ai_summary")
+    .select("id, report_id, status, revision, ai_summary")
     .eq("id", reportVersionId)
+    .eq("report_id", reportId)
     .maybeSingle<{
       id: string;
       report_id: string;
       status: string;
-      version_number: number;
+      revision: number;
       ai_summary: AiSummaryPayload | null;
     }>();
 
@@ -71,45 +76,32 @@ export const PATCH = withAdmin<[Params]>("updateSummary", async (session, reques
   if (version.status === "published" || version.status === "archived") {
     return apiError(409, "versionLocked");
   }
+  if (revision !== undefined && revision !== version.revision) return apiError(409, "staleReport");
 
   const aiSummary: AiSummaryPayload = {
     ...summary,
     generated_at: version.ai_summary?.generated_at ?? new Date().toISOString(),
   };
-  const requiresReapproval = version.status === "approved";
-
-  const { error: updateError } = await supabase
-    .from("report_versions")
-    .update({
-      ai_summary: aiSummary,
-      ...(requiresReapproval ? { status: "needs_review" } : {}),
-    })
-    .eq("id", version.id);
-
-  if (updateError) throw updateError;
-
-  await writeAuditLog(supabase, {
-    actor_id: session.userId,
-    action: "SUMMARY_EDITED",
-    entity_type: "report_version",
-    entity_id: version.id,
-    metadata: {
-      report_id: reportId,
-      version_number: version.version_number,
-      required_reapproval: requiresReapproval,
-    },
+  const saved = await saveReportSummary(supabase, {
+    reportId,
+    versionId: version.id,
+    revision: version.revision,
+    summary: aiSummary,
+    action: "edit",
   });
+  if (!saved.ok) return saved.response;
 
-  return apiOk({ aiSummary, status: requiresReapproval ? "needs_review" as const : version.status });
+  return apiOk({ aiSummary: saved.version.ai_summary, status: saved.version.status, revision: saved.version.revision });
 });
 
-export const POST = withAdmin<[Params]>("generateSummary", async (session, request, { params }) => {
+export const POST = withAdmin<[Params]>("generateSummary", async (_session, request, { params }) => {
   const { reportId } = await params;
+  if (!z.string().uuid().safeParse(reportId).success) return notFound();
 
   const parsed = await parseBody(request, generateSummarySchema);
   if (!parsed.ok) return parsed.response;
 
-  const { reportVersionId, force } = parsed.data;
+  const { reportVersionId, force, revision } = parsed.data;
   const supabase = await createClient();
 
   const { data: version, error: versionError } = await supabase
@@ -117,9 +109,10 @@ export const POST = withAdmin<[Params]>("generateSummary", async (session, reque
     .select(
       // FK named explicitly: two foreign keys join reports and report_versions,
       // so an unqualified `reports(...)` is ambiguous (PGRST201).
-      "id, status, report_id, ai_summary, reports!report_versions_report_id_fkey(id, title, client_id, period_start, period_end, clients(name))"
+      "id, status, report_id, revision, ai_summary, reports!report_versions_report_id_fkey(id, title, client_id, period_start, period_end, clients(name))"
     )
     .eq("id", reportVersionId)
+    .eq("report_id", reportId)
     .maybeSingle<VersionLookup>();
 
   if (versionError) throw versionError;
@@ -132,6 +125,7 @@ export const POST = withAdmin<[Params]>("generateSummary", async (session, reque
   if (version.status === "published" || version.status === "archived") {
     return apiError(409, "versionLocked");
   }
+  if (revision !== undefined && revision !== version.revision) return apiError(409, "staleReport");
   if (version.ai_summary && !force) return apiError(409, "summaryExists");
 
   const report = version.reports;
@@ -165,11 +159,10 @@ export const POST = withAdmin<[Params]>("generateSummary", async (session, reque
   const localeParam = new URL(request.url).searchParams.get("locale");
   const locale = isLocale(localeParam ?? "") ? (localeParam as "en" | "ar") : defaultLocale;
 
-  const provider = getAiProvider();
-
   let raw: string;
   let json: unknown;
   try {
+    const provider = getAiProvider();
     const completion = await withRetry(() =>
       provider.complete({
         systemInstruction: INTERPRETATION_SYSTEM_INSTRUCTION,
@@ -207,18 +200,14 @@ export const POST = withAdmin<[Params]>("generateSummary", async (session, reque
     generated_at: new Date().toISOString(),
   };
 
-  const { error: updateError } = await supabase
-    .from("report_versions")
-    .update({ ai_summary: aiSummary, status: "needs_review" })
-    .eq("id", version.id);
-
-  if (updateError) throw updateError;
-
-  await writeAuditLog(supabase, {
-    actor_id: session.userId,
-    action: "SUMMARY_GENERATED",
-    entity_type: "report_version",
-    entity_id: version.id,
+  // The RPC checks the revision read before generation, so a concurrent metric
+  // edit, approval or summary save cannot be overwritten by this slow request.
+  const saved = await saveReportSummary(supabase, {
+    reportId,
+    versionId: version.id,
+    revision: version.revision,
+    summary: aiSummary,
+    action: "generate",
     metadata: {
       locale,
       metrics_used: settled.length,
@@ -226,8 +215,15 @@ export const POST = withAdmin<[Params]>("generateSummary", async (session, reque
       regenerated: Boolean(version.ai_summary),
     },
   });
+  if (!saved.ok) return saved.response;
 
-  return apiOk({ aiSummary, metricsUsed: settled.length, comparedAgainst: previousMetrics?.label ?? null });
+  return apiOk({
+    aiSummary: saved.version.ai_summary,
+    status: saved.version.status,
+    revision: saved.version.revision,
+    metricsUsed: settled.length,
+    comparedAgainst: previousMetrics?.label ?? null,
+  });
 });
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -244,7 +240,7 @@ async function loadPreviousMetrics(
   periodStart: string,
   excludeReportId: string
 ): Promise<{ label: string; versionId: string; metrics: MetricRow[] } | null> {
-  const { data: previousReport } = await supabase
+  const { data: previousReport, error: reportError } = await supabase
     .from("reports")
     .select("id, title, period_start, period_end, current_published_version_id")
     .eq("client_id", clientId)
@@ -261,14 +257,16 @@ async function loadPreviousMetrics(
       current_published_version_id: string;
     }>();
 
+  if (reportError) throw reportError;
   if (!previousReport) return null;
 
-  const { data: metrics } = await supabase
+  const { data: metrics, error: metricsError } = await supabase
     .from("metrics")
     .select("*")
     .eq("report_version_id", previousReport.current_published_version_id)
     .returns<MetricRow[]>();
 
+  if (metricsError) throw metricsError;
   if (!metrics || metrics.length === 0) return null;
 
   return {
