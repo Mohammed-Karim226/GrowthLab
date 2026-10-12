@@ -202,6 +202,19 @@ export type AiJobRow = {
   completed_at: string | null;
 };
 
+/** Durable external cleanup retained after the report's rows have cascaded. */
+export type ReportDeletionCleanupRow = {
+  report_id: string;
+  storage_prefix: string;
+  storage_paths: string[];
+  job_ids: string[];
+  created_at: string;
+  last_attempt_at: string | null;
+  storage_cleaned_at: string | null;
+  jobs_cancelled_at: string | null;
+  completed_at: string | null;
+};
+
 export type MetricRow = {
   id: string;
   report_version_id: string;
@@ -253,6 +266,11 @@ type Table<Row, Insert> = {
 export type Database = {
   public: {
     Tables: {
+      report_deletion_cleanup: Omit<Table<ReportDeletionCleanupRow, never>, "Update"> & {
+        Update: Partial<Pick<ReportDeletionCleanupRow,
+          "last_attempt_at" | "storage_cleaned_at" | "jobs_cancelled_at" | "completed_at"
+        >>;
+      };
       clients: Table<
         ClientRow,
         InsertOf<
@@ -355,6 +373,10 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      delete_report: {
+        Args: { p_report: string };
+        Returns: ReportDeletionCleanupRow;
+      };
       save_report_summary: {
         Args: {
           p_report: string;

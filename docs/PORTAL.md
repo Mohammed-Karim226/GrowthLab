@@ -93,6 +93,47 @@ The authenticated role still cannot update status columns directly.
 The database verification script uses the configured Postgres connection, creates
 isolated fixtures, and rolls back its entire transaction, including the migration.
 
+### Report deletion cleanup
+
+Apply migration `0011_report_deletion_cleanup.sql` before deploying the updated
+report deletion route and Inngest functions:
+
+```bash
+npm run test:reports
+npm run verify:report-deletion
+npm run db:apply -- supabase/migrations/0011_report_deletion_cleanup.sql
+```
+
+The admin-only `delete_report` transaction removes all report versions, batches,
+image records, metrics, AI analyses and jobs through their foreign keys. Published
+reports must first be withdrawn. A database trigger also captures direct report
+deletions and client cascades, recording the screenshot paths and job IDs in
+`report_deletion_cleanup` together with the deletion audit entry.
+
+After commit, the route removes screenshots from the private `insights` bucket
+and sends `ai/insights.cancelled` events for the deleted jobs. Failed cleanup
+returns HTTP 202 with `cleanupPending: true`; the admin sees that cleanup is still
+pending. The `cleanup-deleted-reports` Inngest function retries durable tasks
+every five minutes, including deletions whose HTTP request stopped after commit.
+Keep the Inngest app synced with `/api/inngest` so both the cancellation rule and
+cleanup function are registered. Local development requires `npm run inngest:dev`.
+
+Completed tasks are swept again for 24 hours to catch screenshots uploaded by a
+request already in flight at deletion time, then their cleanup records are
+removed. Pending tasks remain until cleanup succeeds. The sweep is restricted to
+the deleted report's storage prefix, in addition to its captured image paths.
+The audit entry remains as deletion history.
+
+Workers treat deleted jobs as cancelled and recheck database state before
+provider retries and result writes. An AI HTTP request already in flight may
+finish, but its result cannot recreate the deleted report's data. Inngest can
+retain cancelled run history; cancellation stops execution rather than deleting
+that platform history.
+
+`verify:report-deletion` exercises real PostgreSQL privileges, triggers and
+cascades with temporary fixtures, then rolls back the entire transaction. It
+does not call Storage or Inngest or delete existing reports.
+
 ## 4. The isolation suite (plan §72, §77)
 
 ```bash

@@ -119,9 +119,10 @@ export default function VersionActions({
     onError: reportError,
   });
   const deleteReport = useMutation({
-    mutationFn: () => apiDelete(`/api/admin/reports/${reportId}`),
-    onSuccess: () => {
-      toast.success(t("deleted"));
+    mutationFn: () => apiDelete<{ deleted: string; cleanupPending: boolean }>(`/api/admin/reports/${reportId}`),
+    onSuccess: (data) => {
+      if (data.cleanupPending) toast.info(t("deletedCleanupPending"));
+      else toast.success(t("deleted"));
       router.replace(`/${locale}/admin`);
     },
     onError: reportError,

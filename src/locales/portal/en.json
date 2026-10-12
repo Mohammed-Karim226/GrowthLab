@@ -434,7 +434,8 @@
         "deleteReport": "Delete report",
         "deleting": "Deleting...",
         "deleteConfirm": "Delete this report permanently? All versions, screenshots and metrics will be removed.",
-        "deleted": "Report deleted"
+        "deleted": "Report deleted",
+        "deletedCleanupPending": "Report deleted. Screenshot and background-task cleanup will finish automatically."
       }
     },
     "accounts": {
