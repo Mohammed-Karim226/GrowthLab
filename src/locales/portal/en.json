@@ -143,7 +143,182 @@
       "clients": "Clients",
       "open": "Open menu",
       "close": "Close menu",
-      "templateCreation": "Template creation"
+      "templateCreation": "Template creation",
+      "system": "System health"
+    },
+    "system": {
+      "eyebrow": "Operations",
+      "title": "System health",
+      "subtitle": "Monitor your integrations, AI usage and model thresholds in one place.",
+      "loading": "Loading system health…",
+      "refresh": "Refresh",
+      "refreshing": "Checking…",
+      "checkedAt": "Checked {time} UTC",
+      "autoRefreshOn": "Auto-refresh · 60s",
+      "autoRefreshOff": "Auto-refresh paused",
+      "milliseconds": "{value} ms",
+      "console": "Console",
+      "openConsoleFor": "Open {service} console in a new tab",
+      "last24Hours": "Last 24 hours",
+      "servicesTitle": "Connected services",
+      "servicesSubtitle": "Live connectivity and configuration checks across your tools.",
+      "environment": {
+        "production": "Production",
+        "preview": "Preview",
+        "development": "Development"
+      },
+      "status": {
+        "operational": "Operational",
+        "configured": "Configured",
+        "degraded": "Needs review",
+        "unavailable": "Unavailable",
+        "unconfigured": "Not configured",
+        "unknown": "Unverified"
+      },
+      "check": {
+        "live": "Live check",
+        "configuration": "Configuration only"
+      },
+      "summary": {
+        "label": "System health summary",
+        "healthy": "Live checks are passing",
+        "attention": "{count, plural, one {# service needs attention} other {# services need attention}}",
+        "unknown": "Some services could not be verified",
+        "stale": "Showing the last available snapshot",
+        "detail": "{healthy} of {total} live checks passed. Configuration checks do not verify service delivery."
+      },
+      "metrics": {
+        "services": "Live checks passed",
+        "servicesHint": "Services responding to this check",
+        "requests": "AI requests",
+        "requestsHint": "Recorded provider attempts · last 24 hours",
+        "tokens": "Reported tokens",
+        "tokensHint": "Provider-reported total · last 24 hours",
+        "partialTokens": "Token data available for {count} of {total} requests",
+        "failures": "Failed AI requests",
+        "failuresHint": "Includes {count} rate-limited requests · last 24 hours",
+        "noTelemetry": "Usage data is unavailable"
+      },
+      "filters": {
+        "label": "Filter service checks",
+        "all": "All services",
+        "live": "Live checks",
+        "configuration": "Configuration",
+        "attention": "Needs attention",
+        "empty": "No services match this filter."
+      },
+      "services": {
+        "application": {
+          "name": "Application",
+          "description": "Next.js server runtime"
+        },
+        "database": {
+          "name": "Database",
+          "description": "Supabase data access"
+        },
+        "auth": {
+          "name": "Authentication",
+          "description": "Supabase identity service"
+        },
+        "storage": {
+          "name": "File storage",
+          "description": "Private report uploads"
+        },
+        "gemini": {
+          "name": "Google Gemini",
+          "description": "AI model availability"
+        },
+        "inngest": {
+          "name": "Inngest",
+          "description": "Background AI workflows"
+        },
+        "sentry": {
+          "name": "Sentry",
+          "description": "Error and performance monitoring"
+        },
+        "credentials": {
+          "name": "Credential vault",
+          "description": "Server-side credential encryption"
+        }
+      },
+      "details": {
+        "responding": "The service is responding.",
+        "reachable": "The service endpoint is reachable.",
+        "modelAvailable": "The configured model is accessible. No content was generated.",
+        "missingConfig": "Required settings are missing for this environment.",
+        "invalidConfig": "The current configuration is invalid. Review the service settings.",
+        "checkFailed": "The check could not complete. Review the service console and try again.",
+        "timedOut": "The service did not respond within the check timeout.",
+        "rateLimited": "The provider rate-limited this check. Review usage in its console.",
+        "accessDenied": "The service rejected access. Review its credentials and permissions.",
+        "configuredOnly": "Configuration is present. Service delivery has not been verified.",
+        "development": "Development settings are active. Service delivery has not been verified.",
+        "privateBucket": "The upload bucket is accessible and private.",
+        "publicBucket": "The upload bucket is public. Review its access settings.",
+        "encryptionReady": "The active encryption key is valid. Saved credentials were not decrypted."
+      },
+      "tracking": {
+        "setupTitle": "Usage tracking needs setup",
+        "setupHint": "The usage ledger is not ready in this environment. AI features can continue while tracking is set up.",
+        "unavailableTitle": "Usage data is temporarily unavailable",
+        "unavailableHint": "Recorded usage could not be loaded. Refresh to try again; AI usage totals are unknown until the ledger is available."
+      },
+      "quota": {
+        "title": "AI models & thresholds",
+        "subtitle": "Recorded app usage against your configured monitoring thresholds.",
+        "providerConsole": "Google AI Studio",
+        "provider": "Google · Gemini API",
+        "active": "Active model",
+        "previous": "Previously used",
+        "requestsMinute": "Requests / minute",
+        "tokensMinute": "Input tokens / minute",
+        "requestsDay": "Requests / day",
+        "rollingMinute": "Rolling last 60 seconds",
+        "inputTokens": "Input tokens · rolling last 60 seconds",
+        "incompleteTokens": "Some requests have no token metadata",
+        "utcDay": "Since 00:00 UTC today",
+        "notSet": "Not configured",
+        "approaching": "Near threshold",
+        "thresholdReached": "Threshold reached",
+        "disclaimer": "Thresholds are monitoring settings, not enforced limits or verified provider quotas. Usage covers recorded app calls only. Check Google AI Studio for actual project limits and reset times."
+      },
+      "activity": {
+        "title": "AI request activity",
+        "subtitle": "Recorded requests and failures by hour · UTC",
+        "requests": "Requests",
+        "failures": "Failures",
+        "empty": "No AI requests recorded in the last 24 hours",
+        "unavailable": "Request activity is unavailable",
+        "emptyHint": "Activity appears as new app requests are recorded. Earlier requests are not backfilled."
+      },
+      "jobs": {
+        "title": "AI job queue",
+        "subtitle": "Current queue and recent background jobs",
+        "queued": "Queued",
+        "running": "Processing",
+        "failed": "Failed · 24h",
+        "empty": "No recent background jobs.",
+        "unavailable": "Background job data is unavailable.",
+        "timezone": "Job times are shown in UTC.",
+        "states": {
+          "queued": "Queued",
+          "processing": "Processing",
+          "completed": "Completed",
+          "failed": "Failed",
+          "dead_letter": "Retries exhausted",
+          "unknown": "Unknown status"
+        }
+      },
+      "errors": {
+        "load": "System health could not be loaded. Refresh to try again.",
+        "stale": "The latest check failed. Values below are from the last successful check.",
+        "unauthorized": "Your session no longer has administrator access. Sign in with an admin account to continue.",
+        "signIn": "Admin sign in"
+      },
+      "footer": {
+        "private": "Administrator access only",
+        "probes": "Read-only checks · No AI content generation"
+      }
     },
     "overview": {
       "vipIntelligence": "VIP Intelligence",

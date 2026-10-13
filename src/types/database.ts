@@ -5,6 +5,8 @@
  * in the same PR as the migration. If you change the migration, change this.
  */
 
+import type { AiUsageSummary } from "./admin-system";
+
 export type Platform = "facebook" | "instagram" | "tiktok" | "youtube";
 
 export const PLATFORMS: readonly Platform[] = [
@@ -202,6 +204,22 @@ export type AiJobRow = {
   completed_at: string | null;
 };
 
+/** Operational metadata only: no prompts, responses, credentials or client IDs. */
+export type AiUsageEventRow = {
+  id: string;
+  provider: string;
+  model: string;
+  status: "success" | "error";
+  error_kind: "auth" | "rate_limit" | "timeout" | "network" | "bad_response" | "blocked" | "unknown" | null;
+  status_code: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  total_tokens: number | null;
+  duration_ms: number;
+  started_at: string;
+  created_at: string;
+};
+
 /** Durable external cleanup retained after the report's rows have cascaded. */
 export type ReportDeletionCleanupRow = {
   report_id: string;
@@ -349,6 +367,10 @@ export type Database = {
           | "completed_at"
         >
       >;
+      ai_usage_events: Table<
+        AiUsageEventRow,
+        InsertOf<AiUsageEventRow, "error_kind" | "status_code" | "input_tokens" | "output_tokens" | "total_tokens">
+      >;
       metrics: Table<
         MetricRow,
         InsertOf<
@@ -373,6 +395,10 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      admin_ai_usage_summary: {
+        Args: Record<never, never>;
+        Returns: AiUsageSummary;
+      };
       delete_report: {
         Args: { p_report: string };
         Returns: ReportDeletionCleanupRow;

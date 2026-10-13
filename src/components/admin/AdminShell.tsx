@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Activity,
   BarChart3,
   FilePenLine,
   Menu,
@@ -26,6 +27,7 @@ const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
   { key: "clients", href: "/clients", icon: Users },
   { key: "templateCreation", href: "/template-creation", icon: FilePenLine },
+  { key: "system", href: "/system", icon: Activity },
 ] as const;
 
 export default function AdminShell({
