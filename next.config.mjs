@@ -63,7 +63,11 @@ export default withSentryConfig(createNextIntlPlugin()(nextConfig), {
     deleteSourcemapsAfterUpload: true,
   },
   release: {
-    name: process.env.SENTRY_RELEASE || undefined,
+    name: process.env.NEXT_PUBLIC_SENTRY_RELEASE?.trim()
+      || process.env.SENTRY_RELEASE?.trim()
+      || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA
+      || process.env.VERCEL_GIT_COMMIT_SHA
+      || undefined,
     create: uploadSourceMaps,
     finalize: uploadSourceMaps,
   },

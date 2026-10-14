@@ -3,6 +3,7 @@ import "server-only";
 import { inngest } from "@/lib/inngest/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { processAiJob } from "@/lib/ai/process-job";
+import { flushErrors, reportError } from "@/lib/observability/report-error";
 import type { AiJobRow } from "@/types/database";
 
 export const processAiInsights = inngest.createFunction(
@@ -36,9 +37,16 @@ export const processAiInsights = inngest.createFunction(
         .select("insight_batch_id").maybeSingle<Pick<AiJobRow, "insight_batch_id">>();
       if (jobError) throw jobError;
       if (!failed) return;
-      const { error: batchError } = await db.from("insight_batches")
-        .update({ status: "failed" }).eq("id", failed.insight_batch_id).eq("status", "processing");
-      if (batchError) throw batchError;
+      // Only a live job transitioned by this callback is an actual terminal
+      // failure. Deleted, completed and already-finalized jobs create no issue.
+      reportError(error, { operation: "ai.insights.terminal", jobId: original.jobId });
+      try {
+        const { error: batchError } = await db.from("insight_batches")
+          .update({ status: "failed" }).eq("id", failed.insight_batch_id).eq("status", "processing");
+        if (batchError) throw batchError;
+      } finally {
+        await flushErrors();
+      }
     },
     triggers: [{ event: "ai/insights.requested" }],
   },

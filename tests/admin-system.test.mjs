@@ -10,7 +10,7 @@ const environmentNames = [
   "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_PUBLISHABLE_KEY",
   "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY", "GEMINI_API_KEY", "GEMINI_MODEL",
   "GEMINI_QUOTA_RPM", "GEMINI_QUOTA_TPM", "GEMINI_QUOTA_RPD", "INNGEST_EVENT_KEY", "INNGEST_SIGNING_KEY",
-  "NEXT_PUBLIC_SENTRY_DSN", "SENTRY_DSN", "CREDENTIAL_ENCRYPTION_KEYS", "CREDENTIAL_ACTIVE_KEY_ID",
+  "NEXT_PUBLIC_SENTRY_DSN", "SENTRY_DSN", "NEXT_PUBLIC_SENTRY_ENABLED", "CREDENTIAL_ENCRYPTION_KEYS", "CREDENTIAL_ACTIVE_KEY_ID",
 ];
 
 function configure(t, patch = {}) {
@@ -168,6 +168,16 @@ test("admin sees read-only health, tracked usage and separate historical-model b
   assert.equal(recentRead.limit, 6);
   assert.ok(!recentRead.columns.includes("error_detail"));
   assert.ok(!JSON.stringify(snapshot).includes(sensitiveValue));
+});
+
+test("an explicit monitoring opt-out is displayed as disabled even with a valid DSN", async (t) => {
+  const { request } = scenario(t, { env: { NEXT_PUBLIC_SENTRY_ENABLED: "false" } });
+  const response = await request();
+  const snapshot = await response.json();
+  const sentry = snapshot.services.find((service) => service.id === "sentry");
+  assert.equal(sentry.status, "disabled");
+  assert.equal(sentry.detail, "monitoringDisabled");
+  assert.equal(sentry.check, "configuration");
 });
 
 test("snapshot coalesces concurrent checks but authorizes every request including cached responses", async (t) => {

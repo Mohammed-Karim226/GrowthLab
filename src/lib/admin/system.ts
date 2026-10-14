@@ -1,7 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
-import { geminiModel, sentryDsn } from "@/lib/env";
+import { geminiModel, sentryDsn, sentryEnabled } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { isEncryptionConfigured } from "@/lib/security/secrets";
 import { INSIGHTS_BUCKET } from "@/lib/uploads";
@@ -139,6 +139,7 @@ function sentryHealth(): ServiceHealth {
   try {
     const parsed = new URL(dsn);
     if (!["https:", "http:"].includes(parsed.protocol) || !parsed.username || parsed.password || !/\/\d+\/?$/.test(parsed.pathname)) throw new Error();
+    if (!sentryEnabled()) return health("sentry", "disabled", "monitoringDisabled");
     return health("sentry", "configured", "configuredOnly");
   } catch {
     return health("sentry", "unconfigured", "invalidConfig");

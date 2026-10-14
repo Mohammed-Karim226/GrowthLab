@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -12,6 +14,7 @@ import {
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import SentryWorkspace from "@/components/admin/SentryWorkspace";
 import { apiFetch, ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import type { AiUsageSummary, ModelQuota, ServiceHealth, ServiceId, ServiceStatus, SystemSnapshot } from "@/types/admin-system";
@@ -27,6 +30,7 @@ const STATUS_STYLES: Record<ServiceStatus, string> = {
   unavailable: "border-rose-300/15 bg-rose-300/[0.07] text-rose-300",
   unconfigured: "border-amber-300/15 bg-amber-300/[0.07] text-amber-200",
   unknown: "border-slate-300/15 bg-slate-300/[0.07] text-slate-400",
+  disabled: "border-slate-300/15 bg-slate-300/[0.04] text-slate-400",
 };
 const PANEL = "rounded-2xl border border-white/[0.08] bg-[#10131d]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]";
 const ATTENTION: ServiceStatus[] = ["degraded", "unavailable", "unconfigured"];
@@ -234,6 +238,9 @@ function JobQueue({ jobs }: { jobs: SystemSnapshot["jobs"] }) {
 export default function SystemHealthDashboard() {
   const t = useTranslations("admin.system");
   const locale = useLocale();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const sentrySelected = searchParams.get("tab") === "sentry";
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [filter, setFilter] = useState<"all" | "live" | "configuration" | "attention">("all");
   const { data, isPending, isFetching, isError, error, refetch } = useQuery({
@@ -243,6 +250,7 @@ export default function SystemHealthDashboard() {
     refetchIntervalInBackground: false,
     staleTime: 30_000,
     retry: false,
+    enabled: !sentrySelected,
   });
   const accessDenied = error instanceof ApiRequestError && [401, 403].includes(error.status);
   // A cached snapshot must not remain visible after the session loses access.
@@ -258,8 +266,23 @@ export default function SystemHealthDashboard() {
   const lastChecked = snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC", hour12: false }) : "—";
   const hasIssue = attentionCount > 0 || unknownCount > 0 || isError;
 
+  const navigation = (
+    <nav className="mb-6 flex flex-wrap items-center gap-1 rounded-xl border border-white/[0.07] bg-white/[0.02] p-1.5" aria-label={t("tabs.label")}>
+      {(["overview", "sentry"] as const).map((tab) => {
+        const active = (tab === "sentry") === sentrySelected;
+        const query = new URLSearchParams(searchParams.toString());
+        query.set("tab", tab);
+        const Icon = tab === "sentry" ? ShieldCheck : Activity;
+        return <Link key={tab} href={`${pathname}?${query}`} scroll={false} aria-current={active ? "page" : undefined} className={cn("inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-300", active ? "bg-white/[0.07] text-white shadow-sm" : "text-slate-500 hover:text-slate-200")}><Icon className={cn("size-3.5", active && tab === "sentry" && "text-violet-300")} aria-hidden />{t(`tabs.${tab}`)}</Link>;
+      })}
+    </nav>
+  );
+
+  if (sentrySelected) return <>{navigation}<SentryWorkspace /></>;
+
   return (
     <div className="space-y-7">
+      {navigation}
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
           <p className="mb-2.5 flex items-center gap-2 text-[10px] font-semibold tracking-[0.2em] text-[#d8be78] uppercase"><Activity className="size-3.5" aria-hidden />{t("eyebrow")}</p>

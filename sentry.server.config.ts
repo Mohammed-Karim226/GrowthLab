@@ -5,33 +5,20 @@
 import * as Sentry from "@sentry/nextjs";
 import {
   sentryDsn,
+  sentryEnabled,
   sentryEnvironment,
   sentryRelease,
   sentryTracesSampleRate,
 } from "@/lib/env";
+import { sentryPrivacyOptions } from "@/lib/observability/sentry-options";
 
 const dsn = sentryDsn();
 
 Sentry.init({
   dsn,
-  enabled: Boolean(dsn),
+  enabled: sentryEnabled(),
   environment: sentryEnvironment(),
   release: sentryRelease(),
-  sendDefaultPii: false,
+  ...sentryPrivacyOptions,
   tracesSampleRate: sentryTracesSampleRate(),
-  beforeSend(event) {
-    if (event.user) {
-      delete event.user.email;
-      delete event.user.ip_address;
-      delete event.user.username;
-    }
-
-    if (event.request?.headers) {
-      delete event.request.headers.authorization;
-      delete event.request.headers.cookie;
-      delete event.request.headers["x-forwarded-for"];
-    }
-
-    return event;
-  },
 });

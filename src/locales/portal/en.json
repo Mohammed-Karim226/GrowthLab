@@ -147,6 +147,11 @@
       "system": "System health"
     },
     "system": {
+      "tabs": {
+        "label": "System monitoring sections",
+        "overview": "Overview",
+        "sentry": "Sentry"
+      },
       "eyebrow": "Operations",
       "title": "System health",
       "subtitle": "Monitor your integrations, AI usage and model thresholds in one place.",
@@ -168,6 +173,7 @@
         "development": "Development"
       },
       "status": {
+        "disabled": "Disabled",
         "operational": "Operational",
         "configured": "Configured",
         "degraded": "Needs review",
@@ -242,6 +248,7 @@
         }
       },
       "details": {
+        "monitoringDisabled": "Sentry monitoring is disabled for this environment.",
         "responding": "The service is responding.",
         "reachable": "The service endpoint is reachable.",
         "modelAvailable": "The configured model is accessible. No content was generated.",
@@ -318,6 +325,319 @@
       "footer": {
         "private": "Administrator access only",
         "probes": "Read-only checks · No AI content generation"
+      }
+    },
+
+    "sentry": {
+      "eyebrow": "Error monitoring",
+      "title": "Sentry workspace",
+      "subtitle": "Find the errors that matter, inspect your monitoring setup and move from an issue to a verified fix.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "openSentry": "Open Sentry",
+      "loading": "Loading Sentry workspace…",
+      "checkedAt": "Checked {time} UTC",
+      "connectionLabel": {
+        "connected": "Inbox connected",
+        "setup": "Connection needs review",
+        "stale": "Latest check unavailable"
+      },
+      "tabs": {
+        "label": "Sentry sections",
+        "issues": "Issue inbox",
+        "implementation": "Setup & coverage",
+        "workflow": "Investigate & fix"
+      },
+      "links": {
+        "issues": "Issues",
+        "performance": "Traces",
+        "replays": "Replays",
+        "releases": "Releases",
+        "alerts": "Alerts",
+        "settings": "Settings"
+      },
+      "levels": {
+        "fatal": "Fatal",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info",
+        "debug": "Debug",
+        "unknown": "Unknown"
+      },
+      "statuses": {
+        "unresolved": "Unresolved",
+        "resolved": "Resolved",
+        "ignored": "Ignored"
+      },
+      "periods": {
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "14d": "Last 14 days"
+      },
+      "metrics": {
+        "issues": {
+          "label": "Listed issues",
+          "hint": "Issues on this page before local search"
+        },
+        "events": {
+          "label": "Reported events",
+          "hint": "Sentry-reported counts for the listed issues and selected filters."
+        },
+        "environment": {
+          "label": "Environment filter",
+          "hint": "Applied to the issue query; not the environment of every event"
+        }
+      },
+      "filters": {
+        "search": "Search this page…",
+        "clear": "Clear search",
+        "status": "Issue status",
+        "period": "Time period",
+        "environment": "Environment",
+        "allEnvironments": "All environments"
+      },
+      "inbox": {
+        "title": "Issue inbox",
+        "subtitle": "Recent issues from your Sentry project, ordered by last seen.",
+        "autoOn": "Auto-refresh · 60s",
+        "autoOff": "Auto-refresh paused",
+        "refreshPaging": "Auto-refresh paused while paging",
+        "unavailable": "The issue inbox is unavailable. Refresh to try again.",
+        "events": "{count} events",
+        "openIssue": "Open {id} in Sentry in a new tab",
+        "noMatches": "No matches on this page",
+        "noMatchesHint": "Try an issue ID, title or source location. Search applies only to the current page.",
+        "empty": "No issues for these filters",
+        "emptyHint": "Try another status, a longer period or all environments. An empty inbox does not verify error capture.",
+        "page": "Page {page}",
+        "pageScope": "Search and totals apply to this page",
+        "previous": "Previous",
+        "next": "Next",
+        "helpTitle": "Turn an issue into a verified fix",
+        "helpHint": "Follow a practical workflow from triage to release verification.",
+        "helpAction": "Open fix workflow"
+      },
+      "issue": {
+        "detailsHint": "A summary for triage. Open Sentry for the full event, stack trace and issue history.",
+        "status": "Status",
+        "events": "Reported events",
+        "users": "Affected users",
+        "firstSeen": "First seen · UTC",
+        "lastSeen": "Last seen · UTC",
+        "environment": "Environment filter",
+        "location": "Reported source location",
+        "nextSteps": "Investigation checklist",
+        "steps": {
+          "inspect": "Open the full issue. Check the event environment, release and first application stack frame.",
+          "reproduce": "Reproduce the failure with test data using the event's release and affected flow.",
+          "fix": "Repair the underlying code or configuration and add a regression test for this failure.",
+          "verify": "Deploy the fix, verify the affected flow, then resolve the issue in Sentry and watch for regressions."
+        },
+        "resolveHint": "Resolving an issue changes its status in Sentry. The source code still needs to be fixed and deployed.",
+        "copyBrief": "Copy investigation brief",
+        "copied": "Brief copied",
+        "copyFailed": "Clipboard access failed. Open the issue in Sentry and copy the details there.",
+        "openFull": "Open full issue"
+      },
+      "brief": {
+        "environment": "Environment filter",
+        "period": "Selected period",
+        "location": "Source location",
+        "firstSeen": "First seen",
+        "lastSeen": "Last seen",
+        "link": "Sentry issue",
+        "reproduce": "Reproduction steps:\n- ",
+        "cause": "Root cause:\n- ",
+        "fix": "Code or configuration fix:\n- ",
+        "verify": "Regression test, release and verification:\n- "
+      },
+      "connection": {
+        "connected": {
+          "title": "Issue inbox connected",
+          "body": "The latest Sentry read request succeeded. Verify event ingestion and alert delivery separately in Sentry."
+        },
+        "setup_required": {
+          "title": "Connect your Sentry project",
+          "body": "Add the organization and project slugs plus a dedicated server-side read token to enable the live inbox. The setup guide explains each setting."
+        },
+        "invalid_config": {
+          "title": "Review your Sentry settings",
+          "body": "Use valid organization and project slugs, a valid project DSN and the organization's supported data region: us or eu."
+        },
+        "unauthorized": {
+          "title": "The read credential was rejected",
+          "body": "Check whether the Sentry read token expired or was revoked. Replace SENTRY_READ_AUTH_TOKEN on the deployed server and try again."
+        },
+        "forbidden": {
+          "title": "The read credential needs project access",
+          "body": "Grant event:read and project:read permissions for this Sentry project. Check organization restrictions and confirm the project slug."
+        },
+        "rate_limited": {
+          "title": "Sentry limited this request",
+          "body": "Wait before refreshing and review Sentry API limits. Your last read request could not be completed."
+        },
+        "unavailable": {
+          "title": "Sentry is temporarily unavailable",
+          "body": "Check the Sentry service status, organization region, project slug and server network access, then refresh."
+        },
+        "project_mismatch": {
+          "title": "The project and DSN do not match",
+          "body": "Set the project slug and DSN to the same Sentry project before loading issues. Review both the build and deployed server settings."
+        }
+      },
+      "implementation": {
+        "title": "Monitoring coverage",
+        "subtitle": "See which capabilities are configured for this deployment and which need verification.",
+        "states": {
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "configured": "Configured",
+          "review": "Verify in Sentry"
+        },
+        "replayRates": "Sessions {session} · On error {error}",
+        "disclaimer": "These indicators describe configuration. They do not prove event ingestion, uploaded source maps, recorded replays or delivered alerts. Public SDK settings take effect after a new build.",
+        "features": {
+          "browser": {
+            "title": "Browser errors",
+            "body": "Captures unexpected client errors and application error boundaries when a public DSN and monitoring are enabled."
+          },
+          "server": {
+            "title": "Server & Edge errors",
+            "body": "Captures unexpected Next.js request errors across the Node.js and Edge runtimes."
+          },
+          "handled": {
+            "title": "API & background failures",
+            "body": "Reports unexpected instrumented API failures and active failed jobs with operation names and opaque identifiers."
+          },
+          "tracing": {
+            "title": "Performance traces",
+            "body": "Samples request and navigation traces at the configured rate. Error capture is independent of this sampling."
+          },
+          "replay": {
+            "title": "Session replay",
+            "body": "Samples browser sessions and error sessions. Text and inputs are masked and media is blocked."
+          },
+          "privacy": {
+            "title": "Data scrubbing",
+            "body": "Removes personal data, request bodies, headers and raw messages. Preserves approved diagnostic context and source locations."
+          },
+          "sourceMaps": {
+            "title": "Source maps",
+            "body": "Build credentials enable source uploads. Confirm the matching artifact bundle and readable source frames in Sentry."
+          },
+          "releases": {
+            "title": "Release tracking",
+            "body": "A release identifier links events to a deployed version. Confirm it matches uploaded build artifacts."
+          },
+          "alerts": {
+            "title": "Alerts & ownership",
+            "body": "Choose owners, production alert rules and recipients in Sentry, then verify notification delivery."
+          }
+        }
+      },
+      "setup": {
+        "title": "Connect & configure",
+        "subtitle": "Use the same Sentry project for event capture, issue access and build artifacts.",
+        "docs": "Sentry Next.js guide",
+        "open": "View setup guide",
+        "variables": "Deployment environment variables",
+        "tokenNotice": "The read token stays on the server and needs event:read and project:read. Keep the source-map upload token separate; never use a NEXT_PUBLIC_ prefix for either token.",
+        "projectKeys": "Project DSN settings",
+        "createToken": "Create a read token",
+        "steps": {
+          "project": {
+            "title": "Choose the project",
+            "body": "Copy the DSN from Sentry project settings. Use organization and project slugs from the URL, and confirm the US or EU data region."
+          },
+          "runtime": {
+            "title": "Enable capture for your environment",
+            "body": "Set the public DSN and environment label. Monitoring defaults to production; enable it explicitly only when you intend to capture local or staging events."
+          },
+          "readToken": {
+            "title": "Add dedicated issue access",
+            "body": "Create a server-only token with event:read and project:read for this project. Set it as SENTRY_READ_AUTH_TOKEN with the organization and project slugs."
+          },
+          "deploy": {
+            "title": "Rebuild, deploy & verify",
+            "body": "Public settings require a new build. Refresh the inbox after deployment, then verify ingestion, source frames and alert delivery in the intended Sentry environment."
+          }
+        },
+        "buildTitle": "Source maps & release setup",
+        "buildBody": "Provide the upload token only to CI or the build step, together with the organization, project and an immutable release ID. Match the SDK's release ID to the build. Set SENTRY_UPLOAD_SOURCE_MAPS=false for verification builds.",
+        "buildVerify": "Check the build upload result and the matching artifact bundle in Sentry. A configured status does not prove upload success; unverified is expected when the build token is absent from runtime."
+      },
+      "workflow": {
+        "title": "From issue to verified fix",
+        "subtitle": "A repeatable workflow for investigating failures and confirming the repair in production.",
+        "steps": {
+          "triage": {
+            "title": "1. Triage the impact",
+            "body": "Choose the affected environment. Review severity, recent occurrence, reported event counts and affected users. Confirm the issue belongs to the release you are investigating."
+          },
+          "inspect": {
+            "title": "2. Read the event",
+            "body": "Open the full Sentry issue and start with the first application stack frame. Inspect the release, trace and masked replay when available to understand the failing flow."
+          },
+          "reproduce": {
+            "title": "3. Reproduce the failure",
+            "body": "Check out the event's release and use test data to repeat the affected steps. Correlate the operation and opaque request or job ID with your application logs."
+          },
+          "repair": {
+            "title": "4. Fix & test",
+            "body": "Repair the underlying code or configuration. Add a regression test that reproduces the failure, then run the relevant checks and verify the affected flow."
+          },
+          "release": {
+            "title": "5. Deploy an identifiable release",
+            "body": "Deploy the fix with a unique release ID and matching source maps. Check upload results and confirm the affected flow works in the intended environment."
+          },
+          "verify": {
+            "title": "6. Resolve & watch",
+            "body": "After verifying the repair, resolve the issue in Sentry, or resolve it in the fixed release. Watch new and regressed issues and confirm production alerts reach the right owner."
+          }
+        },
+        "resolveNotice": "Marking an issue resolved does not change application code. Verify the deployed fix before resolving it, and investigate if the issue returns.",
+        "openIssues": "Open project issues",
+        "configureAlerts": "Configure Sentry alerts"
+      },
+      "troubleshooting": {
+        "title": "Common questions",
+        "subtitle": "Checks that help when issues, source frames or monitoring signals are missing.",
+        "items": {
+          "noIssues": {
+            "title": "Why is the inbox empty?",
+            "body": "Clear local search, select all environments and widen the period. Check unresolved, resolved and ignored statuses. Then verify the deployed DSN, enabled setting and environment. A connected inbox proves read access, not error ingestion."
+          },
+          "access": {
+            "title": "Why can I not open an issue?",
+            "body": "The app requires an administrator session. Sentry requires its own sign-in and access to the configured organization and project. For API access failures, check the runtime read token, event:read/project:read permissions and organization region."
+          },
+          "sourceMaps": {
+            "title": "Why are stack traces minified?",
+            "body": "Compare the event release with the deployed build. Check CI source-map uploads and the matching artifact bundle in Sentry. Uploads need build-only credentials; adding that token to runtime does not repair missing artifacts."
+          },
+          "missingReplay": {
+            "title": "Why is there no trace or replay?",
+            "body": "Sampling means some events have neither. Confirm the browser DSN, enabled setting and sampling rates, then check Sentry plan limits and browser network restrictions. Server-only errors may have no associated browser session."
+          },
+          "noise": {
+            "title": "How do I reduce alert noise?",
+            "body": "Scope alerts to production, assign owners and choose useful thresholds. Review grouping and repeated failures before changing rules. Tune trace and replay sampling for traffic and quota; those rates do not sample error reporting."
+          },
+          "regression": {
+            "title": "What if a resolved issue returns?",
+            "body": "Compare the new event's release and stack frames with the verified fix. Check whether every deployment received the change and whether a new input triggers the same failure. Reproduce it, extend the regression test and deploy the repair."
+          }
+        }
+      },
+      "errors": {
+        "access": "Your session no longer has administrator access. Sign in with an admin account to continue.",
+        "stale": "The latest check failed. The workspace shows the last successful result.",
+        "load": "The Sentry workspace could not be loaded. Refresh to try again.",
+        "signIn": "Admin sign in"
+      },
+      "footer": {
+        "private": "Administrator access only",
+        "readOnly": "Read-only issue access · No test events or remote changes"
       }
     },
     "overview": {

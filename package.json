@@ -12,6 +12,7 @@
     "test:auth": "node --test tests/auth-login.test.mjs tests/auth-routing.test.mjs",
     "test:credentials": "node --test tests/gmail-credentials.test.mjs",
     "test:system": "node --test tests/admin-system.test.mjs tests/ai-usage.test.mjs",
+    "test:sentry": "node --test tests/admin-sentry.test.mjs tests/sentry-monitoring.test.mjs",
     "test:reports": "node --test tests/report-publication.test.mjs tests/report-summary.test.mjs tests/report-deletion.test.mjs tests/report-deletion-cleanup.test.mjs tests/ai-job-cancellation.test.mjs",
     "verify:report-summary": "node scripts/verify-report-summary.mjs",
     "verify:report-deletion": "node scripts/verify-report-deletion.mjs",

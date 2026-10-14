@@ -94,39 +94,44 @@ export function sentryDsn(): string | undefined {
   return process.env.NEXT_PUBLIC_SENTRY_DSN?.trim() || process.env.SENTRY_DSN?.trim() || undefined;
 }
 
+/** Local monitoring is opt-in; public switches are embedded during next build. */
+export function sentryEnabled(): boolean {
+  const enabled = process.env.NEXT_PUBLIC_SENTRY_ENABLED?.trim().toLowerCase();
+  return Boolean(sentryDsn()) && enabled !== "false" && (enabled === "true" || process.env.NODE_ENV === "production");
+}
+
 export function sentryEnvironment(): string {
-  return process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "development";
+  return process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT?.trim()
+    || process.env.SENTRY_ENVIRONMENT?.trim() || process.env.NODE_ENV || "development";
 }
 
 export function sentryRelease(): string | undefined {
   return (
-    process.env.SENTRY_RELEASE ||
+    process.env.NEXT_PUBLIC_SENTRY_RELEASE?.trim() ||
+    process.env.SENTRY_RELEASE?.trim() ||
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
     process.env.VERCEL_GIT_COMMIT_SHA
   );
 }
 
-export function sentryTracesSampleRate(): number {
-  const raw = process.env.SENTRY_TRACES_SAMPLE_RATE ?? (process.env.NODE_ENV === "production" ? "0.1" : "1");
+function sentryRate(fallback: number, ...values: Array<string | undefined>): number {
+  const raw = values.find((value) => Boolean(value?.trim()));
+  if (raw === undefined) return fallback;
   const value = Number(raw);
-  if (!Number.isFinite(value)) {
-    return process.env.NODE_ENV === "production" ? 0.1 : 1;
-  }
-  return Math.min(Math.max(value, 0), 1);
+  return Number.isFinite(value) ? Math.min(Math.max(value, 0), 1) : fallback;
+}
+
+export function sentryTracesSampleRate(): number {
+  return sentryRate(process.env.NODE_ENV === "production" ? 0.1 : 1,
+    process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE, process.env.SENTRY_TRACES_SAMPLE_RATE);
 }
 
 export function sentryReplaySessionSampleRate(): number {
-  const raw = process.env.SENTRY_REPLAY_SESSION_SAMPLE_RATE ?? "0.05";
-  const value = Number(raw);
-  if (!Number.isFinite(value)) return 0.05;
-  return Math.min(Math.max(value, 0), 1);
+  return sentryRate(0.05, process.env.NEXT_PUBLIC_SENTRY_REPLAY_SESSION_SAMPLE_RATE, process.env.SENTRY_REPLAY_SESSION_SAMPLE_RATE);
 }
 
 export function sentryReplayErrorSampleRate(): number {
-  const raw = process.env.SENTRY_REPLAY_ERROR_SAMPLE_RATE ?? "1";
-  const value = Number(raw);
-  if (!Number.isFinite(value)) return 1;
-  return Math.min(Math.max(value, 0), 1);
+  return sentryRate(1, process.env.NEXT_PUBLIC_SENTRY_REPLAY_ERROR_SAMPLE_RATE, process.env.SENTRY_REPLAY_ERROR_SAMPLE_RATE);
 }
 
 // Upload limits are NOT here: the browser needs them, and nothing that runs in

@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+import { reportError } from "@/lib/observability/report-error";
 
 import StateMessage from "@/components/portal/StateMessage";
 
@@ -13,6 +15,7 @@ export default function AdminError({
   reset: () => void;
 }) {
   const t = useTranslations("common");
+  useEffect(() => { reportError(error, { operation: "admin.error-boundary" }); }, [error]);
 
   return (
     <StateMessage

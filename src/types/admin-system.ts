@@ -1,4 +1,4 @@
-export type ServiceStatus = "operational" | "configured" | "degraded" | "unavailable" | "unconfigured" | "unknown";
+export type ServiceStatus = "operational" | "configured" | "degraded" | "unavailable" | "unconfigured" | "unknown" | "disabled";
 
 export type ServiceId = "application" | "database" | "auth" | "storage" | "gemini" | "inngest" | "sentry" | "credentials";
 
@@ -6,7 +6,7 @@ export type ServiceHealth = {
   id: ServiceId;
   status: ServiceStatus;
   check: "live" | "configuration";
-  detail: "responding" | "reachable" | "modelAvailable" | "missingConfig" | "invalidConfig" | "checkFailed" | "timedOut" | "rateLimited" | "accessDenied" | "configuredOnly" | "development" | "privateBucket" | "publicBucket" | "encryptionReady";
+  detail: "responding" | "reachable" | "modelAvailable" | "missingConfig" | "invalidConfig" | "checkFailed" | "timedOut" | "rateLimited" | "accessDenied" | "configuredOnly" | "development" | "privateBucket" | "publicBucket" | "encryptionReady" | "monitoringDisabled";
   latencyMs: number | null;
   dashboardUrl: string | null;
 };
