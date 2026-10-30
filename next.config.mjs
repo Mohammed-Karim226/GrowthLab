@@ -4,6 +4,10 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ["@react-pdf/renderer"],
+  outputFileTracingIncludes: {
+    "/api/admin/reports/*/export": ["./node_modules/@fontsource/cairo/files/*-{400,700}-normal.woff"],
+  },
   images: {
     remotePatterns: [
       {

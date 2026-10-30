@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import MetricReviewTable, { type ReviewMetric } from "@/components/admin/MetricReviewTable";
+import ReportExportDialog from "@/components/admin/ReportExportDialog";
 import SummaryPanel from "@/components/admin/SummaryPanel";
 import UploadWorkspace from "@/components/admin/UploadWorkspace";
 import VersionActions from "@/components/admin/VersionActions";
@@ -118,6 +119,23 @@ export default async function ReportWorkspacePage({
     .returns<MetricRow[]>();
   if (metricsError) throw metricsError;
 
+  // Export counts must cover the complete version, independently of the
+  // workspace table's PostgREST row limit.
+  const [exportTotal, exportReviewed] = await Promise.all([
+    supabase.from("metrics")
+      .select("id", { count: "exact", head: true })
+      .eq("report_version_id", version.id),
+    supabase.from("metrics")
+      .select("id", { count: "exact", head: true })
+      .eq("report_version_id", version.id)
+      .eq("needs_review", false)
+      .not("metric_value", "is", null),
+  ]);
+  if (exportTotal.error) throw exportTotal.error;
+  if (exportReviewed.error) throw exportReviewed.error;
+  const exportMetricCount = exportTotal.count ?? 0;
+  const exportExcludedCount = Math.max(0, exportMetricCount - (exportReviewed.count ?? 0));
+
   const metrics: ReviewMetric[] = (metricRows ?? []).map((metric) => ({
     id: metric.id,
     platform: metric.platform,
@@ -163,7 +181,22 @@ export default async function ReportWorkspacePage({
               {formatDateRange(report.period_start, report.period_end, locale)}
             </p>
           </div>
-          <Badge variant={statusBadgeVariant(version.status)}>{tStatus(version.status)}</Badge>
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant={statusBadgeVariant(version.status)}>{tStatus(version.status)}</Badge>
+            <ReportExportDialog
+              key={`${locale}:${version.id}`}
+              locale={locale}
+              reportId={reportId}
+              reportVersionId={version.id}
+              revision={version.revision}
+              versionNumber={version.version_number}
+              status={version.status}
+              reportTitle={report.title}
+              clientName={report.clients?.name ?? ""}
+              pendingReview={exportExcludedCount}
+              metricCount={exportMetricCount}
+            />
+          </div>
         </header>
       </div>
 
