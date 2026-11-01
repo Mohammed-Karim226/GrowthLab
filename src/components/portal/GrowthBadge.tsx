@@ -55,7 +55,7 @@ export default function GrowthBadge({
         className
       )}
     >
-      <Icon className="size-3 rtl:rotate-180" aria-hidden />
+      <Icon className="size-3" aria-hidden />
       {formatSignedPercent(growth.percent, locale)}
     </span>
   );
