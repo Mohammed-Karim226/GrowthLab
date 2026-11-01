@@ -72,6 +72,51 @@ Client accounts are created from the admin UI. The generated password is shown
 once, on screen, immediately after creation; it is never persisted in `clients`
 or anywhere else, so if it is lost the account needs a new one.
 
+### Check all migrations
+
+```powershell
+npm.cmd run db:migrations:check
+```
+
+Set `DIRECT_URL` (preferred) or `DATABASE_URL` in `.env.local` to the same
+Supabase project used by the application. This command uses a read-only
+transaction and reports each migration as `OK` or `FAIL`. It checks required
+tables, RLS, columns, indexes, constraints, triggers, policies, private storage,
+key permissions, and the latest SQL function bodies and argument names.
+Function comparison ignores SQL formatting, comments and unquoted keyword
+casing while preserving quoted values. A failure exits nonzero so the command
+can also gate a release.
+
+The existing manual migration script does not keep migration history. This is
+a schema audit, not proof of when each SQL file was executed. It does not apply
+migrations or replay earlier files, which can overwrite newer functions and
+permissions. Review a failed migration, then apply that specific pending file
+with `npm run db:apply -- supabase/migrations/<filename>.sql` and rerun the check.
+Register schema requirements for new migration files in
+`scripts/lib/migration-checks.mjs`; an unregistered migration fails the check.
+
+If only `auth_client_id()` and `transition_report(...)` differ while the other
+`0008` schema requirements pass, rerun the updated checker first. If the
+function differences remain, apply `0013_restore_report_functions.sql` instead
+of replaying `0008` or `0009`. It restores the latest definitions and execution
+grants for those two functions and reloads the API schema cache. With this file
+present, the checker attributes these function differences to `0013`.
+
+When the AI usage table and its associated objects are missing, apply the
+pending `0012_ai_usage.sql` migration. Both commands use the configured
+`DIRECT_URL` / `DATABASE_URL`, so check that it targets the intended environment:
+
+```powershell
+npm.cmd run db:apply -- supabase/migrations/0012_ai_usage.sql
+# Only when the report function checks still fail:
+npm.cmd run db:apply -- supabase/migrations/0013_restore_report_functions.sql
+npm.cmd run db:migrations:check
+```
+
+If schema checks pass but the REST API still returns `PGRST202`, refresh the
+Supabase API schema cache in its SQL Editor with
+`NOTIFY pgrst, 'reload schema';`.
+
 ### Summary persistence upgrade
 
 After migrations `0008_report_transactions.sql` and

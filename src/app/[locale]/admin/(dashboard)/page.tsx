@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isLocale } from "@/lib/i18n";
 import { formatDate, formatDateRange } from "@/lib/format";
 import { statusBadgeVariant } from "@/components/admin/status";
+import PaginationNav from "@/components/ui/PaginationNav";
 import type { ReportStatus } from "@/types/database";
 import {
   DashboardQuickAction,
@@ -20,6 +21,8 @@ import {
 } from "@/components/admin/DashboardMotion";
 
 export const dynamic = "force-dynamic";
+
+const REPORTS_PER_PAGE = 8;
 
 type RecentReport = {
   id: string;
@@ -34,34 +37,65 @@ type RecentReport = {
 
 export default async function AdminOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale: raw } = await params;
+  const [{ locale: raw }, search] = await Promise.all([params, searchParams]);
   const locale = isLocale(raw) ? raw : defaultLocale;
-  const [t, tStatus] = await Promise.all([
+  const [t, tStatus, tCommon] = await Promise.all([
     getTranslations({ locale, namespace: "admin" }),
     getTranslations({ locale, namespace: "status" }),
+    getTranslations({ locale, namespace: "common" }),
   ]);
 
   const supabase = await createClient();
 
-  const [clientsResult, reportsResult] = await Promise.all([
+  const [clientsResult, totalReportsResult, reviewResult] = await Promise.all([
     supabase.from("clients").select("id, is_active, created_at"),
-    supabase
-      .from("reports")
-      .select(
-        // FK named explicitly: `reports.current_published_version_id` also
-        // points at report_versions, so a bare embed is ambiguous (PGRST201).
-        "id, title, period_start, period_end, updated_at, client_id, clients(name), report_versions!report_versions_report_id_fkey(status, version_number)",
-      )
-      .order("updated_at", { ascending: false })
-      .limit(8)
-      .returns<RecentReport[]>(),
+    supabase.from("reports").select("id", { count: "exact", head: true }),
+    supabase.from("reports")
+      .select("id, report_versions!report_versions_report_id_fkey!inner(status)", { count: "exact", head: true })
+      .eq("report_versions.status", "needs_review"),
   ]);
+  if (clientsResult.error) throw clientsResult.error;
+  if (totalReportsResult.error) throw totalReportsResult.error;
+  if (reviewResult.error) throw reviewResult.error;
+
+  const totalReports = totalReportsResult.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalReports / REPORTS_PER_PAGE));
+  const rawPage = Array.isArray(search.reportsPage) ? search.reportsPage[0] : search.reportsPage;
+  const requestedPage = Number(rawPage ?? 1);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
+    ? Math.min(requestedPage, totalPages)
+    : 1;
+  const start = (page - 1) * REPORTS_PER_PAGE;
+  const reportsResult = await supabase.from("reports")
+    .select(
+      // FK named explicitly: `reports.current_published_version_id` also
+      // points at report_versions, so a bare embed is ambiguous (PGRST201).
+      "id, title, period_start, period_end, updated_at, client_id, clients(name), report_versions!report_versions_report_id_fkey(status, version_number)",
+    )
+    .order("updated_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(start, start + REPORTS_PER_PAGE - 1)
+    .returns<RecentReport[]>();
+  if (reportsResult.error) throw reportsResult.error;
 
   const clients = clientsResult.data ?? [];
   const reports = reportsResult.data ?? [];
+  const awaitingReview = reviewResult.count ?? 0;
+
+  function reportsPageHref(nextPage: number) {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(search)) {
+      if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+      else if (value !== undefined) query.set(key, value);
+    }
+    query.set("reportsPage", String(nextPage));
+    return `/${locale}/admin?${query.toString()}#recent-reports`;
+  }
 
   const monthFormatter = new Intl.DateTimeFormat(locale, { month: "short" });
   const now = new Date();
@@ -70,14 +104,6 @@ export default async function AdminOverviewPage({
     const value = clients.filter((client) => new Date(client.created_at) < new Date(month.getFullYear(), month.getMonth() + 1, 1)).length;
     return { label: monthFormatter.format(month), value };
   });
-
-  const { count: totalReports } = await supabase
-    .from("reports")
-    .select("id", { count: "exact", head: true });
-
-  const awaitingReview = reports.filter((report) =>
-    report.report_versions.some((version) => version.status === "needs_review"),
-  ).length;
 
   const stats = [
     {
@@ -169,7 +195,7 @@ export default async function AdminOverviewPage({
         ))}
       </div>
 
-      <Card className="admin-reports-card">
+      <Card id="recent-reports" className="admin-reports-card scroll-mt-28">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <span className="flex size-8 items-center justify-center rounded-xl border border-[#ead178]/15 bg-[#ead178]/[0.07] text-[#efd77f]">
@@ -228,6 +254,17 @@ export default async function AdminOverviewPage({
                 );
               })}
             </ul>
+          )}
+          {totalPages > 1 && (
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
+              <PaginationNav
+                previousHref={page > 1 ? reportsPageHref(page - 1) : null}
+                nextHref={page < totalPages ? reportsPageHref(page + 1) : null}
+                previousLabel={tCommon("previous")}
+                nextLabel={tCommon("next")}
+                statusLabel={t("overview.reportsPagination", { page, pages: totalPages, total: totalReports })}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

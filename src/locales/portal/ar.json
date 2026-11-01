@@ -649,6 +649,7 @@
       "totalReports": "التقارير",
       "awaitingReview": "بانتظار المراجعة",
       "recentReports": "أحدث التقارير",
+      "reportsPagination": "الصفحة {page} من {pages} · {total} تقرير",
       "noReports": "لا توجد تقارير بعد. أنشئ عميلًا ثم أضف فترة تقرير.",
       "quickCreate": "عميل جديد"
       ,"quickActionsTitle": "إجراءات VIP",
@@ -1027,7 +1028,9 @@
       "serverError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
     },
     "ui": {
-      "verifiedBy": "موثّق من GrowthLab"
+      "verifiedBy": "موثّق من GrowthLab",
+      "switchToAr": "التبديل إلى العربية",
+      "switchToEn": "التبديل إلى الإنجليزية"
     }
   },
   "portal": {

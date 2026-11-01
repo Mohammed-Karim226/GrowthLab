@@ -26,5 +26,6 @@ setup, architecture, and the pre-launch verification checklist.
 | `npm run dev` | Development server |
 | `npm run build` | Production build |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:migrations:check` | Read-only check of all migration schema effects, current function bodies and key permissions |
 | `npm run bootstrap:admin` | Create the first admin account |
 | `npm run verify:isolation` | Tenant-isolation test suite (run before launch) |

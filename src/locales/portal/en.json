@@ -649,6 +649,7 @@
       "totalReports": "Reports",
       "awaitingReview": "Awaiting review",
       "recentReports": "Recent reports",
+      "reportsPagination": "Page {page} of {pages} · {total} reports",
       "noReports": "No reports yet. Create a client, then add a reporting period.",
       "quickCreate": "New client"
       ,"quickActionsTitle": "VIP actions",
@@ -1027,7 +1028,9 @@
       "serverError": "Something went wrong. Please try again."
     },
     "ui": {
-      "verifiedBy": "GrowthLab verified"
+      "verifiedBy": "GrowthLab verified",
+      "switchToAr": "Switch to Arabic",
+      "switchToEn": "Switch to English"
     }
   },
   "portal": {
