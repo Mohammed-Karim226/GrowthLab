@@ -123,26 +123,36 @@ export async function loadPortalMetrics(versionIds: string[]): Promise<Map<strin
   const grouped = new Map<string, PortalMetric[]>();
   if (!versionIds.length) return grouped;
   const supabase = await createClient();
-  const { data, error } = await supabase.from("metrics")
-    .select("*, insight_batches!metrics_insight_batch_id_fkey(account_id, accounts(page_name, page_id, stage))")
-    .in("report_version_id", versionIds)
-    .order("platform", { ascending: true })
-    .returns<Array<MetricRow & {
-      insight_batches: {
-        account_id: string | null;
-        accounts: { page_name: string | null; page_id: string | null; stage: string | null } | null;
-      } | null;
-    }>>();
-  if (error) throw error;
-  for (const id of versionIds) grouped.set(id, []);
-  for (const metric of data ?? []) {
-    const { insight_batches, ...row } = metric;
-    grouped.get(row.report_version_id)?.push({
-      ...row,
-      accountId: insight_batches?.account_id ?? null,
-      accountName: insight_batches?.accounts?.page_name ?? insight_batches?.accounts?.page_id ?? null,
-      accountStage: insight_batches?.accounts?.stage ?? null,
-    });
+  const uniqueVersions = [...new Set(versionIds)];
+  for (const id of uniqueVersions) grouped.set(id, []);
+
+  // Clients cannot read upload batches directly. The attribution RPC exposes
+  // only account metadata for their own currently published reports.
+  for (let offset = 0; offset < uniqueVersions.length; offset += 100) {
+    const versions = uniqueVersions.slice(offset, offset + 100);
+    const [metrics, attribution] = await Promise.all([
+      supabase.from("metrics").select("*")
+        .in("report_version_id", versions)
+        .order("platform", { ascending: true }).returns<MetricRow[]>(),
+      supabase.rpc("portal_attribution", { p_versions: versions }),
+    ]);
+    if (metrics.error) throw metrics.error;
+    if (attribution.error) throw attribution.error;
+
+    const accountsByBatch = new Map((attribution.data ?? []).map((row) => [
+      `${row.version_id}:${row.batch_id}`, row,
+    ]));
+    for (const metric of metrics.data ?? []) {
+      const account = metric.insight_batch_id
+        ? accountsByBatch.get(`${metric.report_version_id}:${metric.insight_batch_id}`)
+        : undefined;
+      grouped.get(metric.report_version_id)?.push({
+        ...metric,
+        accountId: account?.account_id ?? null,
+        accountName: account?.account_name ?? null,
+        accountStage: account?.account_stage ?? null,
+      });
+    }
   }
   return grouped;
 }

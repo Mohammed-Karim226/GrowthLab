@@ -1218,7 +1218,9 @@
       "empty": "لم تُرصد أرقام للمنصّات هذه الفترة.",
       "metricsCount": "{count} مؤشّرات",
       "showMetrics": "عرض كل المؤشّرات",
-      "hideMetrics": "إخفاء المؤشّرات"
+      "hideMetrics": "إخفاء المؤشّرات",
+      "unassignedMetrics": "مؤشّرات غير مرتبطة بحساب",
+      "unnamedAccount": "حساب بدون اسم"
     },
     "insights": {
       "title": "ماذا تعني هذه الأرقام",

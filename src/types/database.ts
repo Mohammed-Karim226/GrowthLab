@@ -140,6 +140,14 @@ export type AccountRow = {
   updated_at: string;
 };
 
+export type PortalAttributionRow = {
+  batch_id: string;
+  version_id: string;
+  account_id: string | null;
+  account_name: string | null;
+  account_stage: string | null;
+};
+
 export type ClientGmailRelatedAccount = {
   id: string;
   service: string;
@@ -395,6 +403,10 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      portal_attribution: {
+        Args: { p_versions: string[] };
+        Returns: PortalAttributionRow[];
+      };
       admin_ai_usage_summary: {
         Args: Record<never, never>;
         Returns: AiUsageSummary;

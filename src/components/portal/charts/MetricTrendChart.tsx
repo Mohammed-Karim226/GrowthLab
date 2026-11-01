@@ -18,8 +18,10 @@ export default function MetricTrendChart({ locale, series }: { locale: Locale; s
   const tMetrics = useTranslations("metrics");
   const tDetail = useTranslations("portal.detail");
   const available = series.filter((entry) => entry.points.filter((point) => point.value !== null).length >= 2);
-  const [selected, setSelected] = useState(available[0]?.metricName ?? "");
-  const active = available.find((entry) => entry.metricName === selected) ?? available[0];
+  const [selected, setSelected] = useState("views");
+  const active = available.find((entry) => entry.metricName === selected)
+    ?? available.find((entry) => entry.metricName === "views")
+    ?? available[0];
   const labelFor = (name: string) => tMetrics.has(name as never) ? tMetrics(name as never) : humanizeMetricName(name);
   const values = active?.points.flatMap((point) => point.value === null ? [] : [point.value]) ?? [];
   const current = values.at(-1) ?? null;

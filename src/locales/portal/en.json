@@ -1218,7 +1218,9 @@
       "empty": "No platform figures were reported this period.",
       "metricsCount": "{count} metrics",
       "showMetrics": "Show all metrics",
-      "hideMetrics": "Hide metrics"
+      "hideMetrics": "Hide metrics",
+      "unassignedMetrics": "Unassigned metrics",
+      "unnamedAccount": "Unnamed account"
     },
     "insights": {
       "title": "What this means",

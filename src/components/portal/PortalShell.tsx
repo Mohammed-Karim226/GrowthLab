@@ -267,7 +267,7 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
                 onClick={switchLanguage}
                 aria-label={languageSwitchLabel}
                 title={languageSwitchLabel}
-                className="gap-1.5 rounded-full border-[#d8be78]/20 bg-[#d8be78]/[0.055] px-3 text-xs font-semibold text-[#ead69e] cursor-pointer hover:border-[#d8be78]/40 hover:bg-[#d8be78]/10"
+                className="gap-1.5 h-7 rounded-full border-[#d8be78]/20 bg-[#d8be78]/[0.055] px-3 text-xs font-semibold text-[#ead69e] cursor-pointer hover:border-[#d8be78]/40 hover:bg-[#d8be78]/10"
               >
                 <Languages className="size-3.5" aria-hidden />
                 <span lang={alternateLocale} dir="ltr">{alternateLocale.toUpperCase()}</span>
