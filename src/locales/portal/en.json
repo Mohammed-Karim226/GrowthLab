@@ -1087,6 +1087,8 @@
     },
     "ui": {
       "clientIntelligence": "Client intelligence",
+      "switchToAr": "Switch to Arabic",
+      "switchToEn": "Switch to English",
       "secureWorkspace": "Secure workspace",
       "verifiedBy": "GrowthLab verified",
       "comparisonStatus": "Comparison status",

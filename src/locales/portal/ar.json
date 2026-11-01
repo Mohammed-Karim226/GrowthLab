@@ -1087,6 +1087,8 @@
     },
     "ui": {
       "clientIntelligence": "ذكاء العميل",
+      "switchToAr": "التبديل إلى العربية",
+      "switchToEn": "التبديل إلى الإنجليزية",
       "secureWorkspace": "مساحة عمل آمنة",
       "verifiedBy": "موثّق من GrowthLab",
       "comparisonStatus": "حالة المقارنة",
