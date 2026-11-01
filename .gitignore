@@ -16,9 +16,13 @@ node_modules/
 # Misc
 .DS_Store
 *.pem
+/.tmp/
+/tmp/
+/.swc/
 
 # Debug
 npm-debug.log*
+.next-dev.*.log
 yarn-debug.log*
 yarn-error.log*
 

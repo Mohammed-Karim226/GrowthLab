@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-cache.ps1",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
