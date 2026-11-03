@@ -28,7 +28,7 @@ function deployedSchema() {
 }
 
 test("all SQL files are checked, including migrations sharing numeric prefixes", () => {
-  assert.equal(migrations.length, 17);
+  assert.equal(migrations.length, 18);
   assert.ok(migrations.some((item) => item.name === "0003_ai_jobs.sql"));
   assert.ok(migrations.some((item) => item.name === "0003_client_payment_plans.sql"));
   assert.ok(checkMigrations(migrations, deployedSchema()).every((item) => item.failures.length === 0));
@@ -53,6 +53,14 @@ test("missing deletion RPC identifies the migration required by PGRST202", () =>
   const failures = checkMigrations(migrations, schema).filter((item) => item.failures.length);
   assert.deepEqual(failures.map((item) => item.name), ["0011_report_deletion_cleanup.sql"]);
   assert.ok(failures[0].failures.includes("function: delete_report(uuid)"));
+});
+
+test("account audience migration checks its column and count constraint", () => {
+  const schema = deployedSchema();
+  schema.columns.delete("public.accounts.audience_count");
+  schema.constraints.get("public.accounts.accounts_audience_count_check").valid = false;
+  const result = checkMigrations(migrations, schema).find((item) => item.name === "0014_account_audience.sql");
+  assert.deepEqual(result.failures, ["column: public.accounts.audience_count", "constraint: public.accounts.accounts_audience_count_check"]);
 });
 
 test("changed function bodies, RPC arguments, language and security mode fail verification", () => {

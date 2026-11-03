@@ -7,6 +7,12 @@ An internal tool alongside the marketing site: GrowthLab staff turn social-media
 insight screenshots into published reports, and each client signs in to see only
 their own.
 
+Admins can set followers (or YouTube subscribers) when adding or editing a social
+account. The saved total appears beneath its name in the portal's **Active
+accounts** list, which refreshes every 30 seconds and when the portal regains
+focus. Blank counts show a dash; zero remains zero. Apply
+`supabase/migrations/0014_account_audience.sql` before saving account counts.
+
 ## Getting started
 
 ```bash

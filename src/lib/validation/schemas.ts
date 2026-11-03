@@ -32,11 +32,14 @@ export const createClientSchema = z
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 
+export const accountAudienceCountSchema = z.number().finite().int().nonnegative().max(Number.MAX_SAFE_INTEGER).nullable();
+
 export const createAccountSchema = z.object({
   platform: platformSchema,
   pageName: z.string().trim().min(1).max(160),
   pageId: z.string().trim().max(160).optional().or(z.literal("")),
   stage: z.string().trim().max(80).optional().or(z.literal("")),
+  audienceCount: accountAudienceCountSchema.optional(),
 }).strict();
 
 export const updateAccountSchema = z.object({
@@ -44,6 +47,7 @@ export const updateAccountSchema = z.object({
   pageName: z.string().trim().min(1).max(160).optional(),
   pageId: z.string().trim().max(160).nullable().optional(),
   stage: z.string().trim().max(80).nullable().optional(),
+  audienceCount: accountAudienceCountSchema.optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
 const relatedGmailAccountSchema = z.object({

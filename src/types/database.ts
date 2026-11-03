@@ -136,6 +136,7 @@ export type AccountRow = {
   page_name: string | null;
   page_id: string | null;
   stage: string | null;
+  audience_count: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -329,7 +330,7 @@ export type Database = {
       >;
       accounts: Table<
         AccountRow,
-        InsertOf<AccountRow, "page_name" | "page_id" | "stage">
+        InsertOf<AccountRow, "page_name" | "page_id" | "stage" | "audience_count">
       >;
       client_gmail_accounts: Table<
         ClientGmailRow,

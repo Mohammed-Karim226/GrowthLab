@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUp,
   BarChart3,
@@ -24,11 +25,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { AccountRow, ClientPaymentPlanRow, Platform } from "@/types/database";
 
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api-client";
 import SignOutButton from "@/components/auth/SignOutButton";
 import { Button } from "@/components/ui/button";
 import PaymentPlanCard from "@/components/portal/PaymentPlanCard";
 
 type PortalShellProps = {
+  clientId: string;
   clientName: string;
   clientEmail: string | null;
   accounts: AccountRow[];
@@ -61,11 +64,22 @@ const NAV = [
   { key: "payments", href: "/payments", icon: CreditCard },
 ] as const;
 
-export default function PortalShell({ clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
+export default function PortalShell({ clientId, clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const { data: liveAccounts } = useQuery({
+    queryKey: ["portal-accounts", clientId],
+    queryFn: async () => {
+      const response = await apiFetch<{ accounts: AccountRow[] }>("/api/portal/accounts", { cache: "no-store" });
+      return response.accounts;
+    },
+    initialData: accounts,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -161,7 +175,7 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
     </nav>
   );
 
-  const activeAccounts = accounts.filter((account) => account.stage?.toLowerCase() !== "inactive");
+  const activeAccounts = liveAccounts.filter((account) => account.stage?.toLowerCase() !== "inactive");
   const accountsNav = (
     <section className="mt-7 border-t border-white/[0.07] pt-6" aria-label={t("nav.accounts")}>
       <div className="mb-3 flex items-center justify-between px-3">
@@ -176,7 +190,15 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
           if (!href) return null;
           return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#aaa79d] transition-colors hover:bg-white/[0.05] hover:text-white">
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.035]" style={{ color: PLATFORM_COLORS[account.platform] }}><FontAwesomeIcon icon={Icon} className="size-3.5" aria-hidden /></span>
-            <span className="min-w-0 flex-1 truncate">{label}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate">{label}</span>
+              <span className="mt-1 flex items-center gap-1 text-[10px] text-[#77766f]">
+                <bdi className="font-medium tabular-nums text-[#aaa79d]">
+                  {account.audience_count == null ? "—" : new Intl.NumberFormat(locale).format(account.audience_count)}
+                </bdi>
+                <span>{t(account.platform === "youtube" ? "nav.subscribers" : "nav.followers")}</span>
+              </span>
+            </span>
             <span className="size-1.5 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
           </a>;
         })}

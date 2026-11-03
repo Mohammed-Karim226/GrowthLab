@@ -63,6 +63,7 @@ export const contracts = {
   "0011_report_deletion_cleanup.sql": [table("report_deletion_cleanup"), index("report_deletion_cleanup_pending_idx"), trigger("reports.capture_report_deletion"), policy("public.report_deletion_cleanup.report_deletion_cleanup_admin_select"), execute("delete_report(uuid)", "authenticated"), execute("delete_report(uuid)", "anon", false)],
   "0012_ai_usage.sql": [table("ai_usage_events"), index("ai_usage_events_started_at_idx"), constraint("ai_usage_events.ai_usage_events_outcome"), policy("public.ai_usage_events.ai_usage_events_admin_read"), execute("admin_ai_usage_summary()", "authenticated"), execute("admin_ai_usage_summary()", "anon", false)],
   "0013_restore_report_functions.sql": [execute("auth_client_id()", "authenticated"), execute("auth_client_id()", "anon", false), execute("transition_report(uuid,uuid,integer,uuid,text)", "authenticated"), execute("transition_report(uuid,uuid,integer,uuid,text)", "anon", false)],
+  "0014_account_audience.sql": [column("accounts.audience_count"), constraint("accounts.accounts_audience_count_check")],
 };
 
 function normalizedBody(body) {
