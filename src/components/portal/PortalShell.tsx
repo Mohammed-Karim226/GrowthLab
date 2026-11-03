@@ -18,6 +18,8 @@ import {
   Menu,
   ShieldCheck,
   Sparkles,
+  UserRoundCheck,
+  UsersRound,
   X,
 } from "lucide-react";
 import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
@@ -182,24 +184,32 @@ export default function PortalShell({ clientId, clientName, clientEmail, account
         <p className="text-[10px] font-semibold tracking-[0.24em] text-[#77766f] uppercase">{t("nav.accounts")}</p>
         <span className="rounded-full border border-[#54d8ac]/20 bg-[#54d8ac]/10 px-2 py-0.5 text-[9px] font-semibold text-[#78d9b9]">{activeAccounts.length}</span>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2.5">
         {activeAccounts.map((account) => {
           const href = accountHref(account);
           const Icon = PLATFORM_ICONS[account.platform];
+          const AudienceIcon = account.platform === "youtube" ? UserRoundCheck : UsersRound;
+          const color = PLATFORM_COLORS[account.platform];
           const label = account.page_name || account.page_id || t(`platforms.${account.platform}` as never);
           if (!href) return null;
-          return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#aaa79d] transition-colors hover:bg-white/[0.05] hover:text-white">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.035]" style={{ color: PLATFORM_COLORS[account.platform] }}><FontAwesomeIcon icon={Icon} className="size-3.5" aria-hidden /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate">{label}</span>
-              <span className="mt-1 flex items-center gap-1 text-[10px] text-[#77766f]">
-                <bdi className="font-medium tabular-nums text-[#aaa79d]">
-                  {account.audience_count == null ? "—" : new Intl.NumberFormat(locale).format(account.audience_count)}
-                </bdi>
-                <span>{t(account.platform === "youtube" ? "nav.subscribers" : "nav.followers")}</span>
+          return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-xs text-[#aaa79d] shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition duration-200 hover:border-white/[0.18] hover:bg-white/[0.045] hover:shadow-[0_8px_24px_rgba(0,0,0,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/50 motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none">
+            <span aria-hidden className="absolute inset-x-3 top-0 h-px opacity-60" style={{ background: `linear-gradient(90deg, transparent, ${color}70, transparent)` }} />
+            <span className="flex items-center gap-2.5">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border" style={{ color, borderColor: `${color}28`, backgroundColor: `${color}12` }}>
+                <FontAwesomeIcon icon={Icon} className="size-4" aria-hidden />
               </span>
+              <span className="min-w-0 flex-1 truncate font-medium text-[#ddd9cf] transition-colors group-hover:text-white" title={label}>{label}</span>
+              <span className="size-1.5 shrink-0 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
             </span>
-            <span className="size-1.5 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
+            <span className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-xl border px-2.5 py-2" style={{ borderColor: `${color}24`, backgroundColor: `${color}0C` }}>
+              <span className="flex items-center gap-1.5">
+                <AudienceIcon className="size-3.5 shrink-0" style={{ color }} strokeWidth={1.8} aria-hidden />
+                <span className="text-[10px] font-medium text-[#b8b5ad]">{t(account.platform === "youtube" ? "nav.subscribers" : "nav.followers")}</span>
+              </span>
+              <bdi className="font-satoshi text-base font-semibold leading-none tracking-tight tabular-nums" style={{ color: account.audience_count == null ? "#77766f" : color }}>
+                {account.audience_count == null ? "—" : new Intl.NumberFormat(locale).format(account.audience_count)}
+              </bdi>
+            </span>
           </a>;
         })}
         {activeAccounts.length === 0 && <p className="px-3 text-[11px] leading-relaxed text-[#77766f]">{t("nav.noAccounts")}</p>}
