@@ -1,6 +1,7 @@
 "use client";
 
 import SectionReveal from "@/components/home/SectionReveal";
+import PlatformAudienceResults from "@/components/home/PlatformAudienceResults";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Testimonial } from "@/lib/landing";
+import type { TestimonialFollowers } from "@/lib/testimonials/followers";
 import { cn } from "@/lib/utils";
 import {
   faFacebook,
@@ -36,6 +38,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type TestimonialsSectionProps = {
   testimonials: Testimonial[];
+  followers: TestimonialFollowers;
 };
 
 const orbitSlots = [
@@ -50,29 +53,33 @@ const orbitSlots = [
 const platformItems = [
   {
     name: "TikTok",
+    key: "tiktok",
     icon: faTiktok,
     color: "#69C9D0",
     glow: "shadow-[0_0_34px_rgba(105,201,208,0.16)]",
   },
   {
     name: "Instagram",
+    key: "instagram",
     icon: faInstagram,
     color: "#E1306C",
     glow: "shadow-[0_0_34px_rgba(225,48,108,0.18)]",
   },
   {
     name: "YouTube",
+    key: "youtube",
     icon: faYoutube,
     color: "#FF3B30",
     glow: "shadow-[0_0_34px_rgba(255,59,48,0.18)]",
   },
   {
     name: "Facebook",
+    key: "facebook",
     icon: faFacebook,
     color: "#1877F2",
     glow: "shadow-[0_0_34px_rgba(24,119,242,0.18)]",
   },
-];
+] as const;
 
 function compactNumber(value: string) {
   const numeric = Number(value.toLowerCase().replace("k", ""));
@@ -84,6 +91,7 @@ const AUTOPLAY_MS = 5200;
 
 export default function TestimonialsSection({
   testimonials,
+  followers,
 }: TestimonialsSectionProps) {
   const locale = useLocale();
   const isRTL = locale === "ar";
@@ -132,6 +140,7 @@ export default function TestimonialsSection({
 
   const before = compactNumber(active.before);
   const after = compactNumber(active.after);
+  const activeFollowers = followers[active.analyticsKey];
   const lift =
     typeof before === "number" && typeof after === "number" && before > 0
       ? Math.round(((after - before) / before) * 100)
@@ -341,7 +350,13 @@ export default function TestimonialsSection({
                   </blockquote>
                 </div>
 
-                <div className="mt-10 grid gap-2 sm:grid-cols-4">
+                <PlatformAudienceResults
+                  platforms={platformItems}
+                  growth={active.platformGrowth}
+                  totals={activeFollowers}
+                />
+
+                <div className="mt-8 grid gap-2 sm:grid-cols-4">
                   <SignalCard
                     icon={<TrendingUp className="h-5 w-5" />}
                     label={t("growth")}
