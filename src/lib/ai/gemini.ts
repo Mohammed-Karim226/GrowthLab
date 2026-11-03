@@ -1,6 +1,7 @@
 import "server-only";
 
 import { geminiApiKey, geminiModel } from "@/lib/env";
+import { recordAiUsage, type AiUsageEvent } from "./usage";
 import {
   AiProviderError,
   extractJson,
@@ -31,7 +32,16 @@ type GeminiResponse = {
     finishReason?: string;
   }>;
   promptFeedback?: { blockReason?: string };
+  usageMetadata?: {
+    promptTokenCount?: unknown;
+    candidatesTokenCount?: unknown;
+    totalTokenCount?: unknown;
+  };
 };
+
+function tokenCount(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
 
 function classify(status: number, body: string): AiProviderError {
   if (status === 401 || status === 403) {
@@ -60,85 +70,126 @@ export function createGeminiProvider(): AiProvider {
     model,
 
     async complete(request: CompletionRequest): Promise<CompletionResult> {
-      const parts: GeminiPart[] = [{ text: request.prompt }];
+      const startedAt = new Date().toISOString();
+      const startedMs = performance.now();
+      let status: AiUsageEvent["status"] = "error";
+      let errorKind: AiUsageEvent["error_kind"] = "unknown";
+      let statusCode: number | null = null;
+      let inputTokens: number | null = null;
+      let outputTokens: number | null = null;
+      let totalTokens: number | null = null;
 
-      for (const image of request.images ?? []) {
-        parts.push({ inline_data: { mime_type: image.mimeType, data: image.data } });
-      }
-
-      const payload = {
-        contents: [{ role: "user", parts }],
-        systemInstruction: { parts: [{ text: request.systemInstruction }] },
-        generationConfig: {
-          // Transcription wants determinism; the caller raises this for prose.
-          temperature: request.temperature ?? 0,
-          maxOutputTokens: request.maxOutputTokens ?? 8192,
-          responseMimeType: "application/json",
-        },
-      };
-
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-      let response: Response;
       try {
-        response = await fetch(`${API_ROOT}/models/${encodeURIComponent(model)}:generateContent`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": geminiApiKey(),
-          },
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-          cache: "no-store",
-        });
-      } catch (cause) {
-        if (cause instanceof Error && cause.name === "AbortError") {
-          throw new AiProviderError("timeout", `Gemini did not respond within ${REQUEST_TIMEOUT_MS}ms`);
+        const parts: GeminiPart[] = [{ text: request.prompt }];
+
+        for (const image of request.images ?? []) {
+          parts.push({ inline_data: { mime_type: image.mimeType, data: image.data } });
         }
-        throw new AiProviderError("network", `Could not reach Gemini: ${String(cause)}`);
+
+        const payload = {
+          contents: [{ role: "user", parts }],
+          systemInstruction: { parts: [{ text: request.systemInstruction }] },
+          generationConfig: {
+            // Transcription wants determinism; the caller raises this for prose.
+            temperature: request.temperature ?? 0,
+            maxOutputTokens: request.maxOutputTokens ?? 8192,
+            responseMimeType: "application/json",
+          },
+        };
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+        let response: Response;
+        let bodyText: string;
+        try {
+          response = await fetch(`${API_ROOT}/models/${encodeURIComponent(model)}:generateContent`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": geminiApiKey(),
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+            cache: "no-store",
+          });
+          statusCode = response.status;
+          // The deadline includes reading the body: response headers alone do
+          // not mean a generation finished, and a stalled stream needs a bound.
+          bodyText = await response.text();
+        } catch (cause) {
+          if (cause instanceof Error && cause.name === "AbortError") {
+            throw new AiProviderError("timeout", `Gemini did not respond within ${REQUEST_TIMEOUT_MS}ms`);
+          }
+          throw new AiProviderError("network", `Could not reach Gemini: ${String(cause)}`);
+        } finally {
+          clearTimeout(timer);
+        }
+
+        let parsed: GeminiResponse | null = null;
+        try {
+          const envelope: unknown = JSON.parse(bodyText);
+          if (envelope && typeof envelope === "object" && !Array.isArray(envelope)) {
+            parsed = envelope as GeminiResponse;
+            // Preserve usage even for blocked, truncated or invalid output.
+            // Input TPM excludes generated/thinking tokens. Missing metadata
+            // remains null; summing known fields would hide unknown usage.
+            inputTokens = tokenCount(parsed.usageMetadata?.promptTokenCount);
+            outputTokens = tokenCount(parsed.usageMetadata?.candidatesTokenCount);
+            totalTokens = tokenCount(parsed.usageMetadata?.totalTokenCount);
+          }
+        } catch {
+          // Classify non-2xx responses by HTTP status, even for HTML envelopes.
+        }
+
+        if (!response.ok) throw classify(response.status, bodyText);
+        if (!parsed) throw new AiProviderError("bad_response", "Gemini returned a non-JSON envelope");
+
+        if (parsed.promptFeedback?.blockReason) {
+          throw new AiProviderError(
+            "blocked",
+            `Gemini blocked the prompt: ${parsed.promptFeedback.blockReason}`
+          );
+        }
+
+        const candidate = parsed.candidates?.[0];
+
+        if (candidate?.finishReason === "SAFETY" || candidate?.finishReason === "PROHIBITED_CONTENT") {
+          throw new AiProviderError("blocked", `Gemini stopped: ${candidate.finishReason}`);
+        }
+
+        // MAX_TOKENS leaves truncated JSON behind — treat it as a bad response
+        // rather than letting extractJson salvage half an object.
+        if (candidate?.finishReason === "MAX_TOKENS") {
+          throw new AiProviderError("bad_response", "Gemini response hit the output token limit");
+        }
+
+        const raw = (candidate?.content?.parts ?? [])
+          .map((part) => part.text ?? "")
+          .join("")
+          .trim();
+
+        if (!raw) throw new AiProviderError("bad_response", "Gemini returned an empty response");
+
+        const json = extractJson(raw);
+        status = "success";
+        errorKind = null;
+        return { raw, json, model, provider: "gemini" };
+      } catch (cause) {
+        if (cause instanceof AiProviderError) errorKind = cause.kind;
+        throw cause;
       } finally {
-        clearTimeout(timer);
+        try {
+          await recordAiUsage({
+            provider: "gemini", model, status, error_kind: errorKind, status_code: statusCode,
+            input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: totalTokens,
+            duration_ms: Math.max(0, Math.round(performance.now() - startedMs)), started_at: startedAt,
+          });
+        } catch {
+          // Defense at the provider boundary, even if a future reporter or a
+          // test double breaks the writer's own best-effort guarantee.
+        }
       }
-
-      const bodyText = await response.text();
-
-      if (!response.ok) throw classify(response.status, bodyText);
-
-      let parsed: GeminiResponse;
-      try {
-        parsed = JSON.parse(bodyText) as GeminiResponse;
-      } catch {
-        throw new AiProviderError("bad_response", "Gemini returned a non-JSON envelope");
-      }
-
-      if (parsed.promptFeedback?.blockReason) {
-        throw new AiProviderError(
-          "blocked",
-          `Gemini blocked the prompt: ${parsed.promptFeedback.blockReason}`
-        );
-      }
-
-      const candidate = parsed.candidates?.[0];
-
-      if (candidate?.finishReason === "SAFETY" || candidate?.finishReason === "PROHIBITED_CONTENT") {
-        throw new AiProviderError("blocked", `Gemini stopped: ${candidate.finishReason}`);
-      }
-
-      // MAX_TOKENS leaves truncated JSON behind — treat it as a bad response
-      // rather than letting extractJson salvage half an object.
-      if (candidate?.finishReason === "MAX_TOKENS") {
-        throw new AiProviderError("bad_response", "Gemini response hit the output token limit");
-      }
-
-      const raw = (candidate?.content?.parts ?? [])
-        .map((part) => part.text ?? "")
-        .join("")
-        .trim();
-
-      if (!raw) throw new AiProviderError("bad_response", "Gemini returned an empty response");
-
-      return { raw, json: extractJson(raw), model, provider: "gemini" };
     },
   };
 }

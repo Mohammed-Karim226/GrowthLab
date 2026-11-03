@@ -72,6 +72,113 @@ Client accounts are created from the admin UI. The generated password is shown
 once, on screen, immediately after creation; it is never persisted in `clients`
 or anywhere else, so if it is lost the account needs a new one.
 
+### Check all migrations
+
+```powershell
+npm.cmd run db:migrations:check
+```
+
+Set `DIRECT_URL` (preferred) or `DATABASE_URL` in `.env.local` to the same
+Supabase project used by the application. This command uses a read-only
+transaction and reports each migration as `OK` or `FAIL`. It checks required
+tables, RLS, columns, indexes, constraints, triggers, policies, private storage,
+key permissions, and the latest SQL function bodies and argument names.
+Function comparison ignores SQL formatting, comments and unquoted keyword
+casing while preserving quoted values. A failure exits nonzero so the command
+can also gate a release.
+
+The existing manual migration script does not keep migration history. This is
+a schema audit, not proof of when each SQL file was executed. It does not apply
+migrations or replay earlier files, which can overwrite newer functions and
+permissions. Review a failed migration, then apply that specific pending file
+with `npm run db:apply -- supabase/migrations/<filename>.sql` and rerun the check.
+Register schema requirements for new migration files in
+`scripts/lib/migration-checks.mjs`; an unregistered migration fails the check.
+
+If only `auth_client_id()` and `transition_report(...)` differ while the other
+`0008` schema requirements pass, rerun the updated checker first. If the
+function differences remain, apply `0013_restore_report_functions.sql` instead
+of replaying `0008` or `0009`. It restores the latest definitions and execution
+grants for those two functions and reloads the API schema cache. With this file
+present, the checker attributes these function differences to `0013`.
+
+When the AI usage table and its associated objects are missing, apply the
+pending `0012_ai_usage.sql` migration. Both commands use the configured
+`DIRECT_URL` / `DATABASE_URL`, so check that it targets the intended environment:
+
+```powershell
+npm.cmd run db:apply -- supabase/migrations/0012_ai_usage.sql
+# Only when the report function checks still fail:
+npm.cmd run db:apply -- supabase/migrations/0013_restore_report_functions.sql
+npm.cmd run db:migrations:check
+```
+
+If schema checks pass but the REST API still returns `PGRST202`, refresh the
+Supabase API schema cache in its SQL Editor with
+`NOTIFY pgrst, 'reload schema';`.
+
+### Summary persistence upgrade
+
+After migrations `0008_report_transactions.sql` and
+`0009_report_publication_fixes.sql`, apply the summary RPC before deploying the
+updated summary routes:
+
+```bash
+npm run db:apply -- supabase/migrations/0010_report_summary.sql
+npm run test:reports
+npm run verify:report-summary
+```
+
+Generation and manual edits use `save_report_summary` to save the copy, its
+review status and audit history in one transaction. Editing an approved version
+reopens it for review. Published and archived versions remain locked, and a
+revision check rejects saves if the version changes during generation or editing.
+The authenticated role still cannot update status columns directly.
+
+The database verification script uses the configured Postgres connection, creates
+isolated fixtures, and rolls back its entire transaction, including the migration.
+
+### Report deletion cleanup
+
+Apply migration `0011_report_deletion_cleanup.sql` before deploying the updated
+report deletion route and Inngest functions:
+
+```bash
+npm run test:reports
+npm run verify:report-deletion
+npm run db:apply -- supabase/migrations/0011_report_deletion_cleanup.sql
+```
+
+The admin-only `delete_report` transaction removes all report versions, batches,
+image records, metrics, AI analyses and jobs through their foreign keys. Published
+reports must first be withdrawn. A database trigger also captures direct report
+deletions and client cascades, recording the screenshot paths and job IDs in
+`report_deletion_cleanup` together with the deletion audit entry.
+
+After commit, the route removes screenshots from the private `insights` bucket
+and sends `ai/insights.cancelled` events for the deleted jobs. Failed cleanup
+returns HTTP 202 with `cleanupPending: true`; the admin sees that cleanup is still
+pending. The `cleanup-deleted-reports` Inngest function retries durable tasks
+every five minutes, including deletions whose HTTP request stopped after commit.
+Keep the Inngest app synced with `/api/inngest` so both the cancellation rule and
+cleanup function are registered. Local development requires `npm run inngest:dev`.
+
+Completed tasks are swept again for 24 hours to catch screenshots uploaded by a
+request already in flight at deletion time, then their cleanup records are
+removed. Pending tasks remain until cleanup succeeds. The sweep is restricted to
+the deleted report's storage prefix, in addition to its captured image paths.
+The audit entry remains as deletion history.
+
+Workers treat deleted jobs as cancelled and recheck database state before
+provider retries and result writes. An AI HTTP request already in flight may
+finish, but its result cannot recreate the deleted report's data. Inngest can
+retain cancelled run history; cancellation stops execution rather than deleting
+that platform history.
+
+`verify:report-deletion` exercises real PostgreSQL privileges, triggers and
+cascades with temporary fixtures, then rolls back the entire transaction. It
+does not call Storage or Inngest or delete existing reports.
+
 ## 4. The isolation suite (plan §72, §77)
 
 ```bash

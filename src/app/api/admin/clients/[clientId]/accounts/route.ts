@@ -21,6 +21,7 @@ export const POST = withAdmin<[Params]>("createAccount", async (session, request
     page_name: input.pageName,
     page_id: input.pageId || null,
     stage: input.stage || null,
+    ...(input.audienceCount === undefined ? {} : { audience_count: input.audienceCount }),
   }).select("*").single();
 
   if (error?.code === "23505") return apiError(409, "accountExists");

@@ -143,7 +143,502 @@
       "clients": "Clients",
       "open": "Open menu",
       "close": "Close menu",
-      "templateCreation": "Template creation"
+      "templateCreation": "Template creation",
+      "system": "System health"
+    },
+    "system": {
+      "tabs": {
+        "label": "System monitoring sections",
+        "overview": "Overview",
+        "sentry": "Sentry"
+      },
+      "eyebrow": "Operations",
+      "title": "System health",
+      "subtitle": "Monitor your integrations, AI usage and model thresholds in one place.",
+      "loading": "Loading system health…",
+      "refresh": "Refresh",
+      "refreshing": "Checking…",
+      "checkedAt": "Checked {time} UTC",
+      "autoRefreshOn": "Auto-refresh · 60s",
+      "autoRefreshOff": "Auto-refresh paused",
+      "milliseconds": "{value} ms",
+      "console": "Console",
+      "openConsoleFor": "Open {service} console in a new tab",
+      "last24Hours": "Last 24 hours",
+      "servicesTitle": "Connected services",
+      "servicesSubtitle": "Live connectivity and configuration checks across your tools.",
+      "environment": {
+        "production": "Production",
+        "preview": "Preview",
+        "development": "Development"
+      },
+      "status": {
+        "disabled": "Disabled",
+        "operational": "Operational",
+        "configured": "Configured",
+        "degraded": "Needs review",
+        "unavailable": "Unavailable",
+        "unconfigured": "Not configured",
+        "unknown": "Unverified"
+      },
+      "check": {
+        "live": "Live check",
+        "configuration": "Configuration only"
+      },
+      "summary": {
+        "label": "System health summary",
+        "healthy": "Live checks are passing",
+        "attention": "{count, plural, one {# service needs attention} other {# services need attention}}",
+        "unknown": "Some services could not be verified",
+        "stale": "Showing the last available snapshot",
+        "detail": "{healthy} of {total} live checks passed. Configuration checks do not verify service delivery."
+      },
+      "metrics": {
+        "services": "Live checks passed",
+        "servicesHint": "Services responding to this check",
+        "requests": "AI requests",
+        "requestsHint": "Recorded provider attempts · last 24 hours",
+        "tokens": "Reported tokens",
+        "tokensHint": "Provider-reported total · last 24 hours",
+        "partialTokens": "Token data available for {count} of {total} requests",
+        "failures": "Failed AI requests",
+        "failuresHint": "Includes {count} rate-limited requests · last 24 hours",
+        "noTelemetry": "Usage data is unavailable"
+      },
+      "filters": {
+        "label": "Filter service checks",
+        "all": "All services",
+        "live": "Live checks",
+        "configuration": "Configuration",
+        "attention": "Needs attention",
+        "empty": "No services match this filter."
+      },
+      "services": {
+        "application": {
+          "name": "Application",
+          "description": "Next.js server runtime"
+        },
+        "database": {
+          "name": "Database",
+          "description": "Supabase data access"
+        },
+        "auth": {
+          "name": "Authentication",
+          "description": "Supabase identity service"
+        },
+        "storage": {
+          "name": "File storage",
+          "description": "Private report uploads"
+        },
+        "gemini": {
+          "name": "Google Gemini",
+          "description": "AI model availability"
+        },
+        "inngest": {
+          "name": "Inngest",
+          "description": "Background AI workflows"
+        },
+        "sentry": {
+          "name": "Sentry",
+          "description": "Error and performance monitoring"
+        },
+        "credentials": {
+          "name": "Credential vault",
+          "description": "Server-side credential encryption"
+        }
+      },
+      "details": {
+        "monitoringDisabled": "Sentry monitoring is disabled for this environment.",
+        "responding": "The service is responding.",
+        "reachable": "The service endpoint is reachable.",
+        "modelAvailable": "The configured model is accessible. No content was generated.",
+        "missingConfig": "Required settings are missing for this environment.",
+        "invalidConfig": "The current configuration is invalid. Review the service settings.",
+        "checkFailed": "The check could not complete. Review the service console and try again.",
+        "timedOut": "The service did not respond within the check timeout.",
+        "rateLimited": "The provider rate-limited this check. Review usage in its console.",
+        "accessDenied": "The service rejected access. Review its credentials and permissions.",
+        "configuredOnly": "Configuration is present. Service delivery has not been verified.",
+        "development": "Development settings are active. Service delivery has not been verified.",
+        "privateBucket": "The upload bucket is accessible and private.",
+        "publicBucket": "The upload bucket is public. Review its access settings.",
+        "encryptionReady": "The active encryption key is valid. Saved credentials were not decrypted."
+      },
+      "tracking": {
+        "setupTitle": "Usage tracking needs setup",
+        "setupHint": "The usage ledger is not ready in this environment. AI features can continue while tracking is set up.",
+        "unavailableTitle": "Usage data is temporarily unavailable",
+        "unavailableHint": "Recorded usage could not be loaded. Refresh to try again; AI usage totals are unknown until the ledger is available."
+      },
+      "quota": {
+        "title": "AI models & thresholds",
+        "subtitle": "Recorded app usage against your configured monitoring thresholds.",
+        "providerConsole": "Google AI Studio",
+        "provider": "Google · Gemini API",
+        "active": "Active model",
+        "previous": "Previously used",
+        "requestsMinute": "Requests / minute",
+        "tokensMinute": "Input tokens / minute",
+        "requestsDay": "Requests / day",
+        "rollingMinute": "Rolling last 60 seconds",
+        "inputTokens": "Input tokens · rolling last 60 seconds",
+        "incompleteTokens": "Some requests have no token metadata",
+        "utcDay": "Since 00:00 UTC today",
+        "notSet": "Not configured",
+        "approaching": "Near threshold",
+        "thresholdReached": "Threshold reached",
+        "disclaimer": "Thresholds are monitoring settings, not enforced limits or verified provider quotas. Usage covers recorded app calls only. Check Google AI Studio for actual project limits and reset times."
+      },
+      "activity": {
+        "title": "AI request activity",
+        "subtitle": "Recorded requests and failures by hour · UTC",
+        "requests": "Requests",
+        "failures": "Failures",
+        "empty": "No AI requests recorded in the last 24 hours",
+        "unavailable": "Request activity is unavailable",
+        "emptyHint": "Activity appears as new app requests are recorded. Earlier requests are not backfilled."
+      },
+      "jobs": {
+        "title": "AI job queue",
+        "subtitle": "Current queue and recent background jobs",
+        "queued": "Queued",
+        "running": "Processing",
+        "failed": "Failed · 24h",
+        "empty": "No recent background jobs.",
+        "unavailable": "Background job data is unavailable.",
+        "timezone": "Job times are shown in UTC.",
+        "states": {
+          "queued": "Queued",
+          "processing": "Processing",
+          "completed": "Completed",
+          "failed": "Failed",
+          "dead_letter": "Retries exhausted",
+          "unknown": "Unknown status"
+        }
+      },
+      "errors": {
+        "load": "System health could not be loaded. Refresh to try again.",
+        "stale": "The latest check failed. Values below are from the last successful check.",
+        "unauthorized": "Your session no longer has administrator access. Sign in with an admin account to continue.",
+        "signIn": "Admin sign in"
+      },
+      "footer": {
+        "private": "Administrator access only",
+        "probes": "Read-only checks · No AI content generation"
+      }
+    },
+
+    "sentry": {
+      "eyebrow": "Error monitoring",
+      "title": "Sentry workspace",
+      "subtitle": "Find the errors that matter, inspect your monitoring setup and move from an issue to a verified fix.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "openSentry": "Open Sentry",
+      "loading": "Loading Sentry workspace…",
+      "checkedAt": "Checked {time} UTC",
+      "connectionLabel": {
+        "connected": "Inbox connected",
+        "setup": "Connection needs review",
+        "stale": "Latest check unavailable"
+      },
+      "tabs": {
+        "label": "Sentry sections",
+        "issues": "Issue inbox",
+        "implementation": "Setup & coverage",
+        "workflow": "Investigate & fix"
+      },
+      "links": {
+        "issues": "Issues",
+        "performance": "Traces",
+        "replays": "Replays",
+        "releases": "Releases",
+        "alerts": "Alerts",
+        "settings": "Settings"
+      },
+      "levels": {
+        "fatal": "Fatal",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info",
+        "debug": "Debug",
+        "unknown": "Unknown"
+      },
+      "statuses": {
+        "unresolved": "Unresolved",
+        "resolved": "Resolved",
+        "ignored": "Ignored"
+      },
+      "periods": {
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "14d": "Last 14 days"
+      },
+      "metrics": {
+        "issues": {
+          "label": "Listed issues",
+          "hint": "Issues on this page before local search"
+        },
+        "events": {
+          "label": "Reported events",
+          "hint": "Sentry-reported counts for the listed issues and selected filters."
+        },
+        "environment": {
+          "label": "Environment filter",
+          "hint": "Applied to the issue query; not the environment of every event"
+        }
+      },
+      "filters": {
+        "search": "Search this page…",
+        "clear": "Clear search",
+        "status": "Issue status",
+        "period": "Time period",
+        "environment": "Environment",
+        "allEnvironments": "All environments"
+      },
+      "inbox": {
+        "title": "Issue inbox",
+        "subtitle": "Recent issues from your Sentry project, ordered by last seen.",
+        "autoOn": "Auto-refresh · 60s",
+        "autoOff": "Auto-refresh paused",
+        "refreshPaging": "Auto-refresh paused while paging",
+        "unavailable": "The issue inbox is unavailable. Refresh to try again.",
+        "events": "{count} events",
+        "openIssue": "Open {id} in Sentry in a new tab",
+        "noMatches": "No matches on this page",
+        "noMatchesHint": "Try an issue ID, title or source location. Search applies only to the current page.",
+        "empty": "No issues for these filters",
+        "emptyHint": "Try another status, a longer period or all environments. An empty inbox does not verify error capture.",
+        "page": "Page {page}",
+        "pageScope": "Search and totals apply to this page",
+        "previous": "Previous",
+        "next": "Next",
+        "helpTitle": "Turn an issue into a verified fix",
+        "helpHint": "Follow a practical workflow from triage to release verification.",
+        "helpAction": "Open fix workflow"
+      },
+      "issue": {
+        "detailsHint": "A summary for triage. Open Sentry for the full event, stack trace and issue history.",
+        "status": "Status",
+        "events": "Reported events",
+        "users": "Affected users",
+        "firstSeen": "First seen · UTC",
+        "lastSeen": "Last seen · UTC",
+        "environment": "Environment filter",
+        "location": "Reported source location",
+        "nextSteps": "Investigation checklist",
+        "steps": {
+          "inspect": "Open the full issue. Check the event environment, release and first application stack frame.",
+          "reproduce": "Reproduce the failure with test data using the event's release and affected flow.",
+          "fix": "Repair the underlying code or configuration and add a regression test for this failure.",
+          "verify": "Deploy the fix, verify the affected flow, then resolve the issue in Sentry and watch for regressions."
+        },
+        "resolveHint": "Resolving an issue changes its status in Sentry. The source code still needs to be fixed and deployed.",
+        "copyBrief": "Copy investigation brief",
+        "copied": "Brief copied",
+        "copyFailed": "Clipboard access failed. Open the issue in Sentry and copy the details there.",
+        "openFull": "Open full issue"
+      },
+      "brief": {
+        "environment": "Environment filter",
+        "period": "Selected period",
+        "location": "Source location",
+        "firstSeen": "First seen",
+        "lastSeen": "Last seen",
+        "link": "Sentry issue",
+        "reproduce": "Reproduction steps:\n- ",
+        "cause": "Root cause:\n- ",
+        "fix": "Code or configuration fix:\n- ",
+        "verify": "Regression test, release and verification:\n- "
+      },
+      "connection": {
+        "connected": {
+          "title": "Issue inbox connected",
+          "body": "The latest Sentry read request succeeded. Verify event ingestion and alert delivery separately in Sentry."
+        },
+        "setup_required": {
+          "title": "Connect your Sentry project",
+          "body": "Add the organization and project slugs plus a dedicated server-side read token to enable the live inbox. The setup guide explains each setting."
+        },
+        "invalid_config": {
+          "title": "Review your Sentry settings",
+          "body": "Use valid organization and project slugs, a valid project DSN and the organization's supported data region: us or eu."
+        },
+        "unauthorized": {
+          "title": "The read credential was rejected",
+          "body": "Check whether the Sentry read token expired or was revoked. Replace SENTRY_READ_AUTH_TOKEN on the deployed server and try again."
+        },
+        "forbidden": {
+          "title": "The read credential needs project access",
+          "body": "Grant event:read and project:read permissions for this Sentry project. Check organization restrictions and confirm the project slug."
+        },
+        "rate_limited": {
+          "title": "Sentry limited this request",
+          "body": "Wait before refreshing and review Sentry API limits. Your last read request could not be completed."
+        },
+        "unavailable": {
+          "title": "Sentry is temporarily unavailable",
+          "body": "Check the Sentry service status, organization region, project slug and server network access, then refresh."
+        },
+        "project_mismatch": {
+          "title": "The project and DSN do not match",
+          "body": "Set the project slug and DSN to the same Sentry project before loading issues. Review both the build and deployed server settings."
+        }
+      },
+      "implementation": {
+        "title": "Monitoring coverage",
+        "subtitle": "See which capabilities are configured for this deployment and which need verification.",
+        "states": {
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "configured": "Configured",
+          "review": "Verify in Sentry"
+        },
+        "replayRates": "Sessions {session} · On error {error}",
+        "disclaimer": "These indicators describe configuration. They do not prove event ingestion, uploaded source maps, recorded replays or delivered alerts. Public SDK settings take effect after a new build.",
+        "features": {
+          "browser": {
+            "title": "Browser errors",
+            "body": "Captures unexpected client errors and application error boundaries when a public DSN and monitoring are enabled."
+          },
+          "server": {
+            "title": "Server & Edge errors",
+            "body": "Captures unexpected Next.js request errors across the Node.js and Edge runtimes."
+          },
+          "handled": {
+            "title": "API & background failures",
+            "body": "Reports unexpected instrumented API failures and active failed jobs with operation names and opaque identifiers."
+          },
+          "tracing": {
+            "title": "Performance traces",
+            "body": "Samples request and navigation traces at the configured rate. Error capture is independent of this sampling."
+          },
+          "replay": {
+            "title": "Session replay",
+            "body": "Samples browser sessions and error sessions. Text and inputs are masked and media is blocked."
+          },
+          "privacy": {
+            "title": "Data scrubbing",
+            "body": "Removes personal data, request bodies, headers and raw messages. Preserves approved diagnostic context and source locations."
+          },
+          "sourceMaps": {
+            "title": "Source maps",
+            "body": "Build credentials enable source uploads. Confirm the matching artifact bundle and readable source frames in Sentry."
+          },
+          "releases": {
+            "title": "Release tracking",
+            "body": "A release identifier links events to a deployed version. Confirm it matches uploaded build artifacts."
+          },
+          "alerts": {
+            "title": "Alerts & ownership",
+            "body": "Choose owners, production alert rules and recipients in Sentry, then verify notification delivery."
+          }
+        }
+      },
+      "setup": {
+        "title": "Connect & configure",
+        "subtitle": "Use the same Sentry project for event capture, issue access and build artifacts.",
+        "docs": "Sentry Next.js guide",
+        "open": "View setup guide",
+        "variables": "Deployment environment variables",
+        "tokenNotice": "The read token stays on the server and needs event:read and project:read. Keep the source-map upload token separate; never use a NEXT_PUBLIC_ prefix for either token.",
+        "projectKeys": "Project DSN settings",
+        "createToken": "Create a read token",
+        "steps": {
+          "project": {
+            "title": "Choose the project",
+            "body": "Copy the DSN from Sentry project settings. Use organization and project slugs from the URL, and confirm the US or EU data region."
+          },
+          "runtime": {
+            "title": "Enable capture for your environment",
+            "body": "Set the public DSN and environment label. Monitoring defaults to production; enable it explicitly only when you intend to capture local or staging events."
+          },
+          "readToken": {
+            "title": "Add dedicated issue access",
+            "body": "Create a server-only token with event:read and project:read for this project. Set it as SENTRY_READ_AUTH_TOKEN with the organization and project slugs."
+          },
+          "deploy": {
+            "title": "Rebuild, deploy & verify",
+            "body": "Public settings require a new build. Refresh the inbox after deployment, then verify ingestion, source frames and alert delivery in the intended Sentry environment."
+          }
+        },
+        "buildTitle": "Source maps & release setup",
+        "buildBody": "Provide the upload token only to CI or the build step, together with the organization, project and an immutable release ID. Match the SDK's release ID to the build. Set SENTRY_UPLOAD_SOURCE_MAPS=false for verification builds.",
+        "buildVerify": "Check the build upload result and the matching artifact bundle in Sentry. A configured status does not prove upload success; unverified is expected when the build token is absent from runtime."
+      },
+      "workflow": {
+        "title": "From issue to verified fix",
+        "subtitle": "A repeatable workflow for investigating failures and confirming the repair in production.",
+        "steps": {
+          "triage": {
+            "title": "1. Triage the impact",
+            "body": "Choose the affected environment. Review severity, recent occurrence, reported event counts and affected users. Confirm the issue belongs to the release you are investigating."
+          },
+          "inspect": {
+            "title": "2. Read the event",
+            "body": "Open the full Sentry issue and start with the first application stack frame. Inspect the release, trace and masked replay when available to understand the failing flow."
+          },
+          "reproduce": {
+            "title": "3. Reproduce the failure",
+            "body": "Check out the event's release and use test data to repeat the affected steps. Correlate the operation and opaque request or job ID with your application logs."
+          },
+          "repair": {
+            "title": "4. Fix & test",
+            "body": "Repair the underlying code or configuration. Add a regression test that reproduces the failure, then run the relevant checks and verify the affected flow."
+          },
+          "release": {
+            "title": "5. Deploy an identifiable release",
+            "body": "Deploy the fix with a unique release ID and matching source maps. Check upload results and confirm the affected flow works in the intended environment."
+          },
+          "verify": {
+            "title": "6. Resolve & watch",
+            "body": "After verifying the repair, resolve the issue in Sentry, or resolve it in the fixed release. Watch new and regressed issues and confirm production alerts reach the right owner."
+          }
+        },
+        "resolveNotice": "Marking an issue resolved does not change application code. Verify the deployed fix before resolving it, and investigate if the issue returns.",
+        "openIssues": "Open project issues",
+        "configureAlerts": "Configure Sentry alerts"
+      },
+      "troubleshooting": {
+        "title": "Common questions",
+        "subtitle": "Checks that help when issues, source frames or monitoring signals are missing.",
+        "items": {
+          "noIssues": {
+            "title": "Why is the inbox empty?",
+            "body": "Clear local search, select all environments and widen the period. Check unresolved, resolved and ignored statuses. Then verify the deployed DSN, enabled setting and environment. A connected inbox proves read access, not error ingestion."
+          },
+          "access": {
+            "title": "Why can I not open an issue?",
+            "body": "The app requires an administrator session. Sentry requires its own sign-in and access to the configured organization and project. For API access failures, check the runtime read token, event:read/project:read permissions and organization region."
+          },
+          "sourceMaps": {
+            "title": "Why are stack traces minified?",
+            "body": "Compare the event release with the deployed build. Check CI source-map uploads and the matching artifact bundle in Sentry. Uploads need build-only credentials; adding that token to runtime does not repair missing artifacts."
+          },
+          "missingReplay": {
+            "title": "Why is there no trace or replay?",
+            "body": "Sampling means some events have neither. Confirm the browser DSN, enabled setting and sampling rates, then check Sentry plan limits and browser network restrictions. Server-only errors may have no associated browser session."
+          },
+          "noise": {
+            "title": "How do I reduce alert noise?",
+            "body": "Scope alerts to production, assign owners and choose useful thresholds. Review grouping and repeated failures before changing rules. Tune trace and replay sampling for traffic and quota; those rates do not sample error reporting."
+          },
+          "regression": {
+            "title": "What if a resolved issue returns?",
+            "body": "Compare the new event's release and stack frames with the verified fix. Check whether every deployment received the change and whether a new input triggers the same failure. Reproduce it, extend the regression test and deploy the repair."
+          }
+        }
+      },
+      "errors": {
+        "access": "Your session no longer has administrator access. Sign in with an admin account to continue.",
+        "stale": "The latest check failed. The workspace shows the last successful result.",
+        "load": "The Sentry workspace could not be loaded. Refresh to try again.",
+        "signIn": "Admin sign in"
+      },
+      "footer": {
+        "private": "Administrator access only",
+        "readOnly": "Read-only issue access · No test events or remote changes"
+      }
     },
     "overview": {
       "vipIntelligence": "VIP Intelligence",
@@ -154,6 +649,7 @@
       "totalReports": "Reports",
       "awaitingReview": "Awaiting review",
       "recentReports": "Recent reports",
+      "reportsPagination": "Page {page} of {pages} · {total} reports",
       "noReports": "No reports yet. Create a client, then add a reporting period.",
       "quickCreate": "New client"
       ,"quickActionsTitle": "VIP actions",
@@ -294,6 +790,41 @@
       }
     },
     "reports": {
+      "export": {
+        "trigger": "Export PDF",
+        "title": "A report worth sharing",
+        "description": "Export a clearly organized GrowthLab report with a performance overview, structured insights, and readable metric tables.",
+        "previewLabel": "PERFORMANCE REPORT",
+        "reviewedCount": "{count, plural, one {# reviewed metric} other {# reviewed metrics}}",
+        "version": "Version {number}",
+        "language": "Document language",
+        "pageSize": "Page size",
+        "letter": "US Letter",
+        "sections": "Build your report",
+        "alwaysIncluded": "The branded overview, performance snapshot, and calculation notes are always included.",
+        "includeSummary": "Executive summary",
+        "includeSummaryHint": "Saved insights, highlights, and recommendations.",
+        "includePlatforms": "Platform breakdown",
+        "includePlatformsHint": "Channel performance and each platform's contribution.",
+        "includeDetails": "Complete metrics ledger",
+        "includeDetailsHint": "Reviewed figures grouped by platform and account, with dates and original units.",
+        "savedNotice": "Your PDF uses saved report data. Save any changes before exporting.",
+        "languageNotice": "Language changes the document labels and layout. Saved text stays in its original language.",
+        "draftNotice": "This version is not currently published. The PDF will be clearly marked as a draft.",
+        "archivedNotice": "This is a historical version. The PDF will be marked as archived.",
+        "reviewNotice": "{count, plural, one {# unreviewed or unreadable metric will be excluded.} other {# unreviewed or unreadable metrics will be excluded.}}",
+        "noMetrics": "Review at least one metric to export this report.",
+        "preparing": "Preparing PDF…",
+        "preparingHint": "Composing your report. Your download will begin automatically.",
+        "download": "Download PDF",
+        "cancel": "Cancel",
+        "success": "Your PDF is ready. Download started.",
+        "error": "The PDF could not be created. Please try again.",
+        "timeout": "The export took too long. Please try again with fewer sections.",
+        "networkError": "The download connection failed. Check your connection and try again.",
+        "invalidPdf": "The server returned an incomplete PDF. Please try again.",
+        "processingNotice": "Wait for report analysis to finish before exporting."
+      },
       "create": {
         "title": "New reporting period",
         "description": "One report per period. Screenshots and metrics attach to its draft version.",
@@ -434,11 +965,17 @@
         "deleteReport": "Delete report",
         "deleting": "Deleting...",
         "deleteConfirm": "Delete this report permanently? All versions, screenshots and metrics will be removed.",
-        "deleted": "Report deleted"
+        "deleted": "Report deleted",
+        "deletedCleanupPending": "Report deleted. Screenshot and background-task cleanup will finish automatically."
       }
     },
     "accounts": {
       "title": "Social accounts",
+      "followers": "Followers",
+      "subscribers": "Subscribers",
+      "audiencePlaceholder": "Audience count (optional)",
+      "audienceHint": "Shown in the client portal. Leave blank if the count is unknown.",
+      "audienceInvalid": "Enter a valid whole-number count of zero or more.",
       "platform": "Platform",
       "namePlaceholder": "Page or profile name",
       "idPlaceholder": "Platform page ID (optional)",
@@ -448,7 +985,7 @@
       "updated": "Account updated",
       "edit": "Edit account",
       "editTitle": "Edit social account",
-      "editHint": "Update the platform, profile details, or account stage.",
+      "editHint": "Update the platform, profile details, audience count, or account stage.",
       "stagePlaceholder": "Stage, for example active or paused",
       "cancel": "Cancel",
       "save": "Save changes",
@@ -479,6 +1016,7 @@
       "notApproved": "Approve the report before publishing it.",
       "alreadyPublished": "This version is already published.",
       "notPublished": "This version is not the published one.",
+      "staleReport": "This report changed while you were viewing it. Check the refreshed report and try again.",
       "draftExists": "There is already an open version. Finish it before starting another.",
       "tooManyFiles": "Too many files at once. Upload up to 12 at a time.",
       "allFilesRejected": "None of those files could be uploaded.",
@@ -495,7 +1033,9 @@
       "serverError": "Something went wrong. Please try again."
     },
     "ui": {
-      "verifiedBy": "GrowthLab verified"
+      "verifiedBy": "GrowthLab verified",
+      "switchToAr": "Switch to Arabic",
+      "switchToEn": "Switch to English"
     }
   },
   "portal": {
@@ -555,6 +1095,8 @@
     },
     "ui": {
       "clientIntelligence": "Client intelligence",
+      "switchToAr": "Switch to Arabic",
+      "switchToEn": "Switch to English",
       "secureWorkspace": "Secure workspace",
       "verifiedBy": "GrowthLab verified",
       "comparisonStatus": "Comparison status",
@@ -583,6 +1125,8 @@
       "close": "Close menu",
       "backToTop": "Back to top",
       "accounts": "Active accounts",
+      "followers": "followers",
+      "subscribers": "subscribers",
       "activeAccount": "Active account",
       "noAccounts": "No active accounts connected yet."
     },
@@ -684,7 +1228,9 @@
       "empty": "No platform figures were reported this period.",
       "metricsCount": "{count} metrics",
       "showMetrics": "Show all metrics",
-      "hideMetrics": "Hide metrics"
+      "hideMetrics": "Hide metrics",
+      "unassignedMetrics": "Unassigned metrics",
+      "unnamedAccount": "Unnamed account"
     },
     "insights": {
       "title": "What this means",
@@ -855,6 +1401,72 @@
       "copyError": "Could not copy the conversation.",
       "messageUpdated": "Conversation updated.",
       "messageUpdateError": "Could not update the conversation."
+    }
+  },
+  "reportPdf": {
+    "intelligence": "PERFORMANCE INTELLIGENCE",
+    "report": "Social media performance report",
+    "preparedFor": "PREPARED FOR",
+    "period": "REPORTING PERIOD",
+    "version": "Version",
+    "draft": "DRAFT",
+    "snapshot": "Performance at a glance",
+    "snapshotHint": "The numbers that define this reporting period.",
+    "contents": "In this report",
+    "keyFindings": "Key findings",
+    "results": "Results by platform",
+    "metricsCount": "metrics",
+    "noPlatforms": "No platform results are available for this period.",
+    "views": "Total views",
+    "reach": "Total reach",
+    "engagement": "Engagement",
+    "audience": "Followers & subscribers",
+    "audienceGrowth": "Net audience growth",
+    "rate": "Engagement rate",
+    "overview": "Overview",
+    "comparison": "Compared with",
+    "noComparison": "No comparable published period is available. Growth is not calculated.",
+    "fromZero": "From a zero baseline",
+    "flat": "No change",
+    "summary": "Executive review",
+    "summaryHint": "The saved narrative, highlights, and next steps for this period.",
+    "wentWell": "What went well",
+    "changed": "What changed",
+    "attention": "Needs attention",
+    "recommendations": "Recommended next steps",
+    "noSummary": "A narrative has not been saved for this report yet.",
+    "platforms": "Platform performance",
+    "platformsHint": "A clear view of how each channel contributed.",
+    "viewDistribution": "Views by platform",
+    "viewDistributionHint": "Bar lengths compare views across the platforms with reported data.",
+    "noViews": "No view counts were reported for this period.",
+    "platform": "Platform",
+    "followers": "Audience",
+    "details": "Detailed metrics",
+    "detailsHint": "Every reviewed figure, with its account, reporting date, and original unit.",
+    "metric": "Metric",
+    "account": "Account",
+    "date": "Date",
+    "value": "Value",
+    "unit": "Unit",
+    "unassigned": "Not assigned",
+    "generated": "Exported",
+    "page": "Page",
+    "of": "of",
+    "reviewed": "reviewed metrics",
+    "excluded": "unreviewed or unreadable metrics excluded",
+    "methodology": "About these figures",
+    "method": "Only saved, reviewed numeric values are included. Missing data is shown as a dash; zero remains zero. Audience combines followers and subscribers. Cross-platform totals are not deduplicated people. Engagement rates use the portal's calculation: weighted by views when available, otherwise a simple average.",
+    "draftNote": "Working report — this version is not currently published. Figures and commentary may change.",
+    "comparisonNote": "Changes compare the preceding, non-overlapping published period. Period lengths and account coverage may differ.",
+    "savedLanguage": "Narrative text is reproduced in its saved language.",
+    "units": {
+      "count": "Count",
+      "percent": "%",
+      "seconds": "Seconds",
+      "minutes": "Minutes",
+      "hours": "Hours",
+      "currency": "Currency"
     }
   }
 }

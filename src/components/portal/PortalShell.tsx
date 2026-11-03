@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUp,
   BarChart3,
@@ -13,9 +14,12 @@ import {
   CreditCard,
   FileBarChart,
   Images,
+  Languages,
   Menu,
   ShieldCheck,
   Sparkles,
+  UserRoundCheck,
+  UsersRound,
   X,
 } from "lucide-react";
 import { faFacebook, faInstagram, faTiktok, faYoutube } from "@fortawesome/free-brands-svg-icons";
@@ -23,11 +27,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { AccountRow, ClientPaymentPlanRow, Platform } from "@/types/database";
 
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api-client";
 import SignOutButton from "@/components/auth/SignOutButton";
 import { Button } from "@/components/ui/button";
 import PaymentPlanCard from "@/components/portal/PaymentPlanCard";
 
 type PortalShellProps = {
+  clientId: string;
   clientName: string;
   clientEmail: string | null;
   accounts: AccountRow[];
@@ -60,15 +66,35 @@ const NAV = [
   { key: "payments", href: "/payments", icon: CreditCard },
 ] as const;
 
-export default function PortalShell({ clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
+export default function PortalShell({ clientId, clientName, clientEmail, accounts, payments, children }: PortalShellProps) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: liveAccounts } = useQuery({
+    queryKey: ["portal-accounts", clientId],
+    queryFn: async () => {
+      const response = await apiFetch<{ accounts: AccountRow[] }>("/api/portal/accounts", { cache: "no-store" });
+      return response.accounts;
+    },
+    initialData: accounts,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const base = `/${locale}/portal`;
   const initial = clientName.trim().charAt(0).toUpperCase() || "G";
+  const alternateLocale = locale === "ar" ? "en" : "ar";
+  const languageSwitchLabel = t(locale === "ar" ? "ui.switchToEn" : "ui.switchToAr");
+
+  function switchLanguage() {
+    const nextPath = pathname.replace(/^\/(en|ar)(?=\/|$)/, `/${alternateLocale}`);
+    router.replace(`${nextPath}${window.location.search}${window.location.hash}`, { scroll: false });
+    setMenuOpen(false);
+  }
 
   useEffect(() => {
     const updateScrollState = () => {
@@ -151,23 +177,39 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
     </nav>
   );
 
-  const activeAccounts = accounts.filter((account) => account.stage?.toLowerCase() !== "inactive");
+  const activeAccounts = liveAccounts.filter((account) => account.stage?.toLowerCase() !== "inactive");
   const accountsNav = (
     <section className="mt-7 border-t border-white/[0.07] pt-6" aria-label={t("nav.accounts")}>
       <div className="mb-3 flex items-center justify-between px-3">
         <p className="text-[10px] font-semibold tracking-[0.24em] text-[#77766f] uppercase">{t("nav.accounts")}</p>
         <span className="rounded-full border border-[#54d8ac]/20 bg-[#54d8ac]/10 px-2 py-0.5 text-[9px] font-semibold text-[#78d9b9]">{activeAccounts.length}</span>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2.5">
         {activeAccounts.map((account) => {
           const href = accountHref(account);
           const Icon = PLATFORM_ICONS[account.platform];
+          const AudienceIcon = account.platform === "youtube" ? UserRoundCheck : UsersRound;
+          const color = PLATFORM_COLORS[account.platform];
           const label = account.page_name || account.page_id || t(`platforms.${account.platform}` as never);
           if (!href) return null;
-          return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#aaa79d] transition-colors hover:bg-white/[0.05] hover:text-white">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.035]" style={{ color: PLATFORM_COLORS[account.platform] }}><FontAwesomeIcon icon={Icon} className="size-3.5" aria-hidden /></span>
-            <span className="min-w-0 flex-1 truncate">{label}</span>
-            <span className="size-1.5 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
+          return <a key={account.id} href={href} target="_blank" rel="noopener noreferrer" className="group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-xs text-[#aaa79d] shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition duration-200 hover:border-white/[0.18] hover:bg-white/[0.045] hover:shadow-[0_8px_24px_rgba(0,0,0,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/50 motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none">
+            <span aria-hidden className="absolute inset-x-3 top-0 h-px opacity-60" style={{ background: `linear-gradient(90deg, transparent, ${color}70, transparent)` }} />
+            <span className="flex items-center gap-2.5">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border" style={{ color, borderColor: `${color}28`, backgroundColor: `${color}12` }}>
+                <FontAwesomeIcon icon={Icon} className="size-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium text-[#ddd9cf] transition-colors group-hover:text-white" title={label}>{label}</span>
+              <span className="size-1.5 shrink-0 rounded-full bg-[#54d8ac] shadow-[0_0_8px_rgba(84,216,172,0.8)]" aria-label={t("nav.activeAccount")} />
+            </span>
+            <span className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-xl border px-2.5 py-2" style={{ borderColor: `${color}24`, backgroundColor: `${color}0C` }}>
+              <span className="flex items-center gap-1.5">
+                <AudienceIcon className="size-3.5 shrink-0" style={{ color }} strokeWidth={1.8} aria-hidden />
+                <span className="text-[10px] font-medium text-[#b8b5ad]">{t(account.platform === "youtube" ? "nav.subscribers" : "nav.followers")}</span>
+              </span>
+              <bdi className="font-satoshi text-base font-semibold leading-none tracking-tight tabular-nums" style={{ color: account.audience_count == null ? "#77766f" : color }}>
+                {account.audience_count == null ? "—" : new Intl.NumberFormat(locale).format(account.audience_count)}
+              </bdi>
+            </span>
           </a>;
         })}
         {activeAccounts.length === 0 && <p className="px-3 text-[11px] leading-relaxed text-[#77766f]">{t("nav.noAccounts")}</p>}
@@ -251,6 +293,17 @@ export default function PortalShell({ clientName, clientEmail, accounts, payment
             </div>
 
             <div className="flex items-center gap-2.5">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={switchLanguage}
+                aria-label={languageSwitchLabel}
+                title={languageSwitchLabel}
+                className="gap-1.5 h-7 rounded-full border-[#d8be78]/20 bg-[#d8be78]/[0.055] px-3 text-xs font-semibold text-[#ead69e] cursor-pointer hover:border-[#d8be78]/40 hover:bg-[#d8be78]/10"
+              >
+                <Languages className="size-3.5" aria-hidden />
+                <span lang={alternateLocale} dir="ltr">{alternateLocale.toUpperCase()}</span>
+              </Button>
               <div className="hidden items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[10px] text-[#8f8c84] sm:flex">
                 <ShieldCheck className="size-3.5 text-[#d8be78]" strokeWidth={1.8} />
                 {t("ui.verifiedBy")}

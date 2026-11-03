@@ -43,6 +43,7 @@ export default async function PortalLayout({
 
   return (
     <PortalShell
+      clientId={session.clientId}
       clientName={session.profile.full_name ?? "GrowthLab"}
       clientEmail={session.email}
       accounts={(accounts ?? []) as AccountRow[]}

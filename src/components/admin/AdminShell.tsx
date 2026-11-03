@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Activity,
   BarChart3,
   FilePenLine,
+  Languages,
   Menu,
   ShieldCheck,
   Users,
@@ -26,6 +28,7 @@ const NAV = [
   { key: "overview", href: "", icon: BarChart3 },
   { key: "clients", href: "/clients", icon: Users },
   { key: "templateCreation", href: "/template-creation", icon: FilePenLine },
+  { key: "system", href: "/system", icon: Activity },
 ] as const;
 
 export default function AdminShell({
@@ -36,8 +39,18 @@ export default function AdminShell({
   const t = useTranslations("admin");
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const base = `/${locale}/admin`;
+  const alternateLocale = locale === "ar" ? "en" : "ar";
+  const languageSwitchLabel = t(locale === "ar" ? "ui.switchToEn" : "ui.switchToAr");
+
+  function switchLanguage() {
+    const nextPath = pathname.replace(/^\/(en|ar)(?=\/|$)/, `/${alternateLocale}`);
+    router.replace(`${nextPath}${window.location.search}${window.location.hash}`, { scroll: false });
+    setMenuOpen(false);
+  }
+
   const isActive = (href: string) =>
     href === ""
       ? pathname === base || pathname === `${base}/`
@@ -151,6 +164,17 @@ export default function AdminShell({
               </span>
             </div>
             <div className="flex items-center gap-2.5">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={switchLanguage}
+                aria-label={languageSwitchLabel}
+                title={languageSwitchLabel}
+                className="h-7 cursor-pointer gap-1.5 rounded-full border-[#d8be78]/20 bg-[#d8be78]/[0.055] px-3 text-xs font-semibold text-[#ead69e] hover:border-[#d8be78]/40 hover:bg-[#d8be78]/10"
+              >
+                <Languages className="size-3.5" aria-hidden />
+                <span lang={alternateLocale} dir="ltr">{alternateLocale.toUpperCase()}</span>
+              </Button>
               <div className="hidden items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[10px] text-[#8f8c84] sm:flex">
                 <ShieldCheck
                   className="size-3.5 text-[#d8be78]"

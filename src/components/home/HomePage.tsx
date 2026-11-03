@@ -20,8 +20,11 @@ import BenefitsSection from "./BenefitsSection";
 import TestimonialsSection from "./TestimonialsSection";
 import FaqSection from "./FaqSection";
 import ContactSection from "./ContactSection";
+import type { TestimonialFollowers } from "@/lib/testimonials/followers";
 
-export default function HomePage() {
+export default function HomePage({ testimonialFollowers = {} }: {
+  testimonialFollowers?: TestimonialFollowers;
+}) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -126,7 +129,7 @@ export default function HomePage() {
         <ProblemSection problems={problems} />
         <HowItWorksSection steps={steps} />
         <BenefitsSection benefits={benefits} />
-        <TestimonialsSection testimonials={testimonials} />
+        <TestimonialsSection testimonials={testimonials} followers={testimonialFollowers} />
         <FaqSection
           faqs={faqs}
           {...({ openFaq, onToggle: setOpenFaq } as any)}

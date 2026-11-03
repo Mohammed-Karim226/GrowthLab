@@ -131,7 +131,14 @@ create function public.check_publication() returns trigger
 language plpgsql security definer set search_path='' as $$
 declare report_id uuid;
 begin
-  report_id := case when TG_TABLE_NAME='reports' then new.id else new.report_id end;
+  if TG_TABLE_NAME='reports' then
+    report_id := new.id;
+  elsif TG_TABLE_NAME='report_versions' then
+    report_id := new.report_id;
+  else
+    return null;
+  end if;
+
   if exists(select 1 from public.reports r where r.id=report_id and
     ((r.current_published_version_id is not null and not exists(select 1 from public.report_versions v where v.id=r.current_published_version_id and v.report_id=r.id and v.status='published')) or
     exists(select 1 from public.report_versions v where v.report_id=r.id and v.status='published' and v.id is distinct from r.current_published_version_id))) then

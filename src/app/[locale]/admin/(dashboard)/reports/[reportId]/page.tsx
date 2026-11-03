@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import MetricReviewTable, { type ReviewMetric } from "@/components/admin/MetricReviewTable";
+import ReportExportDialog from "@/components/admin/ReportExportDialog";
 import SummaryPanel from "@/components/admin/SummaryPanel";
 import UploadWorkspace from "@/components/admin/UploadWorkspace";
 import VersionActions from "@/components/admin/VersionActions";
@@ -34,6 +35,7 @@ type ReportRecord = {
   report_versions: Array<{
     id: string;
     version_number: number;
+    revision: number;
     status: ReportStatus;
     ai_summary: AiSummaryPayload | null;
     published_at: string | null;
@@ -75,7 +77,7 @@ export default async function ReportWorkspacePage({
     .select(
       // FK named explicitly: `current_published_version_id` points the other
       // way across the same pair of tables, so a bare embed is ambiguous.
-      "id, title, period_start, period_end, client_id, current_published_version_id, clients(id, name), report_versions!report_versions_report_id_fkey(id, version_number, status, ai_summary, published_at)"
+      "id, title, period_start, period_end, client_id, current_published_version_id, clients(id, name), report_versions!report_versions_report_id_fkey(id, version_number, revision, status, ai_summary, published_at)"
     )
     .eq("id", reportId)
     .maybeSingle<ReportRecord>();
@@ -89,6 +91,10 @@ export default async function ReportWorkspacePage({
   )[0];
 
   if (!version) notFound();
+
+  const publishedVersion = report.report_versions.find(
+    (candidate) => candidate.id === report.current_published_version_id
+  );
 
   const { data: batches, error: batchesError } = await supabase
     .from("insight_batches")
@@ -112,6 +118,23 @@ export default async function ReportWorkspacePage({
     .order("metric_name", { ascending: true })
     .returns<MetricRow[]>();
   if (metricsError) throw metricsError;
+
+  // Export counts must cover the complete version, independently of the
+  // workspace table's PostgREST row limit.
+  const [exportTotal, exportReviewed] = await Promise.all([
+    supabase.from("metrics")
+      .select("id", { count: "exact", head: true })
+      .eq("report_version_id", version.id),
+    supabase.from("metrics")
+      .select("id", { count: "exact", head: true })
+      .eq("report_version_id", version.id)
+      .eq("needs_review", false)
+      .not("metric_value", "is", null),
+  ]);
+  if (exportTotal.error) throw exportTotal.error;
+  if (exportReviewed.error) throw exportReviewed.error;
+  const exportMetricCount = exportTotal.count ?? 0;
+  const exportExcludedCount = Math.max(0, exportMetricCount - (exportReviewed.count ?? 0));
 
   const metrics: ReviewMetric[] = (metricRows ?? []).map((metric) => ({
     id: metric.id,
@@ -158,7 +181,22 @@ export default async function ReportWorkspacePage({
               {formatDateRange(report.period_start, report.period_end, locale)}
             </p>
           </div>
-          <Badge variant={statusBadgeVariant(version.status)}>{tStatus(version.status)}</Badge>
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant={statusBadgeVariant(version.status)}>{tStatus(version.status)}</Badge>
+            <ReportExportDialog
+              key={`${locale}:${version.id}`}
+              locale={locale}
+              reportId={reportId}
+              reportVersionId={version.id}
+              revision={version.revision}
+              versionNumber={version.version_number}
+              status={version.status}
+              reportTitle={report.title}
+              clientName={report.clients?.name ?? ""}
+              pendingReview={exportExcludedCount}
+              metricCount={exportMetricCount}
+            />
+          </div>
         </header>
       </div>
 
@@ -190,9 +228,11 @@ export default async function ReportWorkspacePage({
       <MetricReviewTable locale={locale} metrics={metrics} locked={locked} />
 
       <SummaryPanel
+        key={version.id}
         locale={locale}
         reportId={report.id}
         reportVersionId={version.id}
+        revision={version.revision}
         summary={version.ai_summary}
         locked={locked}
         // The summary is written from reviewed numbers only, so it stays out of
@@ -204,9 +244,12 @@ export default async function ReportWorkspacePage({
         locale={locale}
         reportId={report.id}
         reportVersionId={version.id}
+        revision={version.revision}
         versionNumber={version.version_number}
         status={version.status}
-        publishedAt={version.published_at}
+        currentPublishedVersionId={report.current_published_version_id}
+        publishedRevision={publishedVersion?.revision ?? null}
+        publishedAt={publishedVersion?.published_at ?? null}
         metricCount={metrics.length}
         pendingReview={pendingReview}
       />

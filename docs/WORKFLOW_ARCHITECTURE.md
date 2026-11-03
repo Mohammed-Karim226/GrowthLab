@@ -271,6 +271,39 @@ Published reports cannot be deleted. For an unpublished report:
 
 This is a hard delete; there is no restore operation.
 
+### 9.5 Export a report PDF
+
+Administrators download a saved version through
+`POST /api/admin/reports/[reportId]/export`. The dialog supplies the version ID,
+revision, language, paper size, and optional sections. The server reads the data;
+the browser never supplies report figures or narrative text.
+
+The export implementation lives in `src/lib/reports/export/`:
+
+| Module | Responsibility |
+| --- | --- |
+| `contract.ts` | Request schema, shared option defaults, section keys, and renderer data types. Safe to import from browser code. |
+| `server.ts` | Read and recheck saved version snapshots, paginate metrics, select the preceding published period, and produce the PDF attachment. Server only. |
+| `document.tsx` | PDF layout, embedded local fonts, Arabic/English rendering, and pagination. Server only; loaded after data checks pass. |
+| `client.ts` | Request cancellation and deadline, response validation, filename parsing, and browser download. |
+
+The API route owns authorization and HTTP responses. `ReportExportDialog.tsx`
+owns the controls and request state. PDF labels live under `reportPdf` in the
+existing English and Arabic portal translation catalogs.
+
+Exports include only reviewed, finite numeric values. Processing reports and
+stale revisions are rejected; current and comparison snapshots are rechecked
+after paginated reads. Draft and archived versions retain their status. No data
+is changed or published by exporting, and responses are never cached.
+
+The PDF document uses the renderer's installed React through local classic JSX,
+keeping it compatible with App Router's separate React runtime. Cairo fonts are
+installed locally and traced by `next.config.mjs` for deployments.
+
+Verify with `npm run test:reports`, `npm run test:report-pdf`, and
+`npm run typecheck`. PDF tests cover both languages, both paper sizes, optional
+sections, long narratives, large ledgers, and mixed Arabic/Latin glyphs.
+
 ## 10. Screenshot Upload Workflow
 
 Entry point: `UploadWorkspace.tsx` and
@@ -448,7 +481,7 @@ Before handling real client data:
 
 ## 17. Deliberate Non-Goals
 
-The current system does not implement PDF export, scheduled jobs, client comments,
+The current system does not implement scheduled jobs, client comments,
 public API access, multi-admin roles, or client-side report editing. The schema
 and version model leave room for these features, but they should not be assumed
 to exist when extending the workflow.

@@ -32,11 +32,14 @@ export const createClientSchema = z
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 
+export const accountAudienceCountSchema = z.number().finite().int().nonnegative().max(Number.MAX_SAFE_INTEGER).nullable();
+
 export const createAccountSchema = z.object({
   platform: platformSchema,
   pageName: z.string().trim().min(1).max(160),
   pageId: z.string().trim().max(160).optional().or(z.literal("")),
   stage: z.string().trim().max(80).optional().or(z.literal("")),
+  audienceCount: accountAudienceCountSchema.optional(),
 }).strict();
 
 export const updateAccountSchema = z.object({
@@ -44,6 +47,7 @@ export const updateAccountSchema = z.object({
   pageName: z.string().trim().min(1).max(160).optional(),
   pageId: z.string().trim().max(160).nullable().optional(),
   stage: z.string().trim().max(80).nullable().optional(),
+  audienceCount: accountAudienceCountSchema.optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
 const relatedGmailAccountSchema = z.object({
@@ -153,23 +157,29 @@ export const createMetricSchema = z
   })
   .strict();
 
+const reportTransitionFields = {
+  reportVersionId: z.string().uuid(),
+  revision: z.number().int().min(0).max(2147483647).optional(),
+  expectedPublishedVersionId: z.string().uuid().nullable().optional(),
+};
+
 export const publishSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
     summary: z.string().trim().max(4000).optional(),
   })
   .strict();
 
 export const approveVersionSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
     summary: z.string().trim().max(4000).nullable().optional(),
   })
   .strict();
 
 export const unpublishSchema = z
   .object({
-    reportVersionId: z.string().uuid(),
+    ...reportTransitionFields,
   })
   .strict();
 

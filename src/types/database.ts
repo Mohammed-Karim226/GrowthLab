@@ -5,6 +5,8 @@
  * in the same PR as the migration. If you change the migration, change this.
  */
 
+import type { AiUsageSummary } from "./admin-system";
+
 export type Platform = "facebook" | "instagram" | "tiktok" | "youtube";
 
 export const PLATFORMS: readonly Platform[] = [
@@ -106,6 +108,7 @@ export type ReportVersionRow = {
   id: string;
   report_id: string;
   version_number: number;
+  revision: number;
   status: ReportStatus;
   summary: string | null;
   ai_summary: AiSummaryPayload | null;
@@ -133,8 +136,17 @@ export type AccountRow = {
   page_name: string | null;
   page_id: string | null;
   stage: string | null;
+  audience_count: number | null;
   created_at: string;
   updated_at: string;
+};
+
+export type PortalAttributionRow = {
+  batch_id: string;
+  version_id: string;
+  account_id: string | null;
+  account_name: string | null;
+  account_stage: string | null;
 };
 
 export type ClientGmailRelatedAccount = {
@@ -201,6 +213,35 @@ export type AiJobRow = {
   completed_at: string | null;
 };
 
+/** Operational metadata only: no prompts, responses, credentials or client IDs. */
+export type AiUsageEventRow = {
+  id: string;
+  provider: string;
+  model: string;
+  status: "success" | "error";
+  error_kind: "auth" | "rate_limit" | "timeout" | "network" | "bad_response" | "blocked" | "unknown" | null;
+  status_code: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  total_tokens: number | null;
+  duration_ms: number;
+  started_at: string;
+  created_at: string;
+};
+
+/** Durable external cleanup retained after the report's rows have cascaded. */
+export type ReportDeletionCleanupRow = {
+  report_id: string;
+  storage_prefix: string;
+  storage_paths: string[];
+  job_ids: string[];
+  created_at: string;
+  last_attempt_at: string | null;
+  storage_cleaned_at: string | null;
+  jobs_cancelled_at: string | null;
+  completed_at: string | null;
+};
+
 export type MetricRow = {
   id: string;
   report_version_id: string;
@@ -252,6 +293,11 @@ type Table<Row, Insert> = {
 export type Database = {
   public: {
     Tables: {
+      report_deletion_cleanup: Omit<Table<ReportDeletionCleanupRow, never>, "Update"> & {
+        Update: Partial<Pick<ReportDeletionCleanupRow,
+          "last_attempt_at" | "storage_cleaned_at" | "jobs_cancelled_at" | "completed_at"
+        >>;
+      };
       clients: Table<
         ClientRow,
         InsertOf<
@@ -275,7 +321,7 @@ export type Database = {
         ReportVersionRow,
         InsertOf<
           ReportVersionRow,
-          "status" | "summary" | "ai_summary" | "created_by" | "published_at"
+          "status" | "summary" | "ai_summary" | "created_by" | "published_at" | "revision"
         >
       >;
       insight_batches: Table<
@@ -284,7 +330,7 @@ export type Database = {
       >;
       accounts: Table<
         AccountRow,
-        InsertOf<AccountRow, "page_name" | "page_id" | "stage">
+        InsertOf<AccountRow, "page_name" | "page_id" | "stage" | "audience_count">
       >;
       client_gmail_accounts: Table<
         ClientGmailRow,
@@ -330,6 +376,10 @@ export type Database = {
           | "completed_at"
         >
       >;
+      ai_usage_events: Table<
+        AiUsageEventRow,
+        InsertOf<AiUsageEventRow, "error_kind" | "status_code" | "input_tokens" | "output_tokens" | "total_tokens">
+      >;
       metrics: Table<
         MetricRow,
         InsertOf<
@@ -354,6 +404,39 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      portal_attribution: {
+        Args: { p_versions: string[] };
+        Returns: PortalAttributionRow[];
+      };
+      admin_ai_usage_summary: {
+        Args: Record<never, never>;
+        Returns: AiUsageSummary;
+      };
+      delete_report: {
+        Args: { p_report: string };
+        Returns: ReportDeletionCleanupRow;
+      };
+      save_report_summary: {
+        Args: {
+          p_report: string;
+          p_version: string;
+          p_revision: number;
+          p_summary: AiSummaryPayload;
+          p_action: "generate" | "edit";
+          p_metadata?: Record<string, unknown>;
+        };
+        Returns: ReportVersionRow;
+      };
+      transition_report: {
+        Args: {
+          p_report: string;
+          p_version: string;
+          p_revision: number;
+          p_expected_published: string | null;
+          p_action: "approve" | "publish" | "unpublish" | "reopen";
+        };
+        Returns: ReportVersionRow;
+      };
       save_credential: { Args: { p_id: string; p_client: string; p_email: string; p_ciphertext: string; p_services: unknown; p_actor: string }; Returns: undefined };
       delete_credential: { Args: { p_id: string; p_actor: string }; Returns: undefined };
       auth_role: { Args: Record<never, never>; Returns: UserRole };

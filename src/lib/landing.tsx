@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { PlatformFollowerGrowth, TestimonialKey } from "@/lib/testimonials/followers";
 import {
   BarChart2,
   Eye,
@@ -73,6 +74,8 @@ export type StepCard = {
 };
 
 export type Testimonial = {
+  analyticsKey: TestimonialKey;
+  platformGrowth?: PlatformFollowerGrowth;
   name: string;
   category: string;
   avatar: string;
@@ -209,8 +212,21 @@ export const benefits: BenefitCard[] = [
     color: "#EC4899",
   },
 ];
+// Illustrative launch-to-day-30 totals within the requested platform ranges.
+const thirtyDayLaunch: Omit<PlatformFollowerGrowth, "after"> = {
+  days: 30,
+  fromLaunch: true,
+  illustrative: true,
+  before: { instagram: 0, facebook: 0, tiktok: 0, youtube: 0 },
+};
+
 export const testimonials: Testimonial[] = [
   {
+    analyticsKey: "mosewilam",
+    platformGrowth: {
+      ...thirtyDayLaunch,
+      after: { instagram: 8200, facebook: 18400, tiktok: 5600, youtube: 4800 },
+    },
     name: "MoSewilam",
     category: "Analysis | Documentaries",
     avatar:
@@ -224,6 +240,11 @@ export const testimonials: Testimonial[] = [
   },
   {
     name: "Omar Jehad",
+    analyticsKey: "omar-jehad",
+    platformGrowth: {
+      ...thirtyDayLaunch,
+      after: { instagram: 10800, facebook: 37600, tiktok: 6900, youtube: 5200 },
+    },
     category: "Analysis | Documentaries",
     avatar:
       "https://yt3.googleusercontent.com/u7oWuSuPz2Ox_qgYCOLxY2o7u6tsQhNG-B6iL3piVQo7GQIBErbud_JHG3B89WsJnFJ2Oka4sXQ=s160-c-k-c0x00ffffff-no-rj",
@@ -236,6 +257,11 @@ export const testimonials: Testimonial[] = [
   },
   {
     name: "MOhammed Rifaat",
+    analyticsKey: "mohammed-rifaat",
+    platformGrowth: {
+      ...thirtyDayLaunch,
+      after: { instagram: 7400, facebook: 12800, tiktok: 5100, youtube: 4900 },
+    },
     category: "Crime Awareness Education",
     avatar:
       "https://yt3.googleusercontent.com/2iswcwM5v1_JxyzyWRoNhYO142HTTJFs5wy10fKjCsQmxwQAaeDYG9xLutMsXa6IWIlhssgv=s160-c-k-c0x00ffffff-no-rj",
@@ -252,10 +278,15 @@ export const testimonials: Testimonial[] = [
     avatar:
       "https://yt3.googleusercontent.com/OEx0vweIN-6qt3vhl7RJJFojC5toag92XqrmuycZz0OaA5ilA4iA8sEjaNgvJrDqWzPo9e8=s160-c-k-c0x00ffffff-no-rj",
     achievementImage: "/testimonials/mind-achievement.jpeg",
+    analyticsKey: "mind",
+    platformGrowth: {
+      ...thirtyDayLaunch,
+      after: { instagram: 30000, facebook: 45000, tiktok: 11000, youtube: 5000 },
+    },
     before: "550k",
-    after: "575k",
-    afterDays: 30,
-    monthlyViews: 4.5e6,
+    after: "578k",
+    afterDays: 60,
+    monthlyViews: 14.0e6,
     quote:
       "Mind is a podcast series covering mental health, healthcare, and more. Thanks to the GrowthLab team, we reached 4.5 million views across social media in just 30 days. Their strategy, creativity, and support made a real difference, and we are truly grateful for the partnership.",
   },

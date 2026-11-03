@@ -5,40 +5,38 @@
 import * as Sentry from "@sentry/nextjs";
 import {
   sentryDsn,
+  sentryEnabled,
   sentryEnvironment,
   sentryRelease,
   sentryReplayErrorSampleRate,
   sentryReplaySessionSampleRate,
   sentryTracesSampleRate,
 } from "@/lib/env";
+import { sentryPrivacyOptions } from "@/lib/observability/sentry-options";
 
 const dsn = sentryDsn();
 
 Sentry.init({
   dsn,
-  enabled: Boolean(dsn),
+  enabled: sentryEnabled(),
   environment: sentryEnvironment(),
   release: sentryRelease(),
-  sendDefaultPii: false,
-  integrations: [Sentry.replayIntegration()],
+  ...sentryPrivacyOptions,
+  integrations: [Sentry.replayIntegration({
+    maskAllText: true,
+    maskAllInputs: true,
+    blockAllMedia: true,
+    networkCaptureBodies: false,
+    networkDetailAllowUrls: [],
+    networkRequestHeaders: [],
+    networkResponseHeaders: [],
+    // DOM snapshots remain masked; custom frames can contain raw console text,
+    // selectors, keystrokes or network URLs outside beforeSend's protection.
+    beforeAddRecordingEvent: (event) => event.data.tag === "options" ? event : null,
+  })],
   tracesSampleRate: sentryTracesSampleRate(),
   replaysSessionSampleRate: sentryReplaySessionSampleRate(),
   replaysOnErrorSampleRate: sentryReplayErrorSampleRate(),
-  beforeSend(event) {
-    if (event.user) {
-      delete event.user.email;
-      delete event.user.ip_address;
-      delete event.user.username;
-    }
-
-    if (event.request?.headers) {
-      delete event.request.headers.authorization;
-      delete event.request.headers.cookie;
-      delete event.request.headers["x-forwarded-for"];
-    }
-
-    return event;
-  },
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

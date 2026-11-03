@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -32,6 +32,11 @@ import {
   apiPost,
 } from "@/lib/api-client";
 import { PLATFORMS, type AccountRow, type Platform } from "@/types/database";
+import { accountAudienceCountSchema } from "@/lib/validation/schemas";
+
+function countFromInput(value: string) {
+  return value.trim() === "" ? null : Number(value);
+}
 
 export default function AccountManager({
   clientId,
@@ -43,16 +48,23 @@ export default function AccountManager({
   const t = useTranslations("admin.accounts");
   const tPlatforms = useTranslations("platforms");
   const tErrors = useTranslations("admin.errors");
+  const locale = useLocale();
   const router = useRouter();
   const [rows, setRows] = useState(accounts);
   const [platform, setPlatform] = useState<Platform>("facebook");
   const [pageName, setPageName] = useState("");
   const [pageId, setPageId] = useState("");
+  const [audienceCount, setAudienceCount] = useState("");
   const [editing, setEditing] = useState<AccountRow | null>(null);
   const [editPlatform, setEditPlatform] = useState<Platform>("facebook");
   const [editPageName, setEditPageName] = useState("");
   const [editPageId, setEditPageId] = useState("");
   const [editStage, setEditStage] = useState("");
+  const [editAudienceCount, setEditAudienceCount] = useState("");
+  const createAudienceValue = countFromInput(audienceCount);
+  const editAudienceValue = countFromInput(editAudienceCount);
+  const createAudienceValid = accountAudienceCountSchema.safeParse(createAudienceValue).success;
+  const editAudienceValid = accountAudienceCountSchema.safeParse(editAudienceValue).success;
 
   const reportError = (error: unknown) =>
     toast.error(
@@ -66,12 +78,13 @@ export default function AccountManager({
     mutationFn: () =>
       apiPost<{ account: AccountRow }>(
         `/api/admin/clients/${clientId}/accounts`,
-        { platform, pageName, pageId },
+        { platform, pageName, pageId, audienceCount: createAudienceValue ?? undefined },
       ),
     onSuccess: ({ account }) => {
       setRows((current) => [...current, account]);
       setPageName("");
       setPageId("");
+      setAudienceCount("");
       toast.success(t("created"));
       router.refresh();
     },
@@ -84,6 +97,7 @@ export default function AccountManager({
         pageName: editPageName,
         pageId: editPageId || null,
         stage: editStage || null,
+        audienceCount: editAudienceValue === (editing?.audience_count ?? null) ? undefined : editAudienceValue,
       }),
     onSuccess: ({ account }) => {
       setRows((current) =>
@@ -111,6 +125,7 @@ export default function AccountManager({
     setEditPageName(account.page_name ?? "");
     setEditPageId(account.page_id ?? "");
     setEditStage(account.stage ?? "");
+    setEditAudienceCount(account.audience_count == null ? "" : String(account.audience_count));
   };
 
   const platformSelect = (
@@ -138,6 +153,30 @@ export default function AccountManager({
     </Select>
   );
 
+  const audienceInput = (id: string, selectedPlatform: Platform, value: string, onChange: (value: string) => void, valid: boolean) => (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-xs font-medium text-slate-300">
+        {t(selectedPlatform === "youtube" ? "subscribers" : "followers")}
+      </label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={Number.MAX_SAFE_INTEGER}
+        step={1}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={t("audiencePlaceholder")}
+        aria-invalid={!valid}
+        aria-describedby={`${id}-hint`}
+      />
+      <p id={`${id}-hint`} className={valid ? "text-[11px] leading-5 text-slate-500" : "text-[11px] text-rose-300"}>
+        {t(valid ? "audienceHint" : "audienceInvalid")}
+      </p>
+    </div>
+  );
+
   return (
     <Card className="liquid-card border-white/[0.06] bg-white/[0.02]">
       <CardHeader>
@@ -156,8 +195,9 @@ export default function AccountManager({
             onChange={(e) => setPageId(e.target.value)}
             placeholder={t("idPlaceholder")}
           />
+          {audienceInput(`create-audience-${clientId}`, platform, audienceCount, setAudienceCount, createAudienceValid)}
           <Button
-            disabled={!pageName.trim() || create.isPending}
+            disabled={!pageName.trim() || !createAudienceValid || create.isPending}
             onClick={() => create.mutate()}
           >
             {create.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
@@ -181,6 +221,10 @@ export default function AccountManager({
                     {tPlatforms(account.platform)}
                     {account.page_id ? ` · ${account.page_id}` : ""}
                     {account.stage ? ` · ${account.stage}` : ""}
+                  </p>
+                  <p className="mt-1 text-[11px] text-cyan-200/70">
+                    {account.audience_count == null ? "—" : new Intl.NumberFormat(locale).format(account.audience_count)}{" "}
+                    {t(account.platform === "youtube" ? "subscribers" : "followers")}
                   </p>
                 </div>
                 <Button
@@ -235,6 +279,7 @@ export default function AccountManager({
                 onChange={(e) => setEditStage(e.target.value)}
                 placeholder={t("stagePlaceholder")}
               />
+              {audienceInput(`edit-audience-${clientId}`, editPlatform, editAudienceCount, setEditAudienceCount, editAudienceValid)}
             </div>
             <DialogFooter>
               <Button
@@ -246,7 +291,7 @@ export default function AccountManager({
               </Button>
               <Button
                 type="button"
-                disabled={!editPageName.trim() || update.isPending}
+                disabled={!editPageName.trim() || !editAudienceValid || update.isPending}
                 onClick={() => update.mutate()}
               >
                 {update.isPending ? (

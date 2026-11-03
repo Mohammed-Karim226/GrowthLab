@@ -25,6 +25,7 @@ export const PATCH = withAdmin<[Params]>("updateAccount", async (session, reques
   if (input.pageName !== undefined) patch.page_name = input.pageName;
   if (input.pageId !== undefined) patch.page_id = input.pageId || null;
   if (input.stage !== undefined) patch.stage = input.stage || null;
+  if (input.audienceCount !== undefined) patch.audience_count = input.audienceCount;
   const { data, error } = await supabase.from("accounts").update(patch).eq("id", accountId).select("*").maybeSingle();
   if (error?.code === "23505") return apiError(409, "accountExists");
   if (error?.code === "23503") return apiError(409, "accountInUse");

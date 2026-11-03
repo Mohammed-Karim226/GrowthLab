@@ -88,6 +88,27 @@ function PlatformCard({
   const [open, setOpen] = useState(false);
   const reduceMotion = useReducedMotion();
   const style = PLATFORM_STYLE[comparison.platform];
+  const accountMetrics = new Map<string | null, MetricComparison[]>();
+  for (const metric of metrics) {
+    const group = accountMetrics.get(metric.accountId);
+    if (group) group.push(metric);
+    else accountMetrics.set(metric.accountId, [metric]);
+  }
+  const accountGroups = [...accountMetrics].map(([accountId, rows]) => {
+    const views = rows.flatMap((row) => row.metricName === "views" && row.current !== null && Number.isFinite(Number(row.current)) ? [Number(row.current)] : []);
+    return {
+      accountId,
+      name: rows.find((row) => row.accountName?.trim())?.accountName
+        ?? t(accountId === null ? "unassignedMetrics" : "unnamedAccount"),
+      stage: rows.find((row) => row.accountStage?.trim())?.accountStage,
+      views: views.length ? views.reduce((sum, value) => sum + value, 0) : null,
+      metrics: [...rows].sort((a, b) => Number(b.metricName === "views") - Number(a.metricName === "views")),
+    };
+  }).sort((a, b) => {
+    if (a.views === null) return b.views === null ? 0 : 1;
+    if (b.views === null) return -1;
+    return b.views - a.views;
+  });
 
   const headline = [
     { key: "totalViews", value: comparison.current.views, growth: comparison.viewsGrowth },
@@ -120,6 +141,20 @@ function PlatformCard({
           {t("metricsCount", { count: metrics.length })}
         </span>
       </div>
+
+      {accountGroups.length > 0 && (
+        <div className="flex flex-wrap gap-2 border-b border-white/[0.055] px-5 py-3">
+          {accountGroups.map((account) => (
+            <span
+              key={account.accountId ?? "unassigned"}
+              dir="auto"
+              className="max-w-full break-words rounded-lg border border-white/[0.08] bg-white/[0.035] px-2.5 py-1.5 text-xs font-medium text-[#d4c8a9]"
+            >
+              {account.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <dl className="grid grid-cols-2 gap-2 bg-transparent p-2.5 sm:p-3">
         {headline.map((entry) => (
@@ -161,41 +196,46 @@ function PlatformCard({
 
           <AnimatePresence initial={false}>
           {open && (
-            <motion.ul
+            <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="divide-y divide-white/[0.045] overflow-hidden border-t border-white/[0.055]"
+              className="space-y-3 overflow-hidden border-t border-white/[0.055] p-3 sm:p-4"
             >
-              {metrics.map((metric) => {
-                const label = tMetrics.has(metric.metricName as never)
-                  ? tMetrics(metric.metricName as never)
-                  : humanizeMetricName(metric.metricName);
+              {accountGroups.map((account) => (
+                <section
+                  key={account.accountId ?? "unassigned"}
+                  aria-label={account.name}
+                  className="min-w-0 overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.025]"
+                >
+                  <div className="flex items-center justify-between gap-3 border-b border-white/[0.065] bg-white/[0.035] px-4 py-3">
+                    <div className="min-w-0">
+                      <h4 dir="auto" className="break-words text-sm font-semibold text-[#e7e3da]">{account.name}</h4>
+                      {account.stage && <p dir="auto" className="mt-1 text-[10px] text-[#77766f]">{account.stage}</p>}
+                    </div>
+                    <span className="shrink-0 text-[9px] text-[#77766f]">{t("metricsCount", { count: account.metrics.length })}</span>
+                  </div>
+                  <dl className="divide-y divide-white/[0.045]">
+                    {account.metrics.map((metric) => {
+                      const label = tMetrics.has(metric.metricName as never)
+                        ? tMetrics(metric.metricName as never)
+                        : humanizeMetricName(metric.metricName);
 
-                return (
-                  <li
-                    key={metric.key}
-                    className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
-                  >
-                    <span className="min-w-0 text-[#8a8880]">
-                      <span className="block truncate">{label}</span>
-                      {(metric.accountName || metric.accountStage) && (
-                        <span className="mt-0.5 block truncate text-[9px] tracking-wide text-[#5f6571] uppercase">
-                          {[metric.accountName, metric.accountStage].filter(Boolean).join(" · ")}
-                        </span>
-                      )}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      <span className="tabular-nums text-[#e7e3da]">
-                        {formatMetricValue(metric.current, metric.unit, locale)}
-                      </span>
-                      <GrowthBadge locale={locale} growth={metric.growth} />
-                    </span>
-                  </li>
-                );
-              })}
-            </motion.ul>
+                      return (
+                        <div key={metric.key} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-sm">
+                          <dt className="min-w-0 break-words text-[#8a8880]">{label}</dt>
+                          <dd className="flex flex-wrap items-center justify-end gap-2">
+                            <span className="tabular-nums text-[#e7e3da]">{formatMetricValue(metric.current, metric.unit, locale)}</span>
+                            <GrowthBadge locale={locale} growth={metric.growth} />
+                          </dd>
+                        </div>
+                      );
+                    })}
+                  </dl>
+                </section>
+              ))}
+            </motion.div>
           )}
           </AnimatePresence>
         </>

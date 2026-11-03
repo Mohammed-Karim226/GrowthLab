@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdminApi, type SessionContext } from "@/lib/auth";
 import { errorCategory, logEvent, redact } from "@/lib/security/logging";
 import { boundedBody, BodyLimitError } from "@/lib/security/body";
+import { reportError, type ErrorContext } from "@/lib/observability/report-error";
 
 /**
  * Route-handler plumbing.
@@ -32,12 +33,15 @@ export const notFound = () => apiError(404, "notFound");
  * Log the real cause server-side, return something safe to the client.
  * `context` is a short call-site label, e.g. "createClient".
  */
-export function serverError(context: string, cause: unknown) {
+export function serverError(context: string, cause: unknown, identifiers: Omit<ErrorContext, "operation"> = {}) {
   logEvent({ operation: context, outcome: "error", category: errorCategory(cause) });
   const category = errorCategory(cause);
+  if (["40001", "55000", "23505", "23503"].includes(category)) return apiError(409, "versionLocked");
+  // Sentry connectivity failures are displayed by the monitoring page. Reporting
+  // its own polling failures to Sentry would generate an avoidable feedback loop.
+  if (!context.toLowerCase().startsWith("sentry")) reportError(cause, { operation: context, ...identifiers });
   // Deployment fault, not operator error — say so rather than a blank 500.
   if (category === "CREDENTIAL_CONFIG") return apiError(503, "credentialConfig");
-  if (["40001", "55000", "23505", "23503"].includes(category)) return apiError(409, "versionLocked");
   return apiError(500, "serverError");
 }
 
@@ -80,7 +84,7 @@ export function withAdmin<T extends unknown[]>(
     try {
       session = await requireAdminApi();
     } catch (cause) {
-      return serverError(`${context}:auth`, cause);
+      return serverError(`${context}:auth`, cause, { requestId });
     }
 
     if (!session) return unauthorized();
@@ -92,7 +96,10 @@ export function withAdmin<T extends unknown[]>(
       logEvent({ operation: context, outcome: String(response.status), requestId, actorId: session.userId, tenantId: session.profile.client_id, durationMs: Date.now() - started });
       return response;
     } catch (cause) {
-      return serverError(context, cause);
+      const response = serverError(context, cause, { requestId, actorId: session.userId, tenantId: session.profile.client_id });
+      response.headers.set("x-request-id", requestId);
+      response.headers.set("cache-control", "no-store");
+      return response;
     }
   };
 }
