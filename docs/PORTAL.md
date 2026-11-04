@@ -117,6 +117,31 @@ If schema checks pass but the REST API still returns `PGRST202`, refresh the
 Supabase API schema cache in its SQL Editor with
 `NOTIFY pgrst, 'reload schema';`.
 
+### System health monitoring
+
+The admin **System health** overview checks integrations every 30 seconds and
+refreshes when the window regains focus or connectivity. **Refresh** requests a
+new server snapshot immediately. The issue list includes failed AI attempts and
+jobs in the last 24 hours, jobs queued more than 10 minutes past `available_at`,
+expired worker leases or processing longer than 10 minutes, unavailable telemetry,
+unresolved Sentry issues seen in the last 14 days, and configured model thresholds
+at or above 80%. Recent job failures link to the affected report for correction
+and re-analysis. Live service checks use read-only requests and generate no AI
+content. Inngest configuration checks alone do not prove worker delivery.
+
+The Sentry inbox requires `SENTRY_READ_AUTH_TOKEN` with `event:read` and
+`project:read`, plus matching `SENTRY_ORG`, `SENTRY_PROJECT`, and `SENTRY_REGION`
+(`us` or `eu`). A source-map upload token alone cannot read issues and is not used
+as a fallback. Set `NEXT_PUBLIC_SENTRY_DSN` and enable monitoring before building
+to capture browser errors. Public settings require rebuilding after a change.
+The overview reports missing read access as an issue instead of showing Sentry
+as healthy based on the DSN alone. A connected inbox verifies API access;
+confirm captured events in Sentry to verify error delivery.
+
+Run `npm run test:system`, `npm run test:sentry`, and `npm run typecheck` after
+monitoring changes. `npm run db:migrations:check` verifies the deployed usage
+ledger and job schema without changing the database.
+
 ### Summary persistence upgrade
 
 After migrations `0008_report_transactions.sql` and

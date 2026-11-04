@@ -99,6 +99,28 @@ function assertSafe(snapshot, extra = []) {
   }
 }
 
+test("explicit refresh reads changed issues immediately while coalescing live requests", async (t) => {
+  const { state, request } = scenario(t);
+  await request();
+  state.issues = [];
+  assert.equal((await (await request()).json()).issues.length, 1);
+  const responses = await Promise.all([request("refresh=1"), request("refresh=1")]);
+  assert.equal((await responses[0].json()).issues.length, 0);
+  assert.equal((await responses[1].json()).issues.length, 0);
+  assert.equal(state.fetches.length, 4);
+  state.role = "client";
+  assert.equal((await request("refresh=1")).status, 401);
+  assert.equal(state.fetches.length, 4);
+});
+
+for (const query of ["refresh=0", "refresh=1&refresh=1"]) {
+  test(`invalid refresh parameters rejected before Sentry reads (${query})`, async (t) => {
+    const { state, request } = scenario(t);
+    assert.equal((await request(query)).status, 400);
+    assert.equal(state.fetches.length, 0);
+  });
+}
+
 for (const role of [null, "client"]) {
   test(`Sentry rejects ${role ?? "anonymous"} before configuration or provider calls`, async (t) => {
     const { state, request } = scenario(t, { role });

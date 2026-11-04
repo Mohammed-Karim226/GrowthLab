@@ -6,7 +6,7 @@ export type ServiceHealth = {
   id: ServiceId;
   status: ServiceStatus;
   check: "live" | "configuration";
-  detail: "responding" | "reachable" | "modelAvailable" | "missingConfig" | "invalidConfig" | "checkFailed" | "timedOut" | "rateLimited" | "accessDenied" | "configuredOnly" | "development" | "privateBucket" | "publicBucket" | "encryptionReady" | "monitoringDisabled";
+  detail: "responding" | "reachable" | "modelAvailable" | "missingConfig" | "invalidConfig" | "checkFailed" | "timedOut" | "rateLimited" | "accessDenied" | "configuredOnly" | "development" | "privateBucket" | "publicBucket" | "encryptionReady" | "monitoringDisabled" | "issueInboxUnconfigured" | "monitoringConnected" | "browserMonitoringMissing" | "sentryProjectMismatch";
   latencyMs: number | null;
   dashboardUrl: string | null;
 };
@@ -43,6 +43,27 @@ export type ModelQuota = {
   requestsPerDay: number | null;
 };
 
+export type SystemIssue = {
+  id: string;
+  kind: "service" | "aiFailures" | "rateLimits" | "jobFailures" | "queuedStalled" | "runningStalled" | "usageSetup" | "usageUnavailable" | "jobsUnavailable" | "sentryIssues" | "quota";
+  severity: "error" | "warning";
+  service?: ServiceId;
+  detail?: ServiceHealth["detail"];
+  count?: number;
+  model?: string;
+  metric?: "requestsMinute" | "tokensMinute" | "requestsDay";
+  href: string;
+};
+
+export type SystemJob = {
+  id: string;
+  status: string;
+  createdAt: string;
+  completedAt: string | null;
+  errorKey: string | null;
+  reportId: string | null;
+};
+
 export type SystemSnapshot = {
   checkedAt: string;
   environment: "production" | "preview" | "development";
@@ -50,10 +71,14 @@ export type SystemSnapshot = {
   usage: AiUsageSummary | null;
   usageStatus: "available" | "setup_required" | "unavailable";
   quotas: ModelQuota[];
+  issues: SystemIssue[];
   jobs: {
     queued: number;
     running: number;
     failed: number;
-    recent: Array<{ id: string; status: string; createdAt: string; completedAt: string | null; errorKey: string | null }>;
+    stalledQueued: number;
+    stalledRunning: number;
+    recent: SystemJob[];
+    failures: SystemJob[];
   } | null;
 };

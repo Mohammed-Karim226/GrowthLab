@@ -11,7 +11,10 @@ export const GET = withAdmin("sentryWorkspace", async (_session, request) => {
   if ([...search.keys()].some((key) => search.getAll(key).length !== 1)) {
     return apiError(400, "validationFailed");
   }
+  const refresh = search.get("refresh");
+  if (refresh !== null && refresh !== "1") return apiError(400, "validationFailed");
+  search.delete("refresh");
   const parsed = sentryFiltersSchema.safeParse(Object.fromEntries(search));
   if (!parsed.success) return apiError(400, "validationFailed");
-  return apiOk(await getSentryWorkspace(parsed.data));
+  return apiOk(await getSentryWorkspace(parsed.data, { refresh: refresh === "1" }));
 });

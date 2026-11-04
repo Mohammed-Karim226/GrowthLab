@@ -1,15 +1,19 @@
 import "server-only";
 
 import { z } from "zod";
-import { geminiModel, sentryDsn, sentryEnabled } from "@/lib/env";
+import { geminiModel } from "@/lib/env";
+import { getSentryWorkspace } from "@/lib/admin/sentry";
+import { collectSystemIssues } from "@/lib/admin/system-issues";
 import { createClient } from "@/lib/supabase/server";
 import { isEncryptionConfigured } from "@/lib/security/secrets";
 import { INSIGHTS_BUCKET } from "@/lib/uploads";
 import type { AiJobRow } from "@/types/database";
-import type { AiUsageSummary, ServiceHealth, ServiceId, SystemSnapshot } from "@/types/admin-system";
+import type { AiUsageSummary, ServiceHealth, ServiceId, SystemJob, SystemSnapshot } from "@/types/admin-system";
+import type { SentryWorkspaceSnapshot } from "@/types/sentry";
 
 const CHECK_TIMEOUT_MS = 4_000;
 const CACHE_MS = 30_000;
+const STALLED_AFTER_MS = 10 * 60 * 1_000;
 const MODEL_NAME = /^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,127}$/;
 const dashboards: Record<ServiceId, string | null> = {
   application: null,
@@ -133,17 +137,18 @@ function environment(): SystemSnapshot["environment"] {
   return process.env.NODE_ENV === "production" ? "production" : "development";
 }
 
-function sentryHealth(): ServiceHealth {
-  const dsn = sentryDsn();
-  if (!dsn) return health("sentry", "unconfigured", "missingConfig");
-  try {
-    const parsed = new URL(dsn);
-    if (!["https:", "http:"].includes(parsed.protocol) || !parsed.username || parsed.password || !/\/\d+\/?$/.test(parsed.pathname)) throw new Error();
-    if (!sentryEnabled()) return health("sentry", "disabled", "monitoringDisabled");
-    return health("sentry", "configured", "configuredOnly");
-  } catch {
-    return health("sentry", "unconfigured", "invalidConfig");
-  }
+function sentryHealth(workspace: SentryWorkspaceSnapshot, latencyMs: number): ServiceHealth {
+  const { configuration, connection } = workspace;
+  if (connection === "invalid_config") return health("sentry", "unconfigured", "invalidConfig");
+  if (!configuration.dsnConfigured) return health("sentry", "unconfigured", "missingConfig");
+  if (!configuration.sdkEnabled) return health("sentry", "disabled", "monitoringDisabled");
+  if (connection === "setup_required") return health("sentry", "unconfigured", "issueInboxUnconfigured");
+  if (connection === "project_mismatch") return health("sentry", "unavailable", "sentryProjectMismatch", "live", latencyMs);
+  if (connection === "unauthorized" || connection === "forbidden") return health("sentry", "unavailable", "accessDenied", "live", latencyMs);
+  if (connection === "rate_limited") return health("sentry", "degraded", "rateLimited", "live", latencyMs);
+  if (connection !== "connected") return health("sentry", "unavailable", "checkFailed", "live", latencyMs);
+  return health("sentry", configuration.browserEnabled ? "operational" : "degraded",
+    configuration.browserEnabled ? "monitoringConnected" : "browserMonitoringMissing", "live", latencyMs);
 }
 
 function configurationChecks(): ServiceHealth[] {
@@ -153,7 +158,6 @@ function configurationChecks(): ServiceHealth[] {
   const vaultPresent = Boolean(first(process.env.CREDENTIAL_ENCRYPTION_KEYS) && first(process.env.CREDENTIAL_ACTIVE_KEY_ID));
   return [
     health("inngest", development || inngestReady ? "configured" : "unconfigured", development ? "development" : inngestReady ? "configuredOnly" : "missingConfig"),
-    sentryHealth(),
     health("credentials", encryptionReady ? "configured" : "unconfigured", encryptionReady ? "encryptionReady" : vaultPresent ? "invalidConfig" : "missingConfig"),
   ];
 }
@@ -166,30 +170,47 @@ const safeJob = z.object({
   created_at: timestamp,
   completed_at: timestamp.nullable(),
   error_key: z.string().nullable(),
+  insight_batches: z.object({ report_versions: z.object({ report_id: z.string().uuid() }).nullable() }).nullable().optional(),
 });
 const jobErrorKeys = new Set(["aiFailed", "aiRateLimited", "aiUnavailable", "aiBlocked", "aiBadResponse"]);
+const JOB_COLUMNS = "id, status, created_at, completed_at, error_key, insight_batches(report_versions(report_id))";
+
+function jobRows(rows: unknown[]): SystemJob[] {
+  return rows.flatMap((row) => {
+    const parsed = safeJob.safeParse(row);
+    if (!parsed.success) return [];
+    const job = parsed.data;
+    return [{ id: job.id, status: job.status, createdAt: job.created_at, completedAt: job.completed_at,
+      errorKey: job.error_key && jobErrorKeys.has(job.error_key) ? job.error_key : null,
+      reportId: job.insight_batches?.report_versions?.report_id ?? null }];
+  });
+}
 
 async function loadJobs(dbPromise: Promise<Db>, since: string): Promise<Jobs | null> {
   try {
     return await bounded(async (signal) => {
       const db = await dbPromise;
+      const now = new Date().toISOString();
+      const stalledBefore = new Date(Date.now() - STALLED_AFTER_MS).toISOString();
       const results = await Promise.all([
         db.from("ai_jobs").select("id", { count: "exact", head: true }).eq("status", "queued").abortSignal(signal),
         db.from("ai_jobs").select("id", { count: "exact", head: true }).eq("status", "processing").abortSignal(signal),
         db.from("ai_jobs").select("id", { count: "exact", head: true }).in("status", ["failed", "dead_letter"]).gte("completed_at", since).abortSignal(signal),
-        db.from("ai_jobs").select("id, status, created_at, completed_at, error_key").order("created_at", { ascending: false }).limit(6).abortSignal(signal)
+        db.from("ai_jobs").select(JOB_COLUMNS).order("created_at", { ascending: false }).limit(6).abortSignal(signal)
           .returns<Array<Pick<AiJobRow, "id" | "status" | "created_at" | "completed_at" | "error_key">>>(),
+        // available_at excludes intentionally scheduled retries from queue alarms.
+        db.from("ai_jobs").select("id", { count: "exact", head: true }).eq("status", "queued").lt("available_at", stalledBefore).abortSignal(signal),
+        db.from("ai_jobs").select("id", { count: "exact", head: true }).eq("status", "processing")
+          .or(`lease_expires_at.lt.${now},started_at.lt.${stalledBefore}`).abortSignal(signal),
+        // Fetch failures separately so newer successful jobs cannot hide them.
+        db.from("ai_jobs").select(JOB_COLUMNS).in("status", ["failed", "dead_letter"]).gte("completed_at", since)
+          .order("completed_at", { ascending: false }).limit(6).abortSignal(signal),
       ]);
       for (const result of results) checkDatabaseError(result.error);
       const counts = results.slice(0, 3).map((result) => count.parse(result.count));
-      const recent = (results[3].data ?? []).flatMap((row) => {
-        const parsed = safeJob.safeParse(row);
-        if (!parsed.success) return [];
-        const job = parsed.data;
-        return [{ id: job.id, status: job.status, createdAt: job.created_at, completedAt: job.completed_at,
-          errorKey: job.error_key && jobErrorKeys.has(job.error_key) ? job.error_key : null }];
-      });
-      return { queued: counts[0], running: counts[1], failed: counts[2], recent };
+      return { queued: counts[0], running: counts[1], failed: counts[2],
+        stalledQueued: count.parse(results[4].count), stalledRunning: count.parse(results[5].count),
+        recent: jobRows(results[3].data ?? []), failures: jobRows(results[6].data ?? []) };
     });
   } catch {
     return null;
@@ -215,8 +236,7 @@ async function loadUsage(dbPromise: Promise<Db>): Promise<Pick<SystemSnapshot, "
   }
 }
 
-async function buildSnapshot(): Promise<SystemSnapshot> {
-  const checkedAt = new Date().toISOString();
+async function buildSnapshot(refresh: boolean): Promise<SystemSnapshot> {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1_000).toISOString();
   const url = first(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_URL);
   const base = url ? serviceBase(url) : null;
@@ -232,7 +252,8 @@ async function buildSnapshot(): Promise<SystemSnapshot> {
   const missingDatabase = !url || !anon ? "missingConfig" : "invalidConfig";
   const missingStorage = !url || !secret ? "missingConfig" : "invalidConfig";
 
-  const [database, auth, storage, gemini, jobs, usage] = await Promise.all([
+  const sentryStarted = Date.now();
+  const [database, auth, storage, gemini, jobs, usage, sentry] = await Promise.all([
     db ? probe("database", async (signal) => {
       const { error } = await (await db).from("clients").select("id", { head: true }).limit(1).abortSignal(signal);
       checkDatabaseError(error);
@@ -256,12 +277,15 @@ async function buildSnapshot(): Promise<SystemSnapshot> {
     }) : Promise.resolve(health("gemini", "unconfigured", !apiKey ? "missingConfig" : "invalidConfig")),
     db ? loadJobs(db, since) : Promise.resolve(null),
     db ? loadUsage(db) : Promise.resolve({ usage: null, usageStatus: "unavailable" as const }),
+    getSentryWorkspace({ status: "unresolved", period: "14d" }, { refresh })
+      .then((workspace) => ({ workspace, latencyMs: Date.now() - sentryStarted })),
   ]);
 
   const models = [model, ...(usage.usage?.models.map((entry) => entry.model).filter((name) => name !== model) ?? [])];
-  return {
-    checkedAt, environment: environment(),
-    services: [health("application", "operational", "responding", "live"), database, auth, storage, gemini, ...configurationChecks()],
+  const snapshot: Omit<SystemSnapshot, "issues"> = {
+    checkedAt: new Date().toISOString(), environment: environment(),
+    services: [health("application", "operational", "responding", "live"), database, auth, storage, gemini,
+      ...configurationChecks(), sentryHealth(sentry.workspace, sentry.latencyMs)],
     ...usage,
     quotas: models.map((name) => ({
       model: name, active: name === model,
@@ -271,16 +295,17 @@ async function buildSnapshot(): Promise<SystemSnapshot> {
     })),
     jobs,
   };
+  return { ...snapshot, issues: collectSystemIssues(snapshot, sentry.workspace) };
 }
 
 let cached: { value: SystemSnapshot; expiresAt: number } | undefined;
 let inFlight: Promise<SystemSnapshot> | undefined;
 
 /** Call only after requireAdmin/withAdmin. Cache contains aggregate data only. */
-export async function getSystemSnapshot(): Promise<SystemSnapshot> {
-  if (cached && cached.expiresAt > Date.now()) return cached.value;
+export async function getSystemSnapshot({ refresh = false }: { refresh?: boolean } = {}): Promise<SystemSnapshot> {
+  if (!refresh && cached && cached.expiresAt > Date.now()) return cached.value;
   if (inFlight) return inFlight;
-  inFlight = buildSnapshot().then((value) => {
+  inFlight = buildSnapshot(refresh).then((value) => {
     cached = { value, expiresAt: Date.now() + CACHE_MS };
     return value;
   }).finally(() => { inFlight = undefined; });

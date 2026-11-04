@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import SentryWorkspace from "@/components/admin/SentryWorkspace";
 import { apiFetch, ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
-import type { AiUsageSummary, ModelQuota, ServiceHealth, ServiceId, ServiceStatus, SystemSnapshot } from "@/types/admin-system";
+import type { AiUsageSummary, ModelQuota, ServiceHealth, ServiceId, ServiceStatus, SystemIssue, SystemSnapshot } from "@/types/admin-system";
 
 const SERVICE_ICONS: Record<ServiceId, LucideIcon> = {
   application: Server, database: Database, auth: Fingerprint, storage: HardDrive,
@@ -33,7 +33,7 @@ const STATUS_STYLES: Record<ServiceStatus, string> = {
   disabled: "border-slate-300/15 bg-slate-300/[0.04] text-slate-400",
 };
 const PANEL = "rounded-2xl border border-white/[0.08] bg-[#10131d]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]";
-const ATTENTION: ServiceStatus[] = ["degraded", "unavailable", "unconfigured"];
+const ATTENTION: ServiceStatus[] = ["degraded", "unavailable", "unconfigured", "unknown", "disabled"];
 
 function StatusBadge({ status }: { status: ServiceStatus }) {
   const t = useTranslations("admin.system");
@@ -175,7 +175,7 @@ function UsageChart({ usage }: { usage: AiUsageSummary | null }) {
   const chartId = useId().replace(/:/g, "");
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", hour12: false, timeZone: "UTC" });
   return (
-    <section className={cn(PANEL, "min-w-0 p-5 sm:p-6")} aria-label={t("activity.title")}>
+    <section id="system-ai-activity" className={cn(PANEL, "min-w-0 scroll-mt-6 p-5 sm:p-6")} aria-label={t("activity.title")}>
       <SectionTitle icon={AudioLines} title={t("activity.title")} subtitle={t("activity.subtitle")} aside={<span className="rounded-md border border-white/[0.07] bg-white/[0.02] px-2 py-1 text-[10px] text-slate-400">{t("last24Hours")}</span>} />
       <div className="mt-5 flex items-center gap-4 text-[10px] text-slate-400">
         <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-3 rounded-full bg-[#d8be78]" aria-hidden />{t("activity.requests")}</span>
@@ -208,6 +208,7 @@ function UsageChart({ usage }: { usage: AiUsageSummary | null }) {
 
 function JobQueue({ jobs }: { jobs: SystemSnapshot["jobs"] }) {
   const t = useTranslations("admin.system");
+  const errors = useTranslations("admin.errors");
   const locale = useLocale();
   const counts = [
     { key: "queued", value: jobs?.queued, color: "text-sky-300" },
@@ -215,7 +216,7 @@ function JobQueue({ jobs }: { jobs: SystemSnapshot["jobs"] }) {
     { key: "failed", value: jobs?.failed, color: "text-rose-300" },
   ] as const;
   return (
-    <section className={cn(PANEL, "min-w-0 p-5 sm:p-6")}>
+    <section id="system-jobs" className={cn(PANEL, "min-w-0 scroll-mt-6 p-5 sm:p-6")}>
       <SectionTitle icon={Workflow} title={t("jobs.title")} subtitle={t("jobs.subtitle")} />
       <div className="mt-5 grid grid-cols-3 gap-2">
         {counts.map(({ key, value, color }) => <div key={key} className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3"><p className={cn("font-satoshi text-xl tabular-nums", color)}>{value?.toLocaleString(locale) ?? "—"}</p><p className="mt-1 text-[10px] text-slate-500">{t(`jobs.${key}`)}</p></div>)}
@@ -230,9 +231,42 @@ function JobQueue({ jobs }: { jobs: SystemSnapshot["jobs"] }) {
           </div>
         )) : <p className="py-5 text-center text-xs leading-relaxed text-slate-500">{t(jobs ? "jobs.empty" : "jobs.unavailable")}</p>}
       </div>
+      {!!jobs?.failures.length && <div className="mt-5 space-y-3 border-t border-rose-300/10 pt-4">
+        <h3 className="text-xs font-medium text-rose-200">{t("jobs.failuresTitle")}</h3>
+        {jobs.failures.map((job) => <div key={job.id} className="flex items-start justify-between gap-3 text-[11px]">
+          <div className="min-w-0"><p className="font-mono text-slate-400">{job.id.slice(0, 8)} · {t(`jobs.states.${job.status}`)}</p><p className="mt-1 leading-relaxed text-rose-200/80">{errors(job.errorKey ?? "aiFailed")}</p></div>
+          {job.reportId && <Link href={`/${locale}/admin/reports/${job.reportId}`} className="shrink-0 rounded-sm text-[#e5cd8c] underline underline-offset-4 focus-visible:outline">{t("jobs.viewReport")}</Link>}
+        </div>)}
+      </div>}
       <p className="mt-4 text-[10px] text-slate-600">{t("jobs.timezone")}</p>
     </section>
   );
+}
+
+function IssueList({ issues }: { issues: SystemIssue[] }) {
+  const t = useTranslations("admin.system");
+  const locale = useLocale();
+  return <section className={cn(PANEL, "p-5 sm:p-6")} aria-label={t("issues.title")}>
+    <SectionTitle icon={CircleAlert} title={t("issues.title")} subtitle={t("issues.subtitle")} aside={<span className="text-xs text-slate-400 tabular-nums">{issues.length.toLocaleString(locale)}</span>} />
+    {issues.length ? <div className="mt-4 divide-y divide-white/[0.06]">
+      {issues.map((issue) => {
+        const title = issue.kind === "service" ? t("issues.serviceTitle", { service: t(`services.${issue.service}.name`) })
+          : issue.kind === "quota" ? t("issues.quota.title", { model: issue.model ?? "", metric: t(`quota.${issue.metric}`) })
+          : t(`issues.${issue.kind}.title`, { count: issue.count ?? 0 });
+        const hint = issue.kind === "service" ? t(`details.${issue.detail}`)
+          : t(`issues.${issue.kind}.hint`);
+        const external = issue.href.startsWith("https://");
+        const href = issue.href.startsWith("/admin/") ? `/${locale}${issue.href}` : issue.href;
+        const action = <>{t(issue.kind === "service" && issue.service === "sentry" ? "issues.setupMonitoring" : "issues.review")}<ArrowUpRight className="size-3" aria-hidden /></>;
+        const actionStyle = "inline-flex shrink-0 items-center gap-1 rounded-lg border border-white/10 px-2.5 py-2 text-[11px] text-slate-300 hover:text-[#e5cd8c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d8be78]";
+        return <article key={issue.id} className="flex flex-wrap items-start gap-3 py-4">
+          <CircleAlert className={cn("mt-0.5 size-4 shrink-0", issue.severity === "error" ? "text-rose-300" : "text-amber-200")} aria-hidden />
+          <div className="min-w-0 flex-1"><h3 className="text-xs font-medium text-slate-200">{title}</h3><p className="mt-1.5 text-xs leading-relaxed text-slate-400">{hint}</p></div>
+          {external ? <a href={href} target="_blank" rel="noopener noreferrer" className={actionStyle} aria-label={t("issues.reviewIssue", { title })}>{action}</a> : <Link href={href} scroll className={actionStyle} aria-label={t("issues.reviewIssue", { title })}>{action}</Link>}
+        </article>;
+      })}
+    </div> : <p className="mt-4 flex items-center gap-2 text-xs text-slate-400"><CheckCheck className="size-4 text-emerald-300" aria-hidden />{t("issues.empty")}</p>}
+  </section>;
 }
 
 export default function SystemHealthDashboard() {
@@ -245,10 +279,12 @@ export default function SystemHealthDashboard() {
   const [filter, setFilter] = useState<"all" | "live" | "configuration" | "attention">("all");
   const { data, isPending, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["admin", "system"],
-    queryFn: ({ signal }) => apiFetch<SystemSnapshot>("/api/admin/system", { signal, cache: "no-store" }),
-    refetchInterval: autoRefresh ? 60_000 : false,
+    queryFn: ({ signal }) => apiFetch<SystemSnapshot>("/api/admin/system?refresh=1", { signal, cache: "no-store" }),
+    refetchInterval: autoRefresh ? 30_000 : false,
     refetchIntervalInBackground: false,
-    staleTime: 30_000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: false,
     enabled: !sentrySelected,
   });
@@ -257,14 +293,14 @@ export default function SystemHealthDashboard() {
   const snapshot = accessDenied ? undefined : data;
   const usage = snapshot?.usage ?? null;
   const services = snapshot?.services ?? [];
+  const issues = snapshot?.issues ?? [];
   const liveServices = services.filter((service) => service.check === "live");
   const healthyServices = liveServices.filter((service) => service.status === "operational").length;
   const attentionCount = services.filter((service) => ATTENTION.includes(service.status)).length;
-  const unknownCount = services.filter((service) => service.status === "unknown").length;
   const shownServices = services.filter((service) => filter === "all" || (filter === "attention" ? ATTENTION.includes(service.status) : service.check === filter));
   const formatNumber = (value: number | null | undefined) => value == null ? "—" : value.toLocaleString(locale);
   const lastChecked = snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC", hour12: false }) : "—";
-  const hasIssue = attentionCount > 0 || unknownCount > 0 || isError;
+  const hasIssue = issues.length > 0 || isError;
 
   const navigation = (
     <nav className="mb-6 flex flex-wrap items-center gap-1 rounded-xl border border-white/[0.07] bg-white/[0.02] p-1.5" aria-label={t("tabs.label")}>
@@ -318,7 +354,7 @@ export default function SystemHealthDashboard() {
                 {hasIssue ? <CircleAlert className="size-5" strokeWidth={1.7} aria-hidden /> : <CheckCheck className="size-5" strokeWidth={1.7} aria-hidden />}
               </span>
               <div>
-                <p className="text-sm font-semibold text-slate-100">{t(isError ? "summary.stale" : attentionCount ? "summary.attention" : unknownCount ? "summary.unknown" : "summary.healthy", { count: attentionCount })}</p>
+                <p className="text-sm font-semibold text-slate-100">{t(isError ? "summary.stale" : issues.length ? "summary.attention" : "summary.healthy", { count: issues.length })}</p>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{t("summary.detail", { healthy: healthyServices, total: liveServices.length })}</p>
               </div>
             </div>
@@ -337,7 +373,9 @@ export default function SystemHealthDashboard() {
             <MetricCard label={t("metrics.failures")} value={formatNumber(usage?.failed)} hint={usage ? t("metrics.failuresHint", { count: usage.rateLimited }) : t("metrics.noTelemetry")} icon={CircleAlert} accent={usage?.failed ? "text-rose-300" : "text-sky-300"} />
           </div>
 
-          <section className="space-y-4">
+          <IssueList issues={issues} />
+
+          <section id="system-services" className="scroll-mt-6 space-y-4">
             <SectionTitle icon={Layers3} title={t("servicesTitle")} subtitle={t("servicesSubtitle")} aside={
               <div className="flex flex-wrap gap-1 rounded-lg border border-white/[0.06] bg-black/10 p-1" role="group" aria-label={t("filters.label")}>
                 {(["all", "live", "configuration", "attention"] as const).map((value) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={cn("rounded-md px-2.5 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d8be78]", filter === value ? "bg-white/[0.08] text-slate-100" : "text-slate-500 hover:text-slate-300")}>{t(`filters.${value}`)}{value === "attention" && attentionCount > 0 && <span className="ms-1.5 text-amber-200">{attentionCount}</span>}</button>)}
@@ -348,13 +386,13 @@ export default function SystemHealthDashboard() {
           </section>
 
           {snapshot.usageStatus !== "available" && (
-            <div className="flex items-start gap-3 rounded-xl border border-sky-300/15 bg-sky-300/[0.04] p-4" role="status">
+            <div id="system-usage" className="flex scroll-mt-6 items-start gap-3 rounded-xl border border-sky-300/15 bg-sky-300/[0.04] p-4" role="status">
               <Info className="mt-0.5 size-4 shrink-0 text-sky-300" aria-hidden />
               <div><p className="text-xs font-medium text-sky-200">{t(snapshot.usageStatus === "setup_required" ? "tracking.setupTitle" : "tracking.unavailableTitle")}</p><p className="mt-1 text-xs leading-relaxed text-slate-400">{t(snapshot.usageStatus === "setup_required" ? "tracking.setupHint" : "tracking.unavailableHint")}</p></div>
             </div>
           )}
 
-          <section className="space-y-4">
+          <section id="system-quota" className="scroll-mt-6 space-y-4">
             <SectionTitle icon={Sparkles} title={t("quota.title")} subtitle={t("quota.subtitle")} aside={<a href="https://aistudio.google.com/usage" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-slate-300 transition-colors hover:border-[#d8be78]/30 hover:text-[#e5cd8c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d8be78]">{t("quota.providerConsole")}<ArrowUpRight className="size-3" aria-hidden /></a>} />
             {snapshot.quotas.map((quota) => <ModelCard key={quota.model} quota={quota} usage={usage} />)}
             <p className="flex items-start gap-2 px-1 text-[11px] leading-relaxed text-slate-500"><Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />{t("quota.disclaimer")}</p>

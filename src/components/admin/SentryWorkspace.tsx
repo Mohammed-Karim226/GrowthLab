@@ -165,10 +165,12 @@ export default function SentryWorkspace() {
   if (cursor) params.set("cursor", cursor);
   const { data, isPending, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["admin", "sentry", status, period, environment, cursor],
-    queryFn: ({ signal }) => apiFetch<SentryWorkspaceSnapshot>(`/api/admin/system/sentry?${params}`, { signal, cache: "no-store" }),
-    refetchInterval: autoRefresh && tab === "issues" && !cursor ? 60_000 : false,
+    queryFn: ({ signal }) => apiFetch<SentryWorkspaceSnapshot>(`/api/admin/system/sentry?${params}&refresh=1`, { signal, cache: "no-store" }),
+    refetchInterval: autoRefresh && tab === "issues" && !cursor ? 30_000 : false,
     refetchIntervalInBackground: false,
-    staleTime: 30_000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: false,
   });
   const denied = error instanceof ApiRequestError && [401, 403].includes(error.status);

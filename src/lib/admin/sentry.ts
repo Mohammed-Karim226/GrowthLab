@@ -320,7 +320,7 @@ type CacheEntry = { expiresAt: number; result?: SentryWorkspaceSnapshot; pending
 const cache = new Map<string, CacheEntry>();
 
 /** Call only after withAdmin/requireAdmin. Every HTTP request rechecks auth. */
-export async function getSentryWorkspace(filters: SentryWorkspaceFilters): Promise<SentryWorkspaceSnapshot> {
+export async function getSentryWorkspace(filters: SentryWorkspaceFilters, { refresh = false }: { refresh?: boolean } = {}): Promise<SentryWorkspaceSnapshot> {
   const validated = sentryFiltersSchema.safeParse(filters);
   const config = readConfiguration();
   if (!validated.success) throw new SentryFailure("invalid_config");
@@ -332,7 +332,7 @@ export async function getSentryWorkspace(filters: SentryWorkspaceFilters): Promi
   })).digest("hex");
   const existing = cache.get(key);
   if (existing?.pending) return existing.pending;
-  if (existing?.result && existing.expiresAt > Date.now()) return existing.result;
+  if (!refresh && existing?.result && existing.expiresAt > Date.now()) return existing.result;
   cache.delete(key);
   while (cache.size >= MAX_CACHE_ENTRIES) cache.delete(cache.keys().next().value!);
   const entry: CacheEntry = { expiresAt: 0 };

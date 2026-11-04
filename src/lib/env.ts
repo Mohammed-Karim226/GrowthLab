@@ -85,8 +85,7 @@ export function geminiApiKey(): string {
 }
 
 export function geminiModel(): string {
-  // gemini-3.5-flash is not a published Gemini model. Keep this valid by
-  // default while still allowing deployments to pin another model.
+  // Use a stable default while allowing deployments to pin another model.
   return process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 }
 

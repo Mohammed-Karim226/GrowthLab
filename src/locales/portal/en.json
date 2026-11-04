@@ -159,7 +159,7 @@
       "refresh": "Refresh",
       "refreshing": "Checking…",
       "checkedAt": "Checked {time} UTC",
-      "autoRefreshOn": "Auto-refresh · 60s",
+      "autoRefreshOn": "Auto-refresh · 30s",
       "autoRefreshOff": "Auto-refresh paused",
       "milliseconds": "{value} ms",
       "console": "Console",
@@ -188,7 +188,7 @@
       "summary": {
         "label": "System health summary",
         "healthy": "Live checks are passing",
-        "attention": "{count, plural, one {# service needs attention} other {# services need attention}}",
+        "attention": "{count, plural, one {# issue needs attention} other {# issues need attention}}",
         "unknown": "Some services could not be verified",
         "stale": "Showing the last available snapshot",
         "detail": "{healthy} of {total} live checks passed. Configuration checks do not verify service delivery."
@@ -248,7 +248,11 @@
         }
       },
       "details": {
-        "monitoringDisabled": "Sentry monitoring is disabled for this environment.",
+        "monitoringDisabled": "Sentry monitoring is disabled for this environment. Enable it to capture new errors.",
+        "issueInboxUnconfigured": "Error capture is configured, but the issue inbox cannot connect. Set SENTRY_READ_AUTH_TOKEN with event:read and project:read access, and verify the organization, project and region.",
+        "monitoringConnected": "The project and issue inbox are responding. Browser and server error capture are enabled; event delivery must still be verified in Sentry.",
+        "browserMonitoringMissing": "The issue inbox is responding, but browser error capture has no public DSN. Set NEXT_PUBLIC_SENTRY_DSN and rebuild the application.",
+        "sentryProjectMismatch": "The DSN and issue inbox point to different projects. Align the Sentry project settings before monitoring errors.",
         "responding": "The service is responding.",
         "reachable": "The service endpoint is reachable.",
         "modelAvailable": "The configured model is accessible. No content was generated.",
@@ -263,6 +267,25 @@
         "privateBucket": "The upload bucket is accessible and private.",
         "publicBucket": "The upload bucket is public. Review its access settings.",
         "encryptionReady": "The active encryption key is valid. Saved credentials were not decrypted."
+      },
+      "issues": {
+        "title": "Issues needing attention",
+        "subtitle": "Live checks, recorded failures and monitoring gaps. Resolved conditions clear on the next check; recent failures remain visible for 24 hours.",
+        "empty": "No issues detected by the current checks.",
+        "serviceTitle": "{service} needs attention",
+        "review": "Review",
+        "reviewIssue": "Review: {title}",
+        "setupMonitoring": "Review monitoring",
+        "aiFailures": { "title": "{count, plural, one {# failed AI request} other {# failed AI requests}} in 24 hours", "hint": "Inspect the request activity and provider usage. Failed retry attempts are included, even when the final job succeeded." },
+        "rateLimits": { "title": "{count, plural, one {# rate-limited request} other {# rate-limited requests}} in 24 hours", "hint": "Check the project's limits in Google AI Studio before retrying or increasing workload." },
+        "jobFailures": { "title": "{count, plural, one {# failed background job} other {# failed background jobs}} in 24 hours", "hint": "Review the failure reasons below. Open the affected report to correct its inputs and rerun analysis." },
+        "queuedStalled": { "title": "{count, plural, one {# job waiting over 10 minutes} other {# jobs waiting over 10 minutes}}", "hint": "Verify the Inngest worker is running and synced with /api/inngest. Scheduled retries are excluded until they are overdue." },
+        "runningStalled": { "title": "{count, plural, one {# stalled processing job} other {# stalled processing jobs}}", "hint": "A worker lease expired or processing has exceeded 10 minutes. Inspect the Inngest run before retrying to avoid duplicate work." },
+        "usageSetup": { "title": "AI usage tracking needs setup", "hint": "Apply the pending 0012_ai_usage.sql migration, then reload the Supabase API schema cache and refresh." },
+        "usageUnavailable": { "title": "AI usage could not be verified", "hint": "Check database connectivity and administrator permissions. Request totals and limits cannot be assessed until telemetry is available." },
+        "jobsUnavailable": { "title": "Background jobs could not be checked", "hint": "Check database access and the AI job schema. An unavailable queue does not mean there are no failed or delayed jobs." },
+        "sentryIssues": { "title": "{count, plural, one {At least # unresolved Sentry issue} other {At least # unresolved Sentry issues}}", "hint": "Open the Sentry inbox to inspect errors seen in the last 14 days. This count covers its first page; additional issues may be available." },
+        "quota": { "title": "{model}: {metric} near or above threshold", "hint": "Recorded usage reached at least 80% of the configured monitoring threshold. Confirm actual provider limits in Google AI Studio." }
       },
       "tracking": {
         "setupTitle": "Usage tracking needs setup",
@@ -307,6 +330,8 @@
         "empty": "No recent background jobs.",
         "unavailable": "Background job data is unavailable.",
         "timezone": "Job times are shown in UTC.",
+        "failuresTitle": "Recent failures",
+        "viewReport": "View report",
         "states": {
           "queued": "Queued",
           "processing": "Processing",
@@ -399,7 +424,7 @@
       "inbox": {
         "title": "Issue inbox",
         "subtitle": "Recent issues from your Sentry project, ordered by last seen.",
-        "autoOn": "Auto-refresh · 60s",
+        "autoOn": "Auto-refresh · 30s",
         "autoOff": "Auto-refresh paused",
         "refreshPaging": "Auto-refresh paused while paging",
         "unavailable": "The issue inbox is unavailable. Refresh to try again.",
@@ -541,7 +566,7 @@
         "docs": "Sentry Next.js guide",
         "open": "View setup guide",
         "variables": "Deployment environment variables",
-        "tokenNotice": "The read token stays on the server and needs event:read and project:read. Keep the source-map upload token separate; never use a NEXT_PUBLIC_ prefix for either token.",
+        "tokenNotice": "Create a personal auth token with event:read and project:read. Organization source-map upload tokens cannot read issues. Keep this read token on the server, separate from the build token; never use a NEXT_PUBLIC_ prefix for either token.",
         "projectKeys": "Project DSN settings",
         "createToken": "Create a read token",
         "steps": {

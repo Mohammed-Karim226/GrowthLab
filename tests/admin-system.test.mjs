@@ -54,7 +54,7 @@ function usage() {
 
 function scenario(t, options = {}) {
   configure(t, options.env);
-  const state = { role: "admin", usage: usage(), vaultReady: true, ...options, authChecks: 0, reads: [], rpcCalls: 0, fetches: [] };
+  const state = { role: "admin", usage: usage(), vaultReady: true, ...options, authChecks: 0, reads: [], rpcCalls: 0, fetches: [], sentryChecks: [] };
   const db = {
     auth: { async getUser() {
       state.authChecks++;
@@ -67,6 +67,8 @@ function scenario(t, options = {}) {
         eq(...args) { read.filters.push(["eq", ...args]); return query; },
         in(...args) { read.filters.push(["in", ...args]); return query; },
         gte(...args) { read.filters.push(["gte", ...args]); return query; },
+        lt(...args) { read.filters.push(["lt", ...args]); return query; },
+        or(...args) { read.filters.push(["or", ...args]); return query; },
         limit(value) { read.limit = value; return query; },
         order(...args) { read.order = args; return query; },
         abortSignal(signal) { read.signal = signal; return query; },
@@ -83,9 +85,10 @@ function scenario(t, options = {}) {
           else {
             assert.equal(table, "ai_jobs");
             const status = read.filters.find((item) => item[0] === "eq")?.[2];
+            const stalled = read.filters.some((item) => ["lt", "or"].includes(item[0]));
             result = read.settings?.head
-              ? { data: null, count: status === "queued" ? 2 : status === "processing" ? 1 : 3, error: null }
-              : { data: [{ id: jobId, status: "dead_letter", created_at: new Date().toISOString(), completed_at: new Date().toISOString(), error_key: state.jobErrorKey ?? "aiFailed", error_detail: sensitiveValue }], error: null };
+              ? { data: null, count: stalled ? (status === "queued" ? state.stalledQueued ?? 0 : state.stalledRunning ?? 0) : status === "queued" ? state.queued ?? 2 : status === "processing" ? state.running ?? 1 : state.failed ?? 3, error: null }
+              : { data: state.recentJobs && !read.filters.some((item) => item[0] === "in") ? state.recentJobs : [{ id: jobId, status: "dead_letter", created_at: new Date().toISOString(), completed_at: new Date().toISOString(), error_key: state.jobErrorKey ?? "aiFailed", error_detail: sensitiveValue, insight_batches: { report_versions: { report_id: actorId } } }], error: null };
           }
           return Promise.resolve(result).then(resolve, reject);
         },
@@ -123,10 +126,18 @@ function scenario(t, options = {}) {
     "@/lib/supabase/server": { createClient: async () => db },
     "@/lib/security/secrets": { isEncryptionConfigured: () => state.vaultReady },
     "@/lib/security/logging": { logEvent() {}, errorCategory: () => "operation_failed", redact: (value) => value },
+    "@/lib/admin/sentry": { async getSentryWorkspace(filters, settings) {
+      state.sentryChecks.push({ filters, settings });
+      const dsn = Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN);
+      const enabled = dsn && process.env.NEXT_PUBLIC_SENTRY_ENABLED !== "false";
+      return { connection: state.sentryConnection ?? (dsn ? "connected" : "setup_required"),
+        configuration: { dsnConfigured: dsn, sdkEnabled: enabled, browserEnabled: enabled && Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN) },
+        issues: state.sentryIssues ?? [] };
+    } },
   });
   return {
     state,
-    request: () => load("src/app/api/admin/system/route.ts").GET(new Request("http://localhost/api/admin/system")),
+    request: (query = "") => load("src/app/api/admin/system/route.ts").GET(new Request(`http://localhost/api/admin/system${query ? `?${query}` : ""}`)),
   };
 }
 
@@ -137,6 +148,7 @@ for (const role of [null, "client"]) {
     assert.equal(state.rpcCalls, 0);
     assert.equal(state.fetches.length, 0);
     assert.equal(state.reads.length, 0);
+    assert.equal(state.sentryChecks.length, 0);
   });
 }
 
@@ -150,10 +162,12 @@ test("admin sees read-only health, tracked usage and separate historical-model b
   assert.equal(snapshot.services.find((item) => item.id === "application").latencyMs, null);
   assert.equal(snapshot.services.find((item) => item.id === "gemini").detail, "modelAvailable");
   assert.equal(snapshot.services.find((item) => item.id === "storage").detail, "privateBucket");
-  for (const id of ["inngest", "sentry", "credentials"]) {
+  for (const id of ["inngest", "credentials"]) {
     assert.equal(snapshot.services.find((item) => item.id === id).check, "configuration");
     assert.equal(snapshot.services.find((item) => item.id === id).status, "configured");
   }
+  assert.equal(snapshot.services.find((item) => item.id === "sentry").check, "live");
+  assert.equal(snapshot.services.find((item) => item.id === "sentry").status, "operational");
   assert.equal(snapshot.usageStatus, "available");
   assert.equal(snapshot.usage.requests, 4);
   assert.equal(snapshot.usage.models[0].minuteInputTokens, 25);
@@ -163,6 +177,8 @@ test("admin sees read-only health, tracked usage and separate historical-model b
   assert.equal(snapshot.jobs.running, 1);
   assert.equal(snapshot.jobs.failed, 3);
   assert.equal(snapshot.jobs.recent[0].errorKey, "aiFailed");
+  assert.equal(snapshot.jobs.failures[0].reportId, actorId);
+  assert.deepEqual(snapshot.issues.map((issue) => issue.kind), ["aiFailures", "jobFailures", "rateLimits"]);
   assert.equal(state.fetches.length, 3);
   const recentRead = state.reads.find((read) => read.table === "ai_jobs" && !read.settings?.head);
   assert.equal(recentRead.limit, 6);
@@ -284,4 +300,90 @@ test("invalid usage payloads are unavailable and arbitrary payload fields never 
   assert.equal(snapshot.usageStatus, "unavailable");
   assert.equal(snapshot.usage, null);
   assert.ok(!JSON.stringify(snapshot).includes(sensitiveValue));
+});
+
+test("refresh bypasses a recent snapshot and coalesces simultaneous live checks", async (t) => {
+  const { state, request } = scenario(t);
+  await request();
+  state.geminiStatus = 429;
+  assert.equal((await (await request()).json()).services.find((item) => item.id === "gemini").status, "operational");
+  const responses = await Promise.all([request("refresh=1"), request("refresh=1")]);
+  const snapshot = await responses[0].json();
+  assert.equal(snapshot.services.find((item) => item.id === "gemini").status, "degraded");
+  assert.deepEqual(snapshot, await responses[1].json());
+  assert.equal(state.rpcCalls, 2);
+  assert.equal(state.sentryChecks[1].settings.refresh, true);
+  state.role = "client";
+  assert.equal((await request("refresh=1")).status, 401);
+  assert.equal(state.rpcCalls, 2);
+});
+
+for (const query of ["refresh=0", "refresh=1&refresh=1", "unknown=1"]) {
+  test(`rejects invalid refresh parameters (${query}) without probing`, async (t) => {
+    const { state, request } = scenario(t);
+    assert.equal((await request(query)).status, 400);
+    assert.equal(state.rpcCalls, 0);
+    assert.equal(state.sentryChecks.length, 0);
+  });
+}
+
+test("failed jobs remain visible when newer successful jobs fill the recent list", async (t) => {
+  const recentJobs = Array.from({ length: 6 }, () => ({ id: actorId, status: "completed", created_at: new Date().toISOString(), completed_at: new Date().toISOString(), error_key: null }));
+  const { state, request } = scenario(t, { recentJobs, stalledQueued: 2, stalledRunning: 1 });
+  const snapshot = await (await request()).json();
+  assert.ok(snapshot.jobs.recent.every((job) => job.status === "completed"));
+  assert.equal(snapshot.jobs.failures[0].id, jobId);
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "jobFailures" && issue.count === 3));
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "queuedStalled" && issue.count === 2));
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "runningStalled" && issue.count === 1));
+  const overdue = state.reads.find((read) => read.filters.some(([op, column]) => op === "lt" && column === "available_at"));
+  assert.equal(overdue.filters.find(([op, column]) => op === "eq" && column === "status")[2], "queued");
+  assert.ok(Date.now() - Date.parse(overdue.filters.find(([op]) => op === "lt")[2]) >= 600_000);
+  const processing = state.reads.find((read) => read.filters.some(([op]) => op === "or"));
+  assert.match(processing.filters.find(([op]) => op === "or")[1], /^lease_expires_at\.lt\..+,started_at\.lt\./);
+});
+
+for (const [connection, status, detail] of [
+  ["setup_required", "unconfigured", "issueInboxUnconfigured"],
+  ["forbidden", "unavailable", "accessDenied"],
+  ["project_mismatch", "unavailable", "sentryProjectMismatch"],
+  ["rate_limited", "degraded", "rateLimited"],
+  ["unavailable", "unavailable", "checkFailed"],
+]) {
+  test(`Sentry ${connection} becomes an actionable monitoring issue`, async (t) => {
+    const { request } = scenario(t, { sentryConnection: connection });
+    const snapshot = await (await request()).json();
+    const sentry = snapshot.services.find((item) => item.id === "sentry");
+    assert.equal(sentry.status, status);
+    assert.equal(sentry.detail, detail);
+    assert.ok(snapshot.issues.some((issue) => issue.service === "sentry" && issue.href === "/admin/system?tab=sentry"));
+    assert.equal(snapshot.usageStatus, "available");
+  });
+}
+
+test("unresolved Sentry issues surface even when all live endpoints are healthy", async (t) => {
+  const { request } = scenario(t, { sentryIssues: [{ id: "123" }] });
+  const snapshot = await (await request()).json();
+  assert.equal(snapshot.services.find((item) => item.id === "sentry").status, "operational");
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "sentryIssues" && issue.count === 1));
+});
+
+test("unknown telemetry and a missing job queue produce issues instead of a healthy summary", async (t) => {
+  const { request } = scenario(t, { dbError: { code: "42501", message: sensitiveValue } });
+  const snapshot = await (await request()).json();
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "usageUnavailable"));
+  assert.ok(snapshot.issues.some((issue) => issue.kind === "jobsUnavailable"));
+  assert.ok(!JSON.stringify(snapshot.issues).includes(sensitiveValue));
+});
+
+test("quota warnings use known usage and omit incomplete token totals", async (t) => {
+  const currentUsage = usage();
+  currentUsage.models[0].minuteRequests = 18;
+  currentUsage.models[0].minuteInputTokens = 2000;
+  currentUsage.models[0].minuteTokenSamples = 17;
+  currentUsage.models[0].dayRequests = 500;
+  const { request } = scenario(t, { usage: currentUsage });
+  const snapshot = await (await request()).json();
+  const quotaIssues = snapshot.issues.filter((issue) => issue.kind === "quota");
+  assert.deepEqual(quotaIssues.map((issue) => [issue.metric, issue.severity]), [["requestsDay", "error"], ["requestsMinute", "warning"]]);
 });
