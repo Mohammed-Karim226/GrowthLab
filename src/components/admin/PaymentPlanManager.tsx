@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { CalendarDays, Check, CreditCard, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, CreditCard, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -21,19 +21,25 @@ import type { ClientPaymentPlanRow, PaymentStatus } from "@/types/database";
 type PaymentDraft = { billingMonth: string; amount: string; totalPlanPrice: string; currency: string; dueDate: string; status: PaymentStatus; notes: string };
 const emptyDraft = (): PaymentDraft => ({ billingMonth: new Date().toISOString().slice(0, 10), amount: "", totalPlanPrice: "", currency: "USD", dueDate: "", status: "pending", notes: "" });
 const CURRENCIES = ["USD", "GBP", "EUR", "AED", "SAR", "EGP", "CAD", "AUD", "JPY", "CHF"] as const;
+const PAYMENTS_PER_PAGE = 10;
 
 export default function PaymentPlanManager({ clientId, initial }: { clientId: string; initial: ClientPaymentPlanRow[] }) {
   const t = useTranslations("admin.clients.detail.payments");
+  const tCommon = useTranslations("common");
   const [payments, setPayments] = useState(initial);
+  const [currentPage, setCurrentPage] = useState(1);
   const [draft, setDraft] = useState<PaymentDraft>(emptyDraft);
   const [editing, setEditing] = useState<ClientPaymentPlanRow | null>(null);
   const [editDraft, setEditDraft] = useState<PaymentDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const sorted = useMemo(() => [...payments].sort((a, b) => b.billing_month.localeCompare(a.billing_month)), [payments]);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAYMENTS_PER_PAGE));
+  const page = Math.min(currentPage, totalPages);
+  const visiblePayments = sorted.slice((page - 1) * PAYMENTS_PER_PAGE, page * PAYMENTS_PER_PAGE);
 
   const create = useMutation({
     mutationFn: () => apiPost<{ payment: ClientPaymentPlanRow }>(`/api/admin/clients/${clientId}/payments`, { ...draft, amount: draft.amount, totalPlanPrice: draft.totalPlanPrice || null, dueDate: draft.dueDate || null, notes: draft.notes || null }),
-    onSuccess: ({ payment }) => { setPayments((rows) => [payment, ...rows]); setDraft(emptyDraft()); setError(null); toast.success(t("created")); },
+    onSuccess: ({ payment }) => { setPayments((rows) => [payment, ...rows]); setCurrentPage(1); setDraft(emptyDraft()); setError(null); toast.success(t("created")); },
     onError: (cause) => setError(cause instanceof ApiRequestError && cause.errorKey === "paymentMonthExists" ? t("monthExists") : t("saveError")),
   });
   const update = useMutation({
@@ -67,7 +73,16 @@ export default function PaymentPlanManager({ clientId, initial }: { clientId: st
       <Field className="sm:col-span-2 lg:col-span-3"><FieldLabel htmlFor="billing-notes">{t("notes")}</FieldLabel><Textarea id="billing-notes" rows={2} value={draft.notes} onChange={(e) => setDraftValue("notes", e.target.value)} placeholder={t("notesPlaceholder")} className="border-white/10 bg-white/[0.035]" /></Field>
     </FieldGroup>
     {error && <p role="alert" className="rounded-lg border border-[#ef9978]/20 bg-[#ef9978]/[0.08] px-3 py-2 text-xs text-[#f3aa8d]">{error}</p>}
-    <div className="space-y-2">{sorted.length === 0 ? <p className="rounded-xl border border-dashed border-white/10 px-4 py-7 text-center text-xs text-slate-500">{t("empty")}</p> : sorted.map((payment) => <div key={payment.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3"><CalendarDays className="size-4 text-[#bca66e]" /><span className="w-20 text-xs font-medium text-slate-200">{payment.billing_month.slice(0, 7)}</span><span className="text-sm font-semibold text-white">{payment.amount} {payment.currency}</span><span className="text-xs text-slate-500">{payment.due_date ?? "—"}</span><span className={`rounded-full border px-2 py-1 text-[10px] uppercase ${payment.status === "paid" ? "border-[#54d8ac]/20 text-[#67ddb5]" : payment.status === "overdue" ? "border-[#ed8f6d]/20 text-[#f19b77]" : "border-[#d8be78]/20 text-[#e2c87e]"}`}>{t(payment.status)}</span><div className="basis-full ps-7 text-xs text-slate-500">{payment.notes || t("noNotes")}</div><div className="ms-auto flex items-center gap-1"><Button type="button" variant="ghost" size="icon-sm" onClick={() => startEdit(payment)} aria-label={t("edit")} className="text-slate-400 hover:text-white"><Pencil className="size-3.5" /></Button><Button type="button" variant="ghost" size="icon-sm" onClick={() => remove.mutate(payment.id)} disabled={remove.isPending} aria-label={t("remove")} className="text-slate-400 hover:text-[#f19b77]"><Trash2 className="size-3.5" /></Button></div></div>)}</div>
+    <div className="space-y-2">{sorted.length === 0 ? <p className="rounded-xl border border-dashed border-white/10 px-4 py-7 text-center text-xs text-slate-500">{t("empty")}</p> : visiblePayments.map((payment) => <div key={payment.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3"><CalendarDays className="size-4 text-[#bca66e]" /><span className="w-20 text-xs font-medium text-slate-200">{payment.billing_month.slice(0, 7)}</span><span className="text-sm font-semibold text-white">{payment.amount} {payment.currency}</span><span className="text-xs text-slate-500">{payment.due_date ?? "—"}</span><span className={`rounded-full border px-2 py-1 text-[10px] uppercase ${payment.status === "paid" ? "border-[#54d8ac]/20 text-[#67ddb5]" : payment.status === "overdue" ? "border-[#ed8f6d]/20 text-[#f19b77]" : "border-[#d8be78]/20 text-[#e2c87e]"}`}>{t(payment.status)}</span><div className="basis-full ps-7 text-xs text-slate-500">{payment.notes || t("noNotes")}</div><div className="ms-auto flex items-center gap-1"><Button type="button" variant="ghost" size="icon-sm" onClick={() => startEdit(payment)} aria-label={t("edit")} className="text-slate-400 hover:text-white"><Pencil className="size-3.5" /></Button><Button type="button" variant="ghost" size="icon-sm" onClick={() => remove.mutate(payment.id)} disabled={remove.isPending} aria-label={t("remove")} className="text-slate-400 hover:text-[#f19b77]"><Trash2 className="size-3.5" /></Button></div></div>)}</div>
+    {sorted.length > 0 && (
+      <nav aria-label={t("paginationLabel")} className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] bg-white/[0.025] px-3 py-2.5">
+        <span role="status" className="text-xs font-medium text-slate-500">{t("pagination", { page, pages: totalPages, total: sorted.length })}</span>
+        <div className="ms-auto flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => setCurrentPage(page - 1)}><ChevronLeft className="size-3.5 rtl:rotate-180" aria-hidden />{tCommon("previous")}</Button>
+          <Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setCurrentPage(page + 1)}>{tCommon("next")}<ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden /></Button>
+        </div>
+      </nav>
+    )}
     <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open) { setEditing(null); setEditDraft(null); } }}><DialogContent className="vip-dialog"><DialogHeader><DialogTitle>{t("editTitle")}</DialogTitle><DialogDescription>{t("editHint")}</DialogDescription></DialogHeader>{editDraft && <FieldGroup className="grid gap-4 sm:grid-cols-2"><Field><FieldLabel>{t("month")}</FieldLabel><CalendarField value={editDraft.billingMonth} onChange={(value) => setEditValue("billingMonth", value)} label={t("chooseDate")} /></Field><Field><FieldLabel>{t("amount")}</FieldLabel><Input type="number" min="0" step="0.01" value={editDraft.amount} onChange={(e) => setEditValue("amount", e.target.value)} /></Field><Field><FieldLabel>{t("totalPlanPrice")}</FieldLabel><Input type="number" min="0" step="0.01" value={editDraft.totalPlanPrice} onChange={(e) => setEditValue("totalPlanPrice", e.target.value)} /></Field><Field><FieldLabel>{t("currency")}</FieldLabel><CurrencySelect value={editDraft.currency} onChange={(value) => setEditValue("currency", value)} labels={currencyLabels(t)} /></Field><Field><FieldLabel>{t("dueDate")}</FieldLabel><CalendarField value={editDraft.dueDate} onChange={(value) => setEditValue("dueDate", value)} label={t("chooseDate")} /></Field><Field><FieldLabel>{t("statusLabel")}</FieldLabel><StatusSelect value={editDraft.status} onChange={(value) => setEditValue("status", value)} labels={{ pending: t("pending"), paid: t("paid"), overdue: t("overdue"), waived: t("waived") }} /></Field><Field className="sm:col-span-2"><FieldLabel htmlFor="edit-billing-notes">{t("notes")}</FieldLabel><Textarea id="edit-billing-notes" rows={3} value={editDraft.notes} onChange={(e) => setEditValue("notes", e.target.value)} placeholder={t("notesPlaceholder")} /></Field></FieldGroup>}<DialogFooter><Button type="button" variant="outline" onClick={() => setEditing(null)}>{t("cancel")}</Button><Button type="button" className="button-primary" disabled={!editing || !editDraft?.amount || update.isPending} onClick={() => editing && editDraft && update.mutate({ id: editing.id, value: editDraft })}>{update.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}{t("save")}</Button></DialogFooter></DialogContent></Dialog>
   </CardContent></Card>;
 }

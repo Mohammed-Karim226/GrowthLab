@@ -799,6 +799,8 @@
           "overdue": "Overdue",
           "waived": "Waived",
           "empty": "No monthly billings have been added yet.",
+          "pagination": "Page {page} of {pages} · {total} payments",
+          "paginationLabel": "Payment pages",
           "edit": "Edit billing",
           "remove": "Remove billing",
           "editTitle": "Edit monthly billing",
@@ -858,6 +860,14 @@
         "periodStart": "Period start",
         "periodEnd": "Period end",
         "submit": "Create period"
+      },
+      "rename": {
+        "action": "Rename report",
+        "title": "Rename report",
+        "description": "Update the title shown for this reporting period.",
+        "titleField": "Report title",
+        "titleHint": "Enter a title between 2 and 160 characters.",
+        "success": "Report title updated."
       },
       "columns": {
         "title": "Period",
