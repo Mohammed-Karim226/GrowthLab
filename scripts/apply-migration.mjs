@@ -18,6 +18,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import pg from "pg";
+import { postgresConnectionOptions } from "./lib/postgres-connection.mjs";
 
 function loadEnvFiles() {
   for (const file of [".env.local", ".env"]) {
@@ -60,12 +61,8 @@ if (!process.env.DIRECT_URL) {
 
 const sql = readFileSync(resolve(process.cwd(), file), "utf8");
 
-// Supabase requires TLS; its pooler presents a certificate this client cannot
-// chain to a local root store, so verification is relaxed for this one-off
-// admin connection. The transport is still encrypted.
 const client = new pg.Client({
-  connectionString,
-  ssl: { rejectUnauthorized: false },
+  ...postgresConnectionOptions(connectionString),
   statement_timeout: 300_000,
 });
 

@@ -95,6 +95,37 @@ with `npm run db:apply -- supabase/migrations/<filename>.sql` and rerun the chec
 Register schema requirements for new migration files in
 `scripts/lib/migration-checks.mjs`; an unregistered migration fails the check.
 
+### Verified PostgreSQL connections
+
+The migration runner, migration checker, and report summary/deletion verification
+scripts share `scripts/lib/postgres-connection.mjs`. Remote connections require
+certificate-chain and hostname verification. If the database uses a private CA,
+set `PGSSLROOTCERT` to its PEM certificate path in `.env.local`, or use the URL's
+`sslrootcert` parameter. URL certificate paths take precedence; client certificate
+and key paths (`sslcert`/`sslkey`) remain supported. Paths resolve from the working
+directory. A certificate error stops the connection; configure the trusted CA
+instead of disabling verification.
+
+The helper parses the final host and credentials once. URL parameters cannot
+replace the client or its TLS configuration. `ssl=0`, `ssl=no-verify`, and
+`sslmode=disable/no-verify` are rejected for TLS connections. Other modes, including
+`require`, `prefer`, and `verify-ca`, are strengthened to `verify-full`, including
+when libpq compatibility is requested. Both Node and native pg clients receive
+explicit verification settings.
+Node certificate identity checks are bound to the effective database host,
+including IP literals and the `PGHOST` fallback when the URL omits its host.
+
+Only `db:migrations:check` permits plaintext by default for an effective host of
+`localhost`, `127.0.0.1`, or `::1`. Explicit localhost TLS options receive the same
+verification as remote connections. A URL with a localhost authority and a remote
+`host` query parameter is treated as remote. The optional native client's
+localhost plaintext mode retains libpq's existing environment/default behavior.
+
+Run `npm run test:postgres` for offline parser checks and synthetic TLS connection
+tests. These do not connect to the configured Supabase database. A successful
+local test does not verify the deployed schema, Storage policies, vault key
+rotation state, or Inngest signing configuration.
+
 If only `auth_client_id()` and `transition_report(...)` differ while the other
 `0008` schema requirements pass, rerun the updated checker first. If the
 function differences remain, apply `0013_restore_report_functions.sql` instead

@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import pg from "pg";
+import { postgresConnectionOptions } from "./lib/postgres-connection.mjs";
 
 for (const file of [".env.local", ".env"]) {
   try {
@@ -35,9 +36,7 @@ const migration = readFileSync(
   new URL("../supabase/migrations/0011_report_deletion_cleanup.sql", import.meta.url), "utf8"
 );
 const client = new pg.Client({
-  connectionString,
-  // Match the project's existing direct Supabase connection configuration.
-  ssl: { rejectUnauthorized: false },
+  ...postgresConnectionOptions(connectionString),
   connectionTimeoutMillis: 10_000,
   query_timeout: 15_000,
   statement_timeout: 10_000,

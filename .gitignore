@@ -16,6 +16,8 @@ node_modules/
 # Misc
 .DS_Store
 *.pem
+!tests/fixtures/postgres-tls/cert.pem
+!tests/fixtures/postgres-tls/key.pem
 /.tmp/
 /tmp/
 /.swc/

@@ -1,6 +1,7 @@
 /** Read-only audit of all local migrations against the configured Supabase database. */
 import { readFileSync } from "node:fs";
 import pg from "pg";
+import { postgresConnectionOptions } from "./lib/postgres-connection.mjs";
 import { checkMigrations, readMigrations, readSchema } from "./lib/migration-checks.mjs";
 
 for (const file of [".env.local", ".env"]) {
@@ -21,25 +22,23 @@ if (!connectionString) {
   process.exit(1);
 }
 
-let connectionUrl;
+let connectionOptions;
 try {
-  connectionUrl = new URL(connectionString);
-} catch {
-  console.error("DIRECT_URL / DATABASE_URL must be a valid PostgreSQL connection URL.");
+  connectionOptions = postgresConnectionOptions(connectionString, { allowLocalPlaintext: true });
+} catch (error) {
+  console.error(error.message);
   process.exit(1);
 }
 const appUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const appProject = appUrl ? /^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/i.exec(appUrl)?.[1] : null;
-const databaseProject = /^db\.([a-z0-9]+)\.supabase\.co$/i.exec(connectionUrl.hostname)?.[1]
-  ?? /^postgres\.([a-z0-9]+)$/i.exec(decodeURIComponent(connectionUrl.username))?.[1];
+const databaseProject = /^db\.([a-z0-9]+)\.supabase\.co$/i.exec(connectionOptions.host)?.[1]
+  ?? /^postgres\.([a-z0-9]+)$/i.exec(connectionOptions.user)?.[1];
 if (appProject && databaseProject && appProject !== databaseProject) {
   console.error("The database connection and app Supabase URL target different projects. Correct .env.local before checking migrations.");
   process.exit(1);
 }
-const localDatabase = ["localhost", "127.0.0.1", "[::1]"].includes(connectionUrl.hostname);
 const client = new pg.Client({
-  connectionString,
-  ssl: localDatabase ? false : { rejectUnauthorized: false },
+  ...connectionOptions,
   connectionTimeoutMillis: 10_000,
   statement_timeout: 15_000,
   application_name: "check-migrations",
